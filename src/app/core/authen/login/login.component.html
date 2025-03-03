@@ -1,0 +1,25 @@
+<p-toast />
+<div class="login-container ">
+  <div class="row justify-content-center">
+    <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-4">
+      <div class="login-form mt-5">
+        <div class="d-flex justify-content-center mb-4">
+          <h2>Đăng Nhập</h2>
+        </div>
+        <form [formGroup]="loginForm" >
+
+          <input id="identifier" formControlName="identifier" class="form-control mb-3"
+            placeholder="Nhập email hoặc số điện thoại" />
+          <input id="passwordHash" type="password" formControlName="passwordHash" class="form-control mb-3"
+            placeholder="Nhập mật khẩu" />
+
+          <div class="w-100 mb-3 mt-5">
+
+            <p-button label="Đăng nhập" severity="success" [style]="{width: '100%'}" (onClick)="onLogin()"></p-button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

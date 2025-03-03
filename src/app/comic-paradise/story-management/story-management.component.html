@@ -1,0 +1,261 @@
+<router-outlet></router-outlet>
+<c-card *ngIf="!isAddstoryPage">
+  <c-card-header>
+    <h5>Quản lý truyện</h5>
+  </c-card-header>
+  <c-card-body>
+    <div class="d-flex justify-content-end">
+      <p-toast />
+      <p-confirmdialog />
+      <p-button class="me-3" icon="pi pi-plus" label="Thêm truyện" [outlined]="true" severity="success"
+        (click)="navigateToAddstory()" />
+      <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help" />
+    </div>
+    <hr>
+
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Truyện của tôi</p-tab>
+        <p-tab value="1">Tất cả truyện</p-tab>
+        <p-tab value="2">Phê duyệt</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="d-flex justify-content-between">
+            <div>
+              <p-button icon="pi pi-refresh" (click)="loadStories()" severity="info" />
+            </div>
+            <div>
+              <c-input-group class="mb-3">
+                <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
+                  placeholder="Nhập tên truyện" />
+                <button cButton color="secondary" id="button-addon2" type="button" variant="outline">
+                  Tìm kiếm
+                </button>
+              </c-input-group>
+            </div>
+
+          </div>
+          <p-table #dt [value]="stories" [paginator]="true" [rows]="rows" [first]="first"
+            [tableStyle]="{ 'min-width': '50rem' }" [rowsPerPageOptions]="[5, 10, 20]" (onPage)="onPageChange($event)">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>STT</th>
+                <th>Tiêu đề</th>
+                <th>Ảnh bìa</th>
+                <th>Trạng thái</th>
+                <th>Người đăng</th>
+                <th>Số chương</th>
+                <th>Thao tác</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-story let-i="rowIndex">
+              <tr>
+                <td>{{ i + 1 + first }}</td>
+                <td>{{ story.title }}</td>
+                <td>
+                  <img [src]="story.coverImage" [alt]="story.title" width="100" class="shadow-4" />
+                </td>
+                <td>
+                  <span [ngClass]="getSeverity(story.status)">{{ story.status }}</span>
+                </td>
+
+                <td>{{ story.publisherName }}</td>
+                <td>{{ story.totalChapter }}</td>
+                <td>
+                  <div style="position: relative;">
+                    <p-menu #menu [model]="items" [popup]="true" appendTo="body" />
+                    <i class="pi pi-ellipsis-h round-icon" (click)="menu.toggle($event)" (click)="setCurrentStory(story)"></i>
+                  </div>
+
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+        <p-tabpanel value="1">
+          <!-- <div class="d-flex justify-content-between">
+            <div>
+              <p-button icon="pi pi-refresh" (click)="loadStories()" severity="info" />
+            </div>
+            <div>
+              <c-input-group class="mb-3">
+                <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
+                  placeholder="Nhập tên truyện" />
+                <button cButton color="secondary" id="button-addon2" type="button" variant="outline">
+                  Tìm kiếm
+                </button>
+              </c-input-group>
+            </div>
+
+          </div>
+          <p-table [value]="stories" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
+            [rowsPerPageOptions]="[5, 10, 20]">
+            <ng-template #header>
+              <tr>
+                <th>Tên truyện</th>
+                <th>Hình ảnh</th>
+                <th>Loại</th>
+                <th>Giá</th>
+                <th>Đơn vị</th>
+                <th>Tồn kho</th>
+                <th>Hành động</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-story>
+              <tr>
+                <td>{{story.name}}</td>
+                <td><img [src]="story.primaryImg" [alt]="story.name" width="100" class="shadow-4" /></td>
+                <td>{{story.idType}}</td>
+                <td>{{story.price }}</td>
+
+                <td>{{story.unit }}</td>
+
+                <td><p-tag [value]="story.quantity" /></td>
+                <td>
+                  <div style="position: relative;">
+                    <p-menu #menu [model]="items" [popup]="true" appendTo="body" (click)="test()" />
+                    <i class="pi pi-ellipsis-h round-icon" (click)="openMenu($event, story, menu)"></i>
+
+
+                  </div>
+                </td>
+              </tr>
+
+            </ng-template>
+          </p-table> -->
+        </p-tabpanel>
+        <p-tabpanel value="2">
+          <p class="m-0">
+            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti
+            atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique
+            sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum
+            facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil
+            impedit quo minus.
+          </p>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+
+
+  </c-card-body>
+</c-card>
+
+
+<!-- Storydetail -->
+<div class="card flex justify-center">
+  <!-- <p-button (click)="showDialog()" label="Show" /> -->
+  <p-dialog *ngIf="selectedStory" header="Chi tiết truyện" [(visible)]="visible" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw' }" [draggable]="false"
+    [resizable]="false">
+    <c-card-body class="p-4">
+      <div class="story-infor">
+        <div class="row">
+          <h6><b>1. Thông tin truyện</b></h6>
+          <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+            <div class="row">
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="storyName" class="block mt-3">Tên truyện</label>
+                  <input pInputText id="storyName" [(ngModel)]="selectedStory.name" />
+                </div>
+              </div>
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="storyPrice" class="block mt-3">Giá</label>
+                  <input pInputText id="storyPrice" [(ngModel)]="selectedStory.price" />
+                </div>
+              </div>
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="storyOrigin" class="block mt-3">Xuất xứ</label>
+                  <input pInputText id="storyOrigin" [(ngModel)]="selectedStory.origin" />
+                </div>
+              </div>
+
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="storyQuantity" class="block mt-3">Số lượng</label>
+                  <input pInputText id="storyQuantity" [(ngModel)]="selectedStory.quantity" />
+                </div>
+              </div>
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="storyGuide" class="block mt-3">Hướng dẫn</label>
+                  <input pInputText id="storyGuide" [(ngModel)]="selectedStory.instruct" />
+                </div>
+              </div>
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="storyUnit" class="block mt-3">Đơn vị</label>
+                  <input pInputText id="storyUnit" [(ngModel)]="selectedStory.unit" />
+                </div>
+              </div>
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="username" class="block mt-3">Loại</label>
+                  <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+                </div>
+              </div>
+              <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
+                <div class="d-flex flex-column">
+                  <label for="username" class="block mt-3">Mã giảm giá</label>
+                  <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="mt-5"><b>2. Hình ảnh</b></h6>
+          <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+            <div class="d-flex justify-content-start">
+              <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
+                (onSelect)="onUpload($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
+            </div>
+            <div class="mt-3 border">
+              <p-image *ngIf="selectedStory.primaryImg" [src]="selectedStory.primaryImg" alt="Image" width="100%"
+                [preview]="true" />
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
+            <div class="">
+
+              <p-fileUpload #fileUploader name="demo[]" customUpload="true" multiple="true" [showUploadButton]="false"
+                [showCancelButton]="false">
+
+                <ng-template pTemplate="content">
+                  <div class="p-fileupload-file-list">
+                    <div class="p-fileupload-file ng-star-inserted"
+                      *ngFor="let img of selectedStory.childrenImg; let i = index">
+                      <img class="p-fileupload-file-thumbnail" [src]="img" width="50">
+                      <div class="p-fileupload-file-info">
+                        <div class="p-fileupload-file-name">Ảnh {{ i + 1 }}</div>
+                      </div>
+                      <div class="p-fileupload-file-actions">
+                        <button
+                          class="p-ripple p-button p-component p-button-icon-only p-button-danger p-button-rounded p-button-text">
+                          <i class="pi pi-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+
+              </p-fileUpload>
+            </div>
+          </div>
+
+          <h6 class="mt-5"><b>3. Mô tả</b></h6>
+          <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+            <div class="story-desc">
+              <div id="editorstoryManagement" class="mb-5"></div>
+              <div class="d-flex justify-content-end">
+                <p-button label="Cập nhật" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </c-card-body>
+  </p-dialog>
+</div>

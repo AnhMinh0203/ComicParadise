@@ -1,0 +1,79 @@
+<c-card>
+  <c-card-header>
+    <h5>Thêm truyện</h5>
+  </c-card-header>
+  <c-card-body class="p-4">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+        <div class="button-back d-flex align-items-center" (click)="navigateToCustomerManagement()"
+          style="cursor: pointer;">
+          <i class="pi pi-arrow-circle-left" style="font-size: 30px;"></i>
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <div class="product-infor">
+      <div class="row">
+
+
+        <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+          <h6 class="mt-5"><b>1. Ảnh đại diện</b></h6>
+          <div class="d-flex justify-content-start">
+            <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
+              (onSelect)="onUpload($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
+          </div>
+          <div class="mt-3 border">
+            <p-image *ngIf="primaryImg" [src]="primaryImg" alt="Image" width="100%" [preview]="true" />
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
+          <h6 class="mt-5"><b>2. Thông tin cá nhân</b></h6>
+          <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="username" class="block mt-3">Họ và tên</label>
+                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="username" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="dob" class="block mt-3 ">Ngày sinh</label>
+                <p-datepicker [readonlyInput]="true" [iconDisplay]="'input'"
+              [showIcon]="true" [style]="{'width': '100%'}" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="phone" class="block mt-3">Số điện thoại</label>
+                <input pInputText id="phone" aria-describedby="username-help" [(ngModel)]="phone" />
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="gender" class="block mt-3">Giới tính</label>
+                <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+              <div class="d-flex flex-column">
+                <label for="address" class="block mt-3">Địa chỉ</label>
+                <input pInputText id="address" aria-describedby="username-help" [(ngModel)]="address" />
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+              <div class="d-flex flex-column">
+                <div class="d-flex justify-content-end mt-5">
+                  <p-button label="Xác nhận"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </c-card-body>
+</c-card>

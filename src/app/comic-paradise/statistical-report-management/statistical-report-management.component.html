@@ -1,0 +1,29 @@
+<div class="my-2">
+  <p-card header="Báo cáo thống kê"></p-card>
+</div>
+
+<p-tabs value="0">
+  <p-tablist>
+    <p-tab value="0">Tất cả</p-tab>
+    <p-tab value="1">Người dùng</p-tab>
+    <p-tab value="2">Đơn hàng</p-tab>
+    <p-tab value="3">Blog</p-tab>
+  </p-tablist>
+
+  <p-tabpanels>
+    <p-tabpanel value="0">
+      <div class="card">
+        <p-chart type="bar" [data]="data" [options]="options" class="h-[30rem]" />
+      </div>
+    </p-tabpanel>
+    <p-tabpanel value="1">
+      <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
+    </p-tabpanel>
+    <p-tabpanel value="2">
+      <p-chart type="line" [data]="dataForOrder" [options]="optionForOrder" class="h-[30rem]" />
+    </p-tabpanel>
+    <p-tabpanel value="3">
+      <p-chart type="bar" [data]="basicData" [options]="basicOptions" class="h-[30rem]" />
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>

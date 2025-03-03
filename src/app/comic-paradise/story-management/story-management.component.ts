@@ -1,0 +1,262 @@
+import { Component, AfterViewInit, ChangeDetectorRef, ViewEncapsulation, ViewChild } from '@angular/core';
+import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+
+import { TagModule } from 'primeng/tag';
+import { PaginatorModule } from 'primeng/paginator';
+import { PaginatorState } from 'primeng/paginator';
+import { Table, TableModule } from 'primeng/table';
+import { RatingModule } from 'primeng/rating';
+import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
+import { InputGroup } from 'primeng/inputgroup';
+import { DialogModule } from 'primeng/dialog';
+
+
+
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import Quill from 'quill';
+
+import { FileUpload, FileUploadModule } from 'primeng/fileupload';
+
+import { ImageModule } from 'primeng/image';
+import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
+import { EditorModule } from 'primeng/editor';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { SelectModule } from 'primeng/select';
+import { TabsModule } from 'primeng/tabs';
+// ---
+
+import { ConfirmationService, MessageService } from 'primeng/api';
+
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { storyService } from '../service/story.service';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
+
+interface Story {
+  StoryID: number;
+  Title: string;
+  Status: string;
+  CoverImage: string;
+  category: string;
+  PublisherName: number;
+  TotalChapter: string;
+}
+
+@Component({
+  selector: 'app-story-management',
+  standalone: true,
+  imports: [
+    CardModule,
+    ButtonModule,
+    TableModule,
+    RatingModule,
+    PrimeUIButtonModule,
+    TagModule,
+    PaginatorModule,
+    FormModule,
+    RouterOutlet,
+    CommonModule,
+    DialogModule,
+    SelectModule,
+    EditorModule,
+    FileUploadModule,
+    ImageModule,
+    FormsModule,
+    InputTextModule,
+    HttpClientModule,
+    ConfirmDialog,
+    ToastModule,
+    TabsModule,
+    MenuModule
+
+  ],
+  providers: [ConfirmationService, MessageService],
+  templateUrl: './story-management.component.html',
+  styleUrl: './story-management.component.scss',
+  encapsulation: ViewEncapsulation.None
+})
+
+
+export class StoryManagementComponent {
+  @ViewChild('dt') dt?: Table;
+  @ViewChild('menu') menu!: Menu;
+
+  first: number = 0;
+  rows: number = 5;
+  isAddstoryPage: boolean = false;
+  visible: boolean = false;
+
+  primaryImg: any;
+  title = 'User';
+
+
+  value: any;
+
+
+  stories!: Story[];
+  selectedStory: any;
+  items: MenuItem[] | undefined;
+
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private sanitizer: DomSanitizer,
+    private cdRef: ChangeDetectorRef,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService,
+    private _storyService: storyService
+  ) {
+    this.router.events.subscribe(() => {
+      this.isAddstoryPage = this.router.url.includes('/story-management/add-story');
+    });
+  }
+
+
+  ngOnInit() {
+    this.loadStories();
+    this.items = [
+      { label: 'Xem nội dung', icon: 'pi pi-file-check', command: () => this.onDetail() },
+      { label: 'Gỡ', icon: 'pi pi-delete-left', command: () => this.updateStatus("Rejected",this.selectedStory?.storyID) },
+      { label: 'Cập nhật', icon: 'pi pi-pen-to-square', command: () => this.onEdit() },
+      { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDelete() }
+    ];
+  }
+  exportExcel() {
+    // Logic xuất Excel (có thể thêm sau)
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Chức năng xuất Excel đang phát triển' });
+  }
+
+  // showDialog(story: any) {
+  //   this.storySelect = { ...story };
+  //   this.visible = true;
+  // }
+  navigateToAddstory() {
+    this.router.navigate(['/story-management/add-story']);
+  }
+  onPageChange(event: PaginatorState) {
+    this.first = event.first ?? 0;  // Đảm bảo giá trị không bị undefined
+    this.rows = event.rows ?? 10;   // Đảm bảo giá trị không bị undefined
+  }
+
+  setCurrentStory(story: any){
+    this.selectedStory = story;
+  }
+
+  getSeverity(status: string): "success" | "danger" | "warn" | undefined {
+    switch (status) {
+      case 'Approved':
+        return 'success';
+      case 'Pending':
+        return 'warn';
+      case 'Rejected':
+        return 'danger';
+      default:
+        return undefined; // Trả về undefined để tránh lỗi
+    }
+  }
+
+  onUpload(event: any) {
+    const file = event.files[0]; // Get the uploaded file
+
+    // Create a URL for the uploaded image file
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.primaryImg = e.target.result; // Set the image source to the uploaded file's data URL
+      console.log('Image Source:', this.primaryImg); // Check the image source in the console
+    };
+    reader.readAsDataURL(file); // Convert the file to a data URL for image preview
+  }
+
+  confirm_delete(event: Event) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Xác nhận xóa truyện ',
+      header: 'Cảnh báo',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Cancel',
+      rejectButtonProps: {
+        label: 'Hủy bỏ',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Đồng ý',
+        severity: 'danger',
+      },
+
+      accept: () => {
+        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
+      },
+      reject: () => {
+        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+      },
+    });
+  }
+
+
+  loadStories() {
+    // this.storySelect = {
+    //   name: '',
+    //   price: 0,
+    //   origin: '',
+    //   quantity: 0,
+    //   guide: '',
+    //   unit: '',
+    // };
+    this._storyService.getStories().subscribe((res: any) => {
+      if (res) {
+        console.log(res);
+        this.stories = res.data;
+      }
+    });
+  }
+
+
+  onRefresh() {
+    console.log('Refresh clicked');
+    // Thêm logic reload dữ liệu nếu cần
+  }
+
+  onEdit() {
+    console.log('Edit clicked');
+    // Thêm logic chỉnh sửa
+  }
+
+  onDelete() {
+    console.log('Delete clicked');
+    // Thêm logic xóa
+  }
+
+  onDetail() {
+    console.log("Detail click");
+  }
+
+  updateStatus(status: string, storyID: number) {
+    this._storyService.updateStatus(status, storyID).subscribe((res: any) => {
+      console.log(res);
+      if (res && res.isSuccess == true) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Thành công',
+          detail: res.data
+        });
+        this.loadStories();
+        return;
+      }
+      else{
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Thất bại',
+          detail: res.data
+        });
+        return;
+      }
+    });
+  }
+}

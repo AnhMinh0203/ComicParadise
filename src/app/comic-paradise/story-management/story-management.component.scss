@@ -1,0 +1,57 @@
+.content-wrapper img,
+.content-wrapper iframe {
+  width: 100%;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+}
+
+.content-wrapper iframe {
+  height: 400px;
+}
+
+.p-menu {
+  transform: translateX(-30px) !important;
+}
+
+.round-icon {
+  font-size: 1rem; /* Kích thước icon */
+  width: 2rem; /* Đường kính vòng tròn */
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Làm tròn */
+  cursor: pointer; /* Con trỏ tay khi hover */
+  background-color: #f0f0f0;
+  transition: background-color 0.3s;
+}
+
+.round-icon:hover {
+  background-color: #d9d9d9; /* Màu khi hover */
+}
+
+.success {
+  color: #166534; /* Xanh đậm hơn */
+  font-weight: bold;
+  padding: 10px;
+  background-color: #d1f1d1; /* Xanh pastel nhẹ */
+  border-radius: 10px;
+}
+
+
+.warn {
+  color: #b45309; /* Cam đậm */
+  font-weight: bold;
+  padding: 10px;
+  background-color: #fde9c9; /* Cam nhạt */
+  border-radius: 10px;
+}
+
+.danger {
+  color: #b91c1c; /* Đỏ đậm */
+  font-weight: bold;
+  padding: 10px;
+  background-color: #fbcaca; /* Đỏ nhạt */
+  border-radius: 10px;
+}

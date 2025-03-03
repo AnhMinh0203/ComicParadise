@@ -1,0 +1,74 @@
+<p-toast />
+<p-confirmdialog />
+<c-card>
+  <c-card-header>
+    <h5>Thêm truyện</h5>
+  </c-card-header>
+  <c-card-body class="p-4">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+        <div class="button-back d-flex align-items-center" style="cursor: pointer;">
+          <i class="pi pi-arrow-circle-left" (click)="navigateTostoryManagement()" style="font-size: 30px;"></i>
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <div class="story-infor">
+      <div class="row">
+        <h6><b>1. Thông tin truyện</b></h6>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="flex justify-center">
+            <p-selectbutton [options]="typeOptions" [(ngModel)]="selectType" optionLabel="label" optionValue="value"
+              aria-labelledby="basic" />
+          </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="title" class="block mt-3">Tên truyện</label>
+                <input pInputText id="title" [(ngModel)]="title" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="author" class="block mt-3">Tác giả</label>
+                <input pInputText id="author" [(ngModel)]="author" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+              <div class=" d-flex flex-column">
+                <label for="categories" class="block mt-3">Danh mục</label>
+                <p-multiselect [options]="categories" [(ngModel)]="categoriesSelect" placeholder="Chọn danh mục"
+                  optionLabel="categoryName" display="chip" styleClass="w-full md:w-80" [maxSelectedLabels]="10" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="mt-5"><b>2. Hình ảnh</b></h6>
+        <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+          <div class="d-flex justify-content-start">
+            <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
+              (onSelect)="onUploadCoverImage($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
+          </div>
+          <div class="mt-3 border">
+            <p-image *ngIf="coverImageDisplay" [src]="coverImageDisplay" alt="Image" width="100%" [preview]="true" />
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
+          <textarea pTextarea [(ngModel)]="description" placeholder="Nhập mô tả ..." rows="10"
+            style="width: 100%;"></textarea>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="d-flex justify-content-end">
+            <p-button label="Xác nhận" (click)="addStory()" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </c-card-body>
+</c-card>
+

@@ -1,0 +1,32 @@
+.content-wrapper img,
+.content-wrapper iframe {
+  width: 100%;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+}
+
+.content-wrapper iframe {
+  height: 400px;
+}
+.button-back{
+  height: 100%;
+}
+
+.button-back {
+  display: inline-block;
+
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.button-back i {
+  transition: color 0.3s ease, transform 0.3s ease;
+  font-size: 30px; /* Kích thước icon mặc định */
+  cursor: pointer;
+}
+
+.button-back i:hover  {
+  color: #007bff;
+  transform: scale(1.2);
+}

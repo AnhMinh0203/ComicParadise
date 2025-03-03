@@ -1,0 +1,173 @@
+<app-widgets-dropdown />
+<c-card class="my-4">
+  <c-card-body>
+    <c-row>
+      <c-col sm="5">
+        <h4 class="card-title mb-0" id="traffic">Traffic</h4>
+        <div class="small text-body-secondary">January - December 2023</div>
+      </c-col>
+      <c-col class="d-none d-md-block" sm="7">
+        <button cButton class="float-end" color="primary" aria-label="Download">
+          <svg cIcon name="cilCloudDownload"></svg>
+        </button>
+        <form [formGroup]="trafficRadioGroup">
+          <c-button-group class="float-end me-3" role="group">
+            <input
+              class="btn-check"
+              formControlName="trafficRadio"
+              type="radio"
+              value="Day"
+              id="dayRadio"
+            />
+            <label
+              (click)="setTrafficPeriod('Day')"
+              cButton
+              cFormCheckLabel
+              color="secondary"
+              variant="outline"
+              for="dayRadio"
+            >
+              Day
+            </label>
+            <input
+              class="btn-check"
+              formControlName="trafficRadio"
+              type="radio"
+              value="Month"
+              id="radioMonth"
+            />
+            <label
+              (click)="setTrafficPeriod('Month')"
+              cButton
+              cFormCheckLabel
+              color="secondary"
+              variant="outline"
+              for="radioMonth"
+            >
+              Month
+            </label>
+            <input
+              class="btn-check"
+              formControlName="trafficRadio"
+              type="radio"
+              value="Year"
+              id="radioYear"
+            />
+            <label
+              (click)="setTrafficPeriod('Year')"
+              cButton
+              cFormCheckLabel
+              color="secondary"
+              variant="outline"
+              for="radioYear"
+            >
+              Year
+            </label>
+          </c-button-group>
+        </form>
+      </c-col>
+    </c-row>
+    <c-chart
+      [data]="mainChart.data"
+      [height]="300"
+      [ngStyle]="{ 'marginTop.px': 40 }"
+      [options]="mainChart.options"
+      [type]="mainChart.type"
+      (chartRef)="handleChartRef($event)"
+    >
+      Main chart
+    </c-chart>
+  </c-card-body>
+  <!-- <c-card-footer>
+    <c-row class="text-center mb-2" [xl]="5" [lg]="4" [sm]="2" [xs]="1" [gutter]="4">
+      <c-col>
+        <div class="text-body-secondary">Visits</div>
+        <strong>29.703 Users (40%)</strong>
+        <c-progress class="mt-2" thin color="success" value="40" aria-label="User visits" />
+      </c-col>
+      <c-col>
+        <div class="text-body-secondary">Unique</div>
+        <div class="fw-semibold text-truncate">24.093 Users (20%)</div>
+        <c-progress class="mt-2" thin color="info" value="20" aria-label="Unique users" />
+      </c-col>
+      <c-col>
+        <div class="text-body-secondary">Page views</div>
+        <div class="fw-semibold text-truncate">78.706 Views (60%)</div>
+        <c-progress class="mt-2" thin color="warning" value="60" aria-label="Page views" />
+      </c-col>
+      <c-col>
+        <div class="text-body-secondary">New Users</div>
+        <div class="fw-semibold text-truncate">22.123 Users (80%)</div>
+        <c-progress class="mt-2" thin color="danger" value="80" aria-label="New users" />
+      </c-col>
+      <c-col class="d-none d-xl-block">
+        <div class="text-body-secondary">Bounce Rate</div>
+        <div class="fw-semibold text-truncate">Average Rate (40.15%)</div>
+        <c-progress class="mt-2" thin value="40" aria-label="Bounce rate" />
+      </c-col>
+    </c-row>
+  </c-card-footer> -->
+</c-card>
+
+<c-row>
+  <c-col xs>
+    <c-card class="mb-4">
+      <c-card-body>
+        <table
+          [hover]="true"
+          [responsive]="true"
+          [striped]="true"
+          align="middle"
+          cTable
+          class="mb-0 border"
+        >
+          <thead class="text-nowrap text-truncate">
+          <tr>
+            <th class="bg-body-tertiary text-center ">
+              <svg cIcon name="cilPeople"></svg>
+            </th>
+            <th class="bg-body-tertiary">Người dùng</th>
+            <th class="bg-body-tertiary text-center">Số điện thoại</th>
+            <th class="bg-body-tertiary">Email</th>
+            <th class="bg-body-tertiary">Trạng thái</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (user of users; track user.name; let i = $index) {
+              <tr>
+                <td class="text-center">
+                  <c-avatar [size]="'md'" src="{{ user.avatar }}" status="{{ user.status }}" />
+                </td>
+                <td>
+                  <div>{{ user.name }}</div>
+                  <div class="small text-body-secondary text-nowrap">
+                  <span>
+                    {{ user.gender }} | Registered: {{ user.registered }}
+                  </span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="phone">
+                    {{ user.phone }}
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex justify-content-between">
+                    <div class="">
+                      {{ user.email }}
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="small text-body-secondary">Đăng nhập</div>
+                  <div class="fw-semibold text-nowrap">{{ user.activity }}</div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>

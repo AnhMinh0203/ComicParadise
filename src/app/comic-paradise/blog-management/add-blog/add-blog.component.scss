@@ -1,0 +1,21 @@
+.button-back{
+  height: 100%;
+}
+
+.button-back {
+  display: inline-block;
+
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.button-back i {
+  transition: color 0.3s ease, transform 0.3s ease;
+  font-size: 30px; /* Kích thước icon mặc định */
+  cursor: pointer;
+}
+
+.button-back i:hover  {
+  color: #007bff; /* Màu icon khi hover */
+  transform: scale(1.2); /* Tăng kích thước icon khi hover */
+}

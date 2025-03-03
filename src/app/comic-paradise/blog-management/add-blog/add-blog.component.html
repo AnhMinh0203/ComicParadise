@@ -1,0 +1,60 @@
+<c-card >
+  <c-card-header>
+    <h5>Thêm mới Blog</h5>
+  </c-card-header>
+  <c-card-body class="p-4">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+        <div class="button-back d-flex align-items-center" (click)="navigateToBlogManagement()" style="cursor: pointer;">
+          <i class="pi pi-arrow-circle-left" style="font-size: 30px;"></i>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="blog-infor">
+      <div class="row">
+        <h6 class="mt-3"><b>1. Ảnh bìa</b></h6>
+        <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 my-3">
+          <div class="d-flex justify-content-start">
+            <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
+              (onSelect)="onUpload($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
+          </div>
+          <div class="mt-3 border">
+            <p-image *ngIf="primaryImg" [src]="primaryImg" alt="Image" width="100%" [preview]="true" />
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 mt-3">
+          <div class="row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+              <div class="d-flex flex-column">
+                <label for="username" class="block">Tên Blog</label>
+                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" [style]="{'width': '100%' }" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="mt-5"><b>3. Mô tả</b></h6>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="blog-desc">
+            <div id="editorBlogManagement" class="mb-5"></div>
+            <div class="d-flex justify-content-end">
+              <p-button label="Xác nhận" />
+            </div>
+
+            <!-- <div class="row">
+              <div class="col col-2"></div>
+              <div class="col col-8">
+                <div class="content-wrapper">
+                  <div [innerHTML]="contentHtml"></div>
+                </div>
+              </div>
+              <div class="col col-2"></div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </c-card-body>
+</c-card>
