@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComicParadise.DataContext.Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace ComicParadise.DataContext.Utils
         public string? Message { get; set; }
         public string? Token { get; set; }
         public int? Status { get; set; }
+        public UserInfor User { get; set; }
     }
 }

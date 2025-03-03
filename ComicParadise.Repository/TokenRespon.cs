@@ -20,7 +20,7 @@ namespace ComicParadise.Repository
             _config = config;
         }
 
-        public string GenerateJwtToken(UserInfor account, int idUser)
+        public string GenerateJwtToken(UserAuthen account, int idUser)
         {
             // tạo token có hiệu lực trong 1 ngày
             var tokenHandler = new JwtSecurityTokenHandler();

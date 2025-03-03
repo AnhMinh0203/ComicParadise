@@ -14,6 +14,20 @@ namespace ComicParadise.DataContext.Database
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Story> Stories { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<StoryCategoriesMapping> StoryCategoriesMapping { get; set; }
+        public DbSet<Chapter> Chapters { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Định nghĩa khóa chính tổng hợp (Composite Primary Key) cho bảng StoryCategoriesMapping
+            modelBuilder.Entity<StoryCategoriesMapping>()
+                .HasKey(sc => new { sc.StoryID, sc.CategoryID });
+
+            base.OnModelCreating(modelBuilder);
+        }
+
 
     }
 }

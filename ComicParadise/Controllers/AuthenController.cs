@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ComicParadise.Api.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class AuthenController : ControllerBase
     {
         IAuthenRepository _authenRepository;

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using ComicParadise.DataContext.Models;
 using ComicParadise.Repository.Common;
 using ComicParadise.Repository;
+using ComicParadise.DataContext.Dto;
 
 namespace ComicParadise.Repository
 {
@@ -40,13 +41,13 @@ namespace ComicParadise.Repository
             }
             try
             {
-                UserInfor? userInfor = new UserInfor();
+                UserAuthen? userAuthen = new UserAuthen();
 
                 if (Regex.IsMatch(signInModel.Identifier, @"^\d+$"))
                 {
-                    userInfor = await _context.Users
+                    userAuthen = await _context.Users
                         .Where(u => u.Phone == signInModel.Identifier)
-                        .Select(u => new UserInfor
+                        .Select(u => new UserAuthen
                         {
                             UserId = u.UserID,
                             FullName = u.Username ,
@@ -57,9 +58,9 @@ namespace ComicParadise.Repository
                 }
                 else
                 {
-                    userInfor = await _context.Users
+                    userAuthen = await _context.Users
                         .Where(u => u.Email == signInModel.Identifier)
-                        .Select(u => new UserInfor
+                        .Select(u => new UserAuthen
                         {
                             UserId = u.UserID,
                             FullName = u.Username ,
@@ -70,7 +71,7 @@ namespace ComicParadise.Repository
 
                 }
 
-                if (userInfor == null)
+                if (userAuthen == null)
                 {
                     return new AuthenResponse
                     {
@@ -80,7 +81,7 @@ namespace ComicParadise.Repository
                 }
 
                 // Check pass
-                if (!BCrypt.Net.BCrypt.Verify(signInModel.PasswordHash, userInfor.PasswordHash))
+                if (!BCrypt.Net.BCrypt.Verify(signInModel.PasswordHash, userAuthen.PasswordHash))
                 {
                     return new AuthenResponse
                     {
@@ -91,12 +92,21 @@ namespace ComicParadise.Repository
                 }
 
                 var tokenRespon = new TokenRespon(_configuration);
-                var token = tokenRespon.GenerateJwtToken(userInfor, userInfor.UserId);
+                var token = tokenRespon.GenerateJwtToken(userAuthen, userAuthen.UserId);
+                UserInfor userInfor = new UserInfor
+                {
+                    UserId = userAuthen.UserId,
+                    FullName = userAuthen.FullName,
+                    Identifier = userAuthen.Identifier ,
+
+                };
+
                 return new AuthenResponse
                 {
                     Message = "Login Successfully",
                     Token = token,
-                    Status = 200
+                    Status = 200,
+                    User = userInfor
                 };
             }
             catch (Exception ex)

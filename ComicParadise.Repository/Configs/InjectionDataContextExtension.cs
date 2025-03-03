@@ -14,7 +14,9 @@ namespace ComicParadise.Repository.Configs
         public static void AddDataContextServices(this IServiceCollection services)
         {
             services.AddScoped<IAuthenRepository, AuthenRepository>();
-/*            services.AddScoped<IProductRepository, ProductRepository>();*/
+            services.AddScoped<IMemberRepository, MemberRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IStoryRepository, StoryRepository>();
         }
     }
 }
