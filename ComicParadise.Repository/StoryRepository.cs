@@ -154,6 +154,8 @@ namespace ComicParadise.Repository
                 return "Không tìm thấy truyện";
             }
 
+
+
             story.Status = status;
             _context.SaveChanges();
             return "Cập nhật trạng thái thành công !";
