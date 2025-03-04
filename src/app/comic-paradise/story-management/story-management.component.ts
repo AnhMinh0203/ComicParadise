@@ -90,6 +90,9 @@ export class StoryManagementComponent {
   first: number = 0;
   rows: number = 5;
   isAddstoryPage: boolean = false;
+  isInforstoryPage: boolean = false;
+  isUpdateStoryPage: boolean = false;
+
   visible: boolean = false;
 
   primaryImg: any;
@@ -114,6 +117,8 @@ export class StoryManagementComponent {
   ) {
     this.router.events.subscribe(() => {
       this.isAddstoryPage = this.router.url.includes('/story-management/add-story');
+      this.isInforstoryPage = this.router.url.includes('/story-management/infor-story');
+      this.isUpdateStoryPage = this.router.url.includes('/story-management/update-story');
     });
   }
 
@@ -132,13 +137,18 @@ export class StoryManagementComponent {
     this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Chức năng xuất Excel đang phát triển' });
   }
 
-  // showDialog(story: any) {
-  //   this.storySelect = { ...story };
-  //   this.visible = true;
-  // }
-  navigateToAddstory() {
+  navigateToAddStory() {
     this.router.navigate(['/story-management/add-story']);
   }
+
+  navigateToInforStory() {
+    this.router.navigate(['/story-management/infor-story']);
+  }
+
+  navigateToUpdateStory() {
+    this.router.navigate(['/story-management/update-story']);
+  }
+
   onPageChange(event: PaginatorState) {
     this.first = event.first ?? 0;  // Đảm bảo giá trị không bị undefined
     this.rows = event.rows ?? 10;   // Đảm bảo giá trị không bị undefined
@@ -224,8 +234,7 @@ export class StoryManagementComponent {
   }
 
   onEdit() {
-    console.log('Edit clicked');
-    // Thêm logic chỉnh sửa
+    this.navigateToUpdateStory();
   }
 
   onDelete() {
@@ -234,7 +243,7 @@ export class StoryManagementComponent {
   }
 
   onDetail() {
-    console.log("Detail click");
+    this.navigateToInforStory();
   }
 
   updateStatus(status: string, storyID: number) {

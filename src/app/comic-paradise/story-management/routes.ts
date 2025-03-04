@@ -15,6 +15,20 @@ export const routes: Routes = [
         data: {
           title: 'Thêm truyện'
         }
+      },
+      {
+        path: 'infor-story',
+        loadComponent: () => import('./infor-story/infor-story.component').then(m => m.InforStoryComponent),
+        data: {
+          title: 'Xem nội dung'
+        }
+      },
+      {
+        path: 'update-story',
+        loadComponent: () => import('./update-story/update-story.component').then(m => m.UpdateStoryComponent),
+        data: {
+          title: 'Cập nhật truyện'
+        }
       }
     ]
   }

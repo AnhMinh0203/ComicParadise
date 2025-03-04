@@ -1,0 +1,278 @@
+<p-toast />
+<p-confirmdialog />
+<c-card>
+  <c-card-header>
+    <h5>Cập nhật truyện</h5>
+  </c-card-header>
+  <c-card-body class="p-4">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+        <div class="button-back d-flex align-items-center" style="cursor: pointer;">
+          <i class="pi pi-arrow-circle-left" (click)="navigateTostoryManagement()" style="font-size: 30px;"></i>
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <div class="story-infor">
+      <div class="row">
+        <h6><b>1. Thông tin truyện</b></h6>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="flex justify-center">
+            <p-selectbutton [options]="typeStoryOptions" [(ngModel)]="selectStoryType" optionLabel="label" optionValue="value"
+              aria-labelledby="basic" />
+          </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="title" class="block mt-3">Tên truyện</label>
+                <input pInputText id="title" [(ngModel)]="title" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
+              <div class="d-flex flex-column">
+                <label for="author" class="block mt-3">Tác giả</label>
+                <input pInputText id="author" [(ngModel)]="author" />
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+              <div class=" d-flex flex-column">
+                <label for="categories" class="block mt-3">Danh mục</label>
+                <p-multiselect [options]="categories" [(ngModel)]="categoriesSelect" placeholder="Chọn danh mục"
+                  optionLabel="categoryName" display="chip" styleClass="w-full md:w-80" [maxSelectedLabels]="10" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="mt-5"><b>2. Hình ảnh</b></h6>
+        <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
+          <div class="d-flex justify-content-start">
+            <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
+              (onSelect)="onUploadCoverImage($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
+          </div>
+          <div class="mt-3 border">
+            <p-image *ngIf="coverImageDisplay" [src]="coverImageDisplay" alt="Image" width="100%" [preview]="true" />
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
+          <textarea pTextarea [(ngModel)]="description" placeholder="Nhập mô tả ..." rows="10"
+            style="width: 100%;"></textarea>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="d-flex justify-content-end">
+            <p-button label="Cập nhật" (click)="updateStory()" />
+          </div>
+        </div>
+        <hr class="my-3">
+        <h6 class="mt-5"><b>3. Chương</b></h6>
+        <p-card header="Danh sách chương (15)" [styleClass]="'mb-2'">
+
+          <div class="chapter-action d-flex justify-content-end my-3">
+
+            <p-button label=" Thêm chương mới" severity="success" icon="pi pi-bookmark-fill"
+              class=" border border-success rounded" (click)="addChapterForm()" />
+          </div>
+
+          <div class="add-chapter mb-5" *ngIf="isAddChapter">
+
+
+
+            <!-- Title -->
+            <div class="add-title d-flex my-3">
+              <div class="d-flex flex-column ">
+                <label class="block ">Số chương</label>
+                <input type="text" pInputText [(ngModel)]="chapterNumber" />
+              </div>
+              <div class="d-flex flex-column ms-3 " [style]="{ 'width': '100%' }">
+                <label class="block ">Tên chương</label>
+                <input type="text" pInputText [(ngModel)]="chapterNumber" />
+              </div>
+            </div>
+
+            <!-- Content novel -->
+            <div class="contentNovelStory" *ngIf="isAddNovel">
+              <div id="contentNovelStory" class="mb-5"></div>
+            </div>
+
+            <!-- Content manga -->
+            <div class="contentMangaStory" *ngIf="isAddManga">
+              <!-- Type of file -->
+              <p-selectbutton [options]="typeMangaOptions" [(ngModel)]="selectMangaType" optionLabel="label" optionValue="value"
+              aria-labelledby="basic" />
+
+
+              <div class="my-3" *ngIf="selectMangaType === 'Pdf'">
+                <label cLabel for="formFile">Tải tệp truyện (pdf)</label>
+                <input cFormControl id="formFile" type="file" accept="application/pdf" />
+              </div>
+
+              <div class="my-3" *ngIf="selectMangaType === 'Imgs'">
+                <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
+                  [auto]="true" chooseLabel="Tải trang truyện" (onSelect)="onUploadChildrenImg($event)"
+                  (onRemove)="onRemoveChildrenImg($event)">
+                  <ng-template #empty>
+                    <div>Kéo và thả tệp vào đây để tải lên.</div>
+                  </ng-template>
+                  <ng-template #content>
+                  </ng-template>
+                </p-fileupload>
+              </div>
+            </div>
+
+            <!-- Actions novel -->
+            <div class="add-novel-actions d-flex justify-content-end">
+              <p-button label="Hủy" severity="secondary" (click)="closeNovelForm()" />
+              <p-button label="Xác nhận" severity="success" [ngClass]="'ms-2'" (click)="confirmAddNovel()" />
+            </div>
+          </div>
+
+          <div class="chapter-list">
+            <div class="row">
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
+                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
+                  <div class="chapter-item-icon me-2">
+                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
+                  </div>
+                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
+                    <span class="chapter-number font-bold">#1</span>
+                    <span class="chapter-time text-700">4 giờ trước</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
+                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
+                  <div class="chapter-item-icon me-2">
+                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
+                  </div>
+                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
+                    <span class="chapter-number font-bold">#1</span>
+                    <span class="chapter-time text-700">4 giờ trước</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
+                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
+                  <div class="chapter-item-icon me-2">
+                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
+                  </div>
+                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
+                    <span class="chapter-number font-bold">#2</span>
+                    <span class="chapter-time text-700">4 giờ trước</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
+                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
+                  <div class="chapter-item-icon me-2">
+                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
+                  </div>
+                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
+                    <span class="chapter-number font-bold">#3</span>
+                    <span class="chapter-time text-700">02-03-2025</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
+                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
+                  <div class="chapter-item-icon me-2">
+                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
+                  </div>
+                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
+                    <span class="chapter-number font-bold">#4</span>
+                    <span class="chapter-time text-700">02-03-2025</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+        </p-card>
+
+        <h6 class="mt-5"><b>4. Bình luận</b></h6>
+        <p-card header="Bình luận (15)" [styleClass]="'mb-2'">
+
+          <div class="comment-list">
+            <div class="mb-2">
+              <div class="comment-item d-flex my-3">
+                <div class="comment-item-avatar p-1">
+                  <p-avatar label="U" styleClass="mr-2" [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
+                    shape="circle" />
+                </div>
+                <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
+                  <div class="comment-item-content-up d-flex flex-column">
+                    <div class="comment-item-infor  d-flex align-items-center p-1">
+                      <div class="comment-name me-3">Abc</div>
+                      <div class="comment-time ">3 giờ trước</div>
+                    </div>
+                    <div class="comment-item-text p-1">
+                      Truyện hay nha :>
+                    </div>
+                    <div class="comment-item-actions d-flex align-items-center p-2">
+                      <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
+                      <i class="pi pi-thumbs-down"><span class="mx-1 me-5">1</span></i>
+                      <p-tag severity="secondary" value="Phản hồi" />
+                    </div>
+                  </div>
+                  <div class="comment-item-content-down">
+                    <p-tree [value]="childComments" styleClass="w-full md:w-[30rem]"
+                      [style]="{padding: '0px', 'margin-left': '-15px'}">
+                      <ng-template let-node pTemplate="default">
+
+
+                        <div class="p-tree-node-content" *ngIf="node.children && node.children.length > 0">
+                          <span class="p-tree-node-label"><b>{{ node.label }}</b></span>
+                        </div>
+
+                        <div class="p-tree-children" *ngIf="node.expanded && node.children">
+                          <div class="comment-item d-flex my-3" *ngFor="let child of node.children">
+                            <div class="comment-item-avatar p-1">
+                              <p-avatar [label]="child.avatar" styleClass="mr-2"
+                                [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
+                            </div>
+                            <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
+                              <div class="comment-item-content-up d-flex flex-column">
+                                <div class="comment-item-infor d-flex align-items-center p-1">
+                                  <div class="comment-name me-3 font-medium text-primary">{{ child.label }}</div>
+                                  <div class="comment-time text-700 text-sm">{{ child.time }}</div>
+                                </div>
+                                <div class="comment-item-text p-1">
+                                  {{ child.content }}
+                                </div>
+                                <div class="comment-item-actions d-flex align-items-center p-2">
+                                  <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
+                                  <i class="pi pi-thumbs-down"><span class="mx-1 me-4">1</span></i>
+                                  <p-tag severity="secondary" value="Phản hồi" />
+                                </div>
+                              </div>
+                            </div>
+                            <div class="comment-item-report p-2">
+                              <i class="pi pi-ellipsis-v mt-3"></i>
+
+                            </div>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </p-tree>
+                  </div>
+                </div>
+                <div class="comment-item-report p-2">
+                  <i class="pi pi-ellipsis-v mt-3"></i>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </p-card>
+      </div>
+    </div>
+  </c-card-body>
+
+
+</c-card>
