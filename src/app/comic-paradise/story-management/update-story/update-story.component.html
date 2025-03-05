@@ -19,8 +19,8 @@
         <h6><b>1. Thông tin truyện</b></h6>
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
           <div class="flex justify-center">
-            <p-selectbutton [options]="typeStoryOptions" [(ngModel)]="selectStoryType" optionLabel="label" optionValue="value"
-              aria-labelledby="basic" />
+            <p-selectbutton [options]="typeStoryOptions" [(ngModel)]="selectStoryType" optionLabel="label"
+              optionValue="value" aria-labelledby="basic" />
           </div>
         </div>
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
@@ -101,8 +101,8 @@
             <!-- Content manga -->
             <div class="contentMangaStory" *ngIf="isAddManga">
               <!-- Type of file -->
-              <p-selectbutton [options]="typeMangaOptions" [(ngModel)]="selectMangaType" optionLabel="label" optionValue="value"
-              aria-labelledby="basic" />
+              <p-selectbutton [options]="typeMangaOptions" [(ngModel)]="selectMangaType" optionLabel="label"
+                optionValue="value" aria-labelledby="basic" />
 
 
               <div class="my-3" *ngIf="selectMangaType === 'Pdf'">
@@ -195,54 +195,63 @@
         </p-card>
 
         <h6 class="mt-5"><b>4. Bình luận</b></h6>
-        <p-card header="Bình luận (15)" [styleClass]="'mb-2'">
-
+        <p-card header="Bình luận ({{ comments.length || 0 }})" [styleClass]="'mb-2'">
           <div class="comment-list">
             <div class="mb-2">
-              <div class="comment-item d-flex my-3">
+              <!-- Lặp qua danh sách comment gốc -->
+              <div class="comment-item d-flex my-3" *ngFor="let comment of comments">
                 <div class="comment-item-avatar p-1">
-                  <p-avatar label="U" styleClass="mr-2" [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
-                    shape="circle" />
+                  <p-avatar [label]="comment.avatar" styleClass="mr-2"
+                    [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
                 </div>
                 <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
                   <div class="comment-item-content-up d-flex flex-column">
-                    <div class="comment-item-infor  d-flex align-items-center p-1">
-                      <div class="comment-name me-3">Abc</div>
-                      <div class="comment-time ">3 giờ trước</div>
+                    <div class="comment-item-infor d-flex align-items-center p-1">
+                      <div class="comment-name me-3 font-medium text-primary">{{ comment.label }}</div>
+                      <div class="comment-time text-700 text-sm">{{ comment.time }}</div>
                     </div>
                     <div class="comment-item-text p-1">
-                      Truyện hay nha :>
+                      {{ comment.content }}
                     </div>
                     <div class="comment-item-actions d-flex align-items-center p-2">
                       <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
                       <i class="pi pi-thumbs-down"><span class="mx-1 me-5">1</span></i>
-                      <p-tag severity="secondary" value="Phản hồi" />
+                      <p-tag severity="secondary" value="Phản hồi" [rounded]="true" />
                     </div>
+                    <!-- Nút "> X phản hồi" nếu có comment con -->
+                    <div>
+                      <p-tag *ngIf="comment.children && comment.children.length > 0"
+                        class="cursor-pointer text-secondary border border-secondary flex items-center gap-2"
+                        severity="secondary"
+                        (click)="toggleExpand(comment)"
+                        [rounded]="true">
+                        <i class="pi" [ngClass]="comment.expanded ? 'pi-angle-up' : 'pi-angle-down'"></i>
+                        {{ comment.expanded ? 'Ẩn phản hồi' : comment.children.length + ' phản hồi' }}
+                      </p-tag>
+                    </div>
+
+
                   </div>
-                  <div class="comment-item-content-down">
-                    <p-tree [value]="childComments" styleClass="w-full md:w-[30rem]"
-                      [style]="{padding: '0px', 'margin-left': '-15px'}">
+                  <!-- Hiển thị comment con nếu expanded = true -->
+                  <div class="comment-item-content-down"
+                    *ngIf="comment.expanded && comment.children && comment.children.length > 0">
+                    <p-tree [value]="comment.children" styleClass="w-full md:w-[30rem]"
+                      [style]="{ padding: '0px', 'margin-left': '-15px' }">
                       <ng-template let-node pTemplate="default">
-
-
-                        <div class="p-tree-node-content" *ngIf="node.children && node.children.length > 0">
-                          <span class="p-tree-node-label"><b>{{ node.label }}</b></span>
-                        </div>
-
-                        <div class="p-tree-children" *ngIf="node.expanded && node.children">
-                          <div class="comment-item d-flex my-3" *ngFor="let child of node.children">
+                        <div class="p-tree-node-content">
+                          <div class="comment-item d-flex my-3">
                             <div class="comment-item-avatar p-1">
-                              <p-avatar [label]="child.avatar" styleClass="mr-2"
+                              <p-avatar [label]="node.avatar" styleClass="mr-2"
                                 [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
                             </div>
                             <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
                               <div class="comment-item-content-up d-flex flex-column">
                                 <div class="comment-item-infor d-flex align-items-center p-1">
-                                  <div class="comment-name me-3 font-medium text-primary">{{ child.label }}</div>
-                                  <div class="comment-time text-700 text-sm">{{ child.time }}</div>
+                                  <div class="comment-name me-3 font-medium text-primary">{{ node.label }}</div>
+                                  <div class="comment-time text-700 text-sm">{{ node.time }}</div>
                                 </div>
                                 <div class="comment-item-text p-1">
-                                  {{ child.content }}
+                                  {{ node.content }}
                                 </div>
                                 <div class="comment-item-actions d-flex align-items-center p-2">
                                   <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
@@ -253,7 +262,6 @@
                             </div>
                             <div class="comment-item-report p-2">
                               <i class="pi pi-ellipsis-v mt-3"></i>
-
                             </div>
                           </div>
                         </div>
@@ -263,11 +271,9 @@
                 </div>
                 <div class="comment-item-report p-2">
                   <i class="pi pi-ellipsis-v mt-3"></i>
-
                 </div>
               </div>
             </div>
-
           </div>
         </p-card>
       </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {SharedModule} from '../../../core/share/shared.module';
+import { SharedModule } from '../../../core/share/shared.module';
 import { storyService } from '../../service/story.service';
 import { categoryService } from '../../service/category.service';
 import { Router } from '@angular/router';
@@ -9,6 +9,8 @@ import { HttpClient } from '@angular/common/http';
 import { CardModule } from 'primeng/card';
 import { FileUploadModule } from 'primeng/fileupload';
 import Quill from 'quill';
+import { ActivatedRoute } from '@angular/router';
+
 
 interface CommentNode {
   key: string;
@@ -24,14 +26,16 @@ interface CommentNode {
   imports: [
     SharedModule,
     CardModule,
-    FileUploadModule
+    FileUploadModule,
+
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './update-story.component.html',
   styleUrl: './update-story.component.scss'
 })
 export class UpdateStoryComponent {
-  chapterNumber:any;
+  storyID: number | null = null;
+  chapterNumber: any;
   title: any;
   author: any;
   categories: any;
@@ -40,9 +44,9 @@ export class UpdateStoryComponent {
   publisher: any;
   coverImage: any;
   coverImageDisplay: any;
-  chapterContent:any;
+  chapterContent: any;
 
-  editorInstance:any;
+  editorInstance: any;
 
   isAddChapter: boolean = false;
   isAddNovel: boolean = false;
@@ -50,9 +54,16 @@ export class UpdateStoryComponent {
   isAddMangaPdf: boolean = false;
   isAddMangaImgs: boolean = false;
 
+  typeStoryOptions: any[] = [{ label: 'Tiểu thuyết', value: 'Novel' }, { label: 'Truyện tranh', value: 'Manga' }];
+  typeMangaOptions: any[] = [{ label: 'PDF', value: 'Pdf' }, { label: 'Ảnh', value: 'Imgs' }];
+  selectStoryType: any;
+  selectMangaType: any;
+
+  comments: any[] = [];
   //
-  index:any;
-  showValue:any;
+  index: any;
+  showValue: any;
+
   constructor(
     private http: HttpClient,
     private sanitizer: DomSanitizer,
@@ -61,13 +72,22 @@ export class UpdateStoryComponent {
     private _categoryService: categoryService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private activatedRoute: ActivatedRoute,
 
   ) { }
 
-  typeStoryOptions: any[] = [{ label: 'Tiểu thuyết', value: 'Novel' }, { label: 'Truyện tranh', value: 'Manga' }];
-  typeMangaOptions: any[] = [{ label: 'PDF', value: 'Pdf' }, { label: 'Ảnh', value: 'Imgs' }];
-  selectStoryType: any;
-  selectMangaType: any;
+  ngOnInit() {
+    this.activatedRoute.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.storyID = +id;
+        console.log('Story ID:', this.storyID);
+        this.getStoryDetail(this.storyID);
+      }
+    });
+
+    this.getCategories();
+  }
 
   toolbarOptions = [
     ['bold', 'italic', 'underline', 'strike'],
@@ -82,7 +102,7 @@ export class UpdateStoryComponent {
     [{ 'color': [] }, { 'background': [] }],
     [{ 'font': [] }],
     [{ 'align': [] }],
-    ['clean']  // remove formatting button
+    ['clean']
   ];
 
   initializeQuill() {
@@ -91,68 +111,41 @@ export class UpdateStoryComponent {
       this.editorInstance = new Quill(quillContainer, {
         theme: 'snow',
         placeholder: 'Nhập nội dung truyện...',
-        modules:{
+        modules: {
           toolbar: this.toolbarOptions
         }
       });
     }
   }
 
-  childComments!: CommentNode[];
-  ngOnInit() {
-    this.getCategories();
-    this.selectStoryType = this.typeStoryOptions[1].value;
-    this.childComments = [
-      {
-        key: '0',
-        label: '4 phản hồi',
-        avatar: 'U',
-        content: 'Truyện hay nha :>',
-        time: '3 giờ trước',
-        children: [
-          {
-            key: '0-0',
-            label: 'Người Dùng 2',
-            avatar: 'N',
-            content: 'Cảm ơn bạn, mình cũng thích!',
-            time: '4 giờ trước',
-            children: [] // Không có reply con cho reply này
-          },
-          {
-            key: '0-1',
-            label: 'Người Dùng 3',
-            avatar: 'P',
-            content: 'Truyện này tuyệt vời quá!',
-            time: '3.5 giờ trước',
-            children: [] // Không có reply con cho reply này
-          }
-          ,
-          {
-            key: '0-1',
-            label: 'Người Dùng 3',
-            avatar: 'P',
-            content: 'Truyện này tuyệt vời quá!',
-            time: '3.5 giờ trước',
-            children: [] // Không có reply con cho reply này
-          }
-          ,
-          {
-            key: '0-1',
-            label: 'Người Dùng 3',
-            avatar: 'P',
-            content: 'Truyện này tuyệt vời quá!',
-            time: '3.5 giờ trước',
-            children: [] // Không có reply con cho reply này
-          }
-        ]
-      }
-    ];
+  getStoryDetail(storyID:number){
+    this._storyService.getStoryById(storyID).subscribe((res: any) => {
+      console.log(res);
+      this.author = res.data.author;
+      this.title = res.data.title;
+      this.selectStoryType = res.data.type;
 
+      this.categoriesSelect = this.categories.filter((category: any) =>
+        res.data.categories.some((c: any) => c.categoryID === category.categoryID)
+      );
+
+      this.coverImageDisplay = res.data.coverImage;
+      this.description = res.data.description;
+
+      this.comments = res.data.comments.map((comment: any) => ({
+        key: comment.commentID.toString(),
+        label: comment.username || 'Người dùng',
+        avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
+        content: comment.content,
+        time: this.getTimeAgo(comment.createdAt),
+        children: this.mapChildComments(comment.childComments)
+      }));
+    });
   }
 
-  addChapterForm(){
+  addChapterForm() {
     this.isAddChapter = true;
-    if(this.selectStoryType === "Novel"){
+    if (this.selectStoryType === "Novel") {
       this.isAddNovel = !this.isAddNovel;
 
       if (this.isAddNovel) {
@@ -163,15 +156,15 @@ export class UpdateStoryComponent {
       }
     }
 
-   else {
+    else {
 
-    this.isAddManga = true;
-    this.selectMangaType = this.typeMangaOptions[1].value
-    this.isAddMangaPdf
+      this.isAddManga = true;
+      this.selectMangaType = this.typeMangaOptions[1].value
+      this.isAddMangaPdf
     }
   }
 
-  confirmAddNovel(){
+  confirmAddNovel() {
     this.messageService.add({
       severity: 'success',
       summary: 'Thành công',
@@ -180,11 +173,11 @@ export class UpdateStoryComponent {
     return;
   }
 
-  closeNovelForm(){
+  closeNovelForm() {
     this.isAddChapter = false;
   }
 
-  resetForm(){
+  resetForm() {
     this.chapterNumber = '';
     this.title = '';
     this.chapterContent = '';
@@ -287,6 +280,48 @@ export class UpdateStoryComponent {
       }
     });
   }
+  private getTimeAgo(createdAt: string): string {
+    const now = new Date();
+    const commentTime = new Date(createdAt);
 
+    const diffInMs = now.getTime() - commentTime.getTime();
+    const diffInMinutes = Math.floor(diffInMs / 1000 / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInMinutes / 1440);
 
+    // Tính chính xác số tháng và năm
+    let diffInMonths = (now.getFullYear() - commentTime.getFullYear()) * 12 + (now.getMonth() - commentTime.getMonth());
+    const diffInYears = now.getFullYear() - commentTime.getFullYear();
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} phút trước`;
+    } else if (diffInMinutes < 1440) {
+      return `${diffInHours} giờ trước`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays} ngày trước`;
+    } else if (diffInDays < 30) {
+      const diffInWeeks = Math.floor(diffInDays / 7);
+      return `${diffInWeeks} tuần trước`;
+    } else if (diffInDays < 365) {
+      return `${diffInMonths} tháng trước`;
+    } else {
+      return `${diffInYears} năm trước`;
+    }
+  }
+
+  // Hàm chuyển đổi danh sách comments thành cấu trúc cây
+  private mapChildComments(childComments: any[]): any[] {
+    if (!childComments || childComments.length === 0) return [];
+    return childComments.map((child: any) => ({
+      key: child.commentID.toString(),
+      label: child.username || 'Người dùng',
+      avatar: child.username ? child.username.charAt(0).toUpperCase() : 'U',
+      content: child.content,
+      time: this.getTimeAgo(child.createdAt),
+      children: this.mapChildComments(child.childComments || [])
+    }));
+  }
+  toggleExpand(comment: any): void {
+    comment.expanded = !comment.expanded;
+  }
 }

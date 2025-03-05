@@ -128,7 +128,7 @@ export class StoryManagementComponent {
     this.items = [
       { label: 'Xem nội dung', icon: 'pi pi-file-check', command: () => this.onDetail() },
       { label: 'Gỡ', icon: 'pi pi-delete-left', command: () => this.updateStatus("Rejected",this.selectedStory?.storyID) },
-      { label: 'Cập nhật', icon: 'pi pi-pen-to-square', command: () => this.onEdit() },
+      { label: 'Cập nhật', icon: 'pi pi-pen-to-square', command: () => this.onEdit(this.selectedStory.storyID) },
       { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDelete() }
     ];
   }
@@ -145,8 +145,8 @@ export class StoryManagementComponent {
     this.router.navigate(['/story-management/infor-story']);
   }
 
-  navigateToUpdateStory() {
-    this.router.navigate(['/story-management/update-story']);
+  navigateToUpdateStory(storyID:number) {
+    this.router.navigate(['/story-management/update-story',storyID]);
   }
 
   onPageChange(event: PaginatorState) {
@@ -172,9 +172,7 @@ export class StoryManagementComponent {
   }
 
   onUpload(event: any) {
-    const file = event.files[0]; // Get the uploaded file
-
-    // Create a URL for the uploaded image file
+    const file = event.files[0];
     const reader = new FileReader();
     reader.onload = (e: any) => {
       this.primaryImg = e.target.result; // Set the image source to the uploaded file's data URL
@@ -211,14 +209,6 @@ export class StoryManagementComponent {
 
 
   loadStories() {
-    // this.storySelect = {
-    //   name: '',
-    //   price: 0,
-    //   origin: '',
-    //   quantity: 0,
-    //   guide: '',
-    //   unit: '',
-    // };
     this._storyService.getStories().subscribe((res: any) => {
       if (res) {
         console.log(res);
@@ -233,8 +223,8 @@ export class StoryManagementComponent {
     // Thêm logic reload dữ liệu nếu cần
   }
 
-  onEdit() {
-    this.navigateToUpdateStory();
+  onEdit(storyID:number) {
+    this.navigateToUpdateStory(storyID);
   }
 
   onDelete() {

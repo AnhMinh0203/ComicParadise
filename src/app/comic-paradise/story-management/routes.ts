@@ -24,7 +24,7 @@ export const routes: Routes = [
         }
       },
       {
-        path: 'update-story',
+        path: 'update-story/:id',
         loadComponent: () => import('./update-story/update-story.component').then(m => m.UpdateStoryComponent),
         data: {
           title: 'Cập nhật truyện'
