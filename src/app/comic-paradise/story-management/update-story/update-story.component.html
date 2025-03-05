@@ -196,13 +196,13 @@
 
         <h6 class="mt-5"><b>4. Bình luận</b></h6>
         <p-card header="Bình luận ({{ comments.length || 0 }})" [styleClass]="'mb-2'">
-          <div class="new-comment-input my-1" >
+          <div class="new-comment-input my-1">
             <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
               [style]="{ 'width': '100%' }"></textarea>
 
             <div class="comment-input-actions d-flex justify-content-end">
               <!-- <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary" /> -->
-              <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" (click)="postComment()" />
+              <p-tag class="p-tag-hover p-2" value="Phản hồi" label="Primary" (click)="postComment()" />
 
             </div>
           </div>
@@ -225,18 +225,29 @@
                       {{ comment.content }}
                     </div>
                     <div class="comment-item-actions d-flex align-items-center p-2">
-                      <i class="pi pi-thumbs-up me-3 "><span class="mx-1" *ngIf="comment.likes > 0">{{comment.likes}}</span></i>
-                      <i class="pi pi-thumbs-down mx-1"><span class="mx-1 me-5" *ngIf="comment.disLikes > 0">{{comment.disLikes}}</span></i>
-                      <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi" [rounded]="true"
-                        (click)="toggleReply(comment)" />
+                      <i [class.pi-thumbs-up]="!comment.isLiked" [class.pi-thumbs-up-fill]="comment.isLiked"
+                        class="pi me-3" (click)="onLike(comment)">
+                        <span class="mx-1" *ngIf="comment.likes > 0">{{ comment.likes }}</span>
+                      </i>
+
+                      <i [class.pi-thumbs-down]="!comment.isDisliked" [class.pi-thumbs-down-fill]="comment.isDisliked"
+                        class="pi mx-1" (click)="onDislike(comment)">
+                        <span class="mx-1 me-5" *ngIf="comment.disLikes > 0">{{ comment.disLikes }}</span>
+                      </i>
+
+                      <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi"
+                        [rounded]="true" (click)="toggleReply(comment)" />
                     </div>
+
+
 
                     <div class="comment-input my-1" *ngIf="comment.isReplying">
                       <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
                         [style]="{ 'width': '100%' }"></textarea>
 
                       <div class="comment-input-actions d-flex justify-content-end">
-                        <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary" (click)="toggleReply(comment)"/>
+                        <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary"
+                          (click)="toggleReply(comment)" />
                         <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" />
 
                       </div>
@@ -292,7 +303,9 @@
                   </div>
                 </div>
                 <div class="comment-item-report p-2">
-                  <i class="pi pi-ellipsis-v mt-3"></i>
+
+                  <p-menu #menu [model]="commentSelections" [popup]="true" appendTo="body" />
+                    <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)"></i>
                 </div>
               </div>
             </div>

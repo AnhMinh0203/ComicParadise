@@ -11,6 +11,10 @@ import { FileUploadModule } from 'primeng/fileupload';
 import Quill from 'quill';
 import { ActivatedRoute } from '@angular/router';
 import { commentService } from '../../service/comment.service';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
+
 
 @Component({
   selector: 'app-update-story',
@@ -18,7 +22,8 @@ import { commentService } from '../../service/comment.service';
     SharedModule,
     CardModule,
     FileUploadModule,
-
+    MenuModule,
+    Menu
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './update-story.component.html',
@@ -50,10 +55,12 @@ export class UpdateStoryComponent {
   selectMangaType: any;
 
   comments: any[] = [];
-  commentInput:any;
+  commentInput: any;
   replyingCommentId: number | null = null;
 
-
+  hoverLike: boolean = false;
+  hoverDislike: boolean = false;
+  commentSelections: MenuItem[] | undefined;
   //
   index: any;
   showValue: any;
@@ -81,6 +88,11 @@ export class UpdateStoryComponent {
       }
     });
     this.getCategories();
+    this.commentSelections = [
+      { label: 'Gỡ', icon: 'pi pi-delete-left', command: () => this.onHideComment() },
+      { label: 'Khóa bình luận', icon: 'pi pi-pen-to-square', command: () => this.onLockComment() },
+      { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDeleteComment() }
+    ];
   }
 
   toolbarOptions = [
@@ -116,7 +128,7 @@ export class UpdateStoryComponent {
     comment.isReplying = !comment.isReplying;
   }
 
-  getStoryDetail(storyID:number){
+  getStoryDetail(storyID: number) {
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
       console.log(res);
       this.author = res.data.author;
@@ -294,7 +306,8 @@ export class UpdateStoryComponent {
     const diffInYears = now.getFullYear() - commentTime.getFullYear();
 
     if (diffInMinutes < 1) {
-      return 'Vừa xong';}
+      return 'Vừa xong';
+    }
     else if (diffInMinutes < 60) {
       return `${diffInMinutes} phút trước`;
     } else if (diffInMinutes < 1440) {
@@ -327,12 +340,13 @@ export class UpdateStoryComponent {
     comment.expanded = !comment.expanded;
   }
 
-  postComment(){
-    const comment= {
+  // --- Comment ---//
+  postComment() {
+    const comment = {
       StoryID: this.storyID,
       UserID: JSON.parse(localStorage.getItem('user') || '{}').userId,
       Content: this.commentInput,
-      CreatedAt:  new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
+      CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",
       Reply: this.replyingCommentId,
     };
@@ -355,5 +369,29 @@ export class UpdateStoryComponent {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
       }
     });
+  }
+
+  onLike(comment: any) {
+    comment.isLiked = !comment.isLiked;
+    if (comment.isLiked) {
+      comment.isDisliked = false; // Không cho phép like & dislike cùng lúc
+    }
+  }
+
+  onDislike(comment: any) {
+    comment.isDisliked = !comment.isDisliked;
+    if (comment.isDisliked) {
+      comment.isLiked = false; // Không cho phép like & dislike cùng lúc
+    }
+  }
+
+  onHideComment() {
+
+  }
+  onLockComment() {
+
+  }
+  onDeleteComment(){
+
   }
 }
