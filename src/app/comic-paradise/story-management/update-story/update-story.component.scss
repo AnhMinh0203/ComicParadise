@@ -1,0 +1,17 @@
+.p-tag-hover {
+  outline: 1px solid transparent;
+  transition: outline 0.2s ease-in-out, transform 0.1s ease-in-out;
+  user-select: none;
+}
+
+.p-tag-hover:hover {
+  outline: 1px solid #6b6d6e;
+}
+
+.p-tag-hover:active {
+  transform: scale(0.95);
+}
+
+.ms-n5{
+  margin-left: -30px;
+}

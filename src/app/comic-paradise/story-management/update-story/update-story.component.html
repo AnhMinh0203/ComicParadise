@@ -196,6 +196,17 @@
 
         <h6 class="mt-5"><b>4. Bình luận</b></h6>
         <p-card header="Bình luận ({{ comments.length || 0 }})" [styleClass]="'mb-2'">
+          <div class="new-comment-input my-1" >
+            <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
+              [style]="{ 'width': '100%' }"></textarea>
+
+            <div class="comment-input-actions d-flex justify-content-end">
+              <!-- <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary" /> -->
+              <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" (click)="postComment()" />
+
+            </div>
+          </div>
+
           <div class="comment-list">
             <div class="mb-2">
               <!-- Lặp qua danh sách comment gốc -->
@@ -214,17 +225,28 @@
                       {{ comment.content }}
                     </div>
                     <div class="comment-item-actions d-flex align-items-center p-2">
-                      <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
-                      <i class="pi pi-thumbs-down"><span class="mx-1 me-5">1</span></i>
-                      <p-tag severity="secondary" value="Phản hồi" [rounded]="true" />
+                      <i class="pi pi-thumbs-up me-3 "><span class="mx-1" *ngIf="comment.likes > 0">{{comment.likes}}</span></i>
+                      <i class="pi pi-thumbs-down mx-1"><span class="mx-1 me-5" *ngIf="comment.disLikes > 0">{{comment.disLikes}}</span></i>
+                      <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi" [rounded]="true"
+                        (click)="toggleReply(comment)" />
                     </div>
+
+                    <div class="comment-input my-1" *ngIf="comment.isReplying">
+                      <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
+                        [style]="{ 'width': '100%' }"></textarea>
+
+                      <div class="comment-input-actions d-flex justify-content-end">
+                        <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary" (click)="toggleReply(comment)"/>
+                        <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" />
+
+                      </div>
+                    </div>
+
                     <!-- Nút "> X phản hồi" nếu có comment con -->
                     <div>
                       <p-tag *ngIf="comment.children && comment.children.length > 0"
-                        class="cursor-pointer text-secondary border border-secondary flex items-center gap-2"
-                        severity="secondary"
-                        (click)="toggleExpand(comment)"
-                        [rounded]="true">
+                        class="cursor-pointer text-secondary flex items-center gap-2  p-tag-hover" severity="secondary"
+                        (click)="toggleExpand(comment)" [rounded]="true">
                         <i class="pi" [ngClass]="comment.expanded ? 'pi-angle-up' : 'pi-angle-down'"></i>
                         {{ comment.expanded ? 'Ẩn phản hồi' : comment.children.length + ' phản hồi' }}
                       </p-tag>
@@ -233,38 +255,38 @@
 
                   </div>
                   <!-- Hiển thị comment con nếu expanded = true -->
-                  <div class="comment-item-content-down"
+                  <div class="comment-item-content-down ms-n5"
                     *ngIf="comment.expanded && comment.children && comment.children.length > 0">
                     <p-tree [value]="comment.children" styleClass="w-full md:w-[30rem]"
                       [style]="{ padding: '0px', 'margin-left': '-15px' }">
                       <ng-template let-node pTemplate="default">
-                        <div class="p-tree-node-content">
-                          <div class="comment-item d-flex my-3">
-                            <div class="comment-item-avatar p-1">
-                              <p-avatar [label]="node.avatar" styleClass="mr-2"
-                                [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
-                            </div>
-                            <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
-                              <div class="comment-item-content-up d-flex flex-column">
-                                <div class="comment-item-infor d-flex align-items-center p-1">
-                                  <div class="comment-name me-3 font-medium text-primary">{{ node.label }}</div>
-                                  <div class="comment-time text-700 text-sm">{{ node.time }}</div>
-                                </div>
-                                <div class="comment-item-text p-1">
-                                  {{ node.content }}
-                                </div>
-                                <div class="comment-item-actions d-flex align-items-center p-2">
-                                  <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
-                                  <i class="pi pi-thumbs-down"><span class="mx-1 me-4">1</span></i>
-                                  <p-tag severity="secondary" value="Phản hồi" />
-                                </div>
+
+                        <div class="comment-item d-flex my-3">
+                          <div class="comment-item-avatar p-1">
+                            <p-avatar [label]="node.avatar" styleClass="mr-2"
+                              [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
+                          </div>
+                          <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
+                            <div class="comment-item-content-up d-flex flex-column">
+                              <div class="comment-item-infor d-flex align-items-center p-1">
+                                <div class="comment-name me-3 font-medium text-primary">{{ node.label }}</div>
+                                <div class="comment-time text-700 text-sm">{{ node.time }}</div>
+                              </div>
+                              <div class="comment-item-text p-1">
+                                {{ node.content }}
+                              </div>
+                              <div class="comment-item-actions d-flex align-items-center p-2">
+                                <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
+                                <i class="pi pi-thumbs-down"><span class="mx-1 me-4">1</span></i>
+                                <p-tag severity="secondary" value="Phản hồi" />
                               </div>
                             </div>
-                            <div class="comment-item-report p-2">
-                              <i class="pi pi-ellipsis-v mt-3"></i>
-                            </div>
+                          </div>
+                          <div class="comment-item-report p-2">
+                            <i class="pi pi-ellipsis-v mt-3"></i>
                           </div>
                         </div>
+
                       </ng-template>
                     </p-tree>
                   </div>

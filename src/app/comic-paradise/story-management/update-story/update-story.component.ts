@@ -10,16 +10,7 @@ import { CardModule } from 'primeng/card';
 import { FileUploadModule } from 'primeng/fileupload';
 import Quill from 'quill';
 import { ActivatedRoute } from '@angular/router';
-
-
-interface CommentNode {
-  key: string;
-  label: string; // Tên người dùng (ví dụ: "Abc")
-  avatar: string; // Chuỗi cho avatar (ví dụ: "U")
-  content: string; // Nội dung bình luận (ví dụ: "Truyện hay nha :>")
-  time: string; // Thời gian (ví dụ: "3 giờ trước")
-  children?: CommentNode[]; // Chỉ chứa các reply trực tiếp (không lồng sâu hơn)
-}
+import { commentService } from '../../service/comment.service';
 
 @Component({
   selector: 'app-update-story',
@@ -45,7 +36,6 @@ export class UpdateStoryComponent {
   coverImage: any;
   coverImageDisplay: any;
   chapterContent: any;
-
   editorInstance: any;
 
   isAddChapter: boolean = false;
@@ -60,6 +50,10 @@ export class UpdateStoryComponent {
   selectMangaType: any;
 
   comments: any[] = [];
+  commentInput:any;
+  replyingCommentId: number | null = null;
+
+
   //
   index: any;
   showValue: any;
@@ -70,6 +64,7 @@ export class UpdateStoryComponent {
     private router: Router,
     private _storyService: storyService,
     private _categoryService: categoryService,
+    private _commentService: commentService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private activatedRoute: ActivatedRoute,
@@ -85,7 +80,6 @@ export class UpdateStoryComponent {
         this.getStoryDetail(this.storyID);
       }
     });
-
     this.getCategories();
   }
 
@@ -118,6 +112,10 @@ export class UpdateStoryComponent {
     }
   }
 
+  toggleReply(comment: any) {
+    comment.isReplying = !comment.isReplying;
+  }
+
   getStoryDetail(storyID:number){
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
       console.log(res);
@@ -138,6 +136,8 @@ export class UpdateStoryComponent {
         avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
         content: comment.content,
         time: this.getTimeAgo(comment.createdAt),
+        likes: comment.likes,
+        disLikes: comment.disLikes,
         children: this.mapChildComments(comment.childComments)
       }));
     });
@@ -293,7 +293,9 @@ export class UpdateStoryComponent {
     let diffInMonths = (now.getFullYear() - commentTime.getFullYear()) * 12 + (now.getMonth() - commentTime.getMonth());
     const diffInYears = now.getFullYear() - commentTime.getFullYear();
 
-    if (diffInMinutes < 60) {
+    if (diffInMinutes < 1) {
+      return 'Vừa xong';}
+    else if (diffInMinutes < 60) {
       return `${diffInMinutes} phút trước`;
     } else if (diffInMinutes < 1440) {
       return `${diffInHours} giờ trước`;
@@ -323,5 +325,35 @@ export class UpdateStoryComponent {
   }
   toggleExpand(comment: any): void {
     comment.expanded = !comment.expanded;
+  }
+
+  postComment(){
+    const comment= {
+      StoryID: this.storyID,
+      UserID: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      Content: this.commentInput,
+      CreatedAt:  new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
+      Status: "Visible",
+      Reply: this.replyingCommentId,
+    };
+
+    this._commentService.postComment(comment).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        var userName = JSON.parse(localStorage.getItem('user') || '{}').fullName
+        const newComment = {
+          key: res.data.commentID,
+          label: userName,
+          avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
+          content: res.data.content,
+          time: this.getTimeAgo(res.data.createdAt),
+        };
+
+        this.comments.unshift(newComment);
+        this.commentInput = "";
+        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
   }
 }
