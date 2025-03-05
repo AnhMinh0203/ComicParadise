@@ -35,5 +35,12 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.UpdateStatusAsync(status, storyID);
             return Ok(new BaseResponse<string>(true, result));
         }
+
+        [HttpGet("Get-story-by-id")]
+        public async Task<ActionResult> GetStoryById (int storyID)
+        {
+            var result = await _storyRepository.GetStoryByIdAsync(storyID);
+            return Ok(new BaseResponse<StoryDetail>(true,result));  
+        }
     }
 }

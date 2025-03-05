@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 
 namespace ComicParadise.Repository
 {
@@ -106,22 +107,7 @@ namespace ComicParadise.Repository
         {
             try
             {
-                /*
-                var listStories = await _context.Stories
-                    .Select (s => new StoryInfor
-                    {
-                        Title = s.Title,
-                        CoverImage = s.CoverImage,
-                        Status = s.Status,
-                        PublisherName = _context.Users
-                                        .Where(u => u.UserID == s.PublisherID )
-                                        .Select(u=>u.Username)
-                                        .FirstOrDefault(),
-
-                    })
-                    .ToListAsync();*/
-
-                var listStories = await (from s in _context.Stories
+                List<StoryInfor> listStories = await (from s in _context.Stories
                                          join u in _context.Users on s.PublisherID equals u.UserID
                                          join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
                                          select new StoryInfor
@@ -144,7 +130,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Update status 
-        public async Task<string> UpdateStatusAsync (string status, int storyID)
+        public async Task<string> UpdateStatusAsync(string status, int storyID)
         {
             var story = await _context.Stories
                         .Where(s => s.StoryID == storyID)
@@ -160,6 +146,113 @@ namespace ComicParadise.Repository
             _context.SaveChanges();
             return "Cập nhật trạng thái thành công !";
         }
+        #endregion
+
+        #region Get story by ID
+
+        public async Task<StoryDetail> GetStoryByIdAsync(int storyID)
+        {
+            var storyDetail = await (from s in _context.Stories
+                                     where s.StoryID == storyID
+                                     join u in _context.Users on s.PublisherID equals u.UserID
+                                     select new StoryDetail
+                                     {
+                                         StoryID = s.StoryID,
+                                         Title = s.Title,
+                                         Author = s.Author,
+                                         Type = s.Type,
+                                         Description = s.Description,
+                                         CoverImage = s.CoverImage,
+                                         Categories = (from sc in _context.StoryCategoriesMapping
+                                                       join c in _context.Categories on sc.CategoryID equals c.CategoryID
+                                                       where sc.StoryID == storyID
+                                                       select c).ToList(),
+
+                                         Chapters = (from ct in _context.Chapters
+                                                     where ct.StoryID == storyID
+                                                     orderby ct.ChapterNumber ascending
+                                                     select ct).ToList(),
+
+                                         comments = (from cm in _context.Comments
+                                                     join u2 in _context.Users on cm.UserID equals u2.UserID into users
+                                                     from u2 in users.DefaultIfEmpty()
+                                                     where cm.StoryID == storyID
+                                                     select new CommentDto
+                                                     {
+                                                         CommentID = cm.CommentID,
+                                                         StoryID = cm.StoryID,
+                                                         UserID = cm.UserID,
+                                                         Username = u2 != null ? u2.Username : "Người dùng ẩn danh",
+                                                         Content = cm.Content,
+                                                         CreatedAt = cm.CreatedAt,
+                                                         Status = cm.Status,
+                                                         Reply = cm.Reply,
+                                                         Likes = cm.Likes,
+                                                         DisLikes = cm.DisLikes,
+                                                         ChildComments = new List<CommentDto>() 
+                                                     }).ToList()
+                                     })
+                                     .FirstOrDefaultAsync();
+
+            if (storyDetail == null)
+            {
+                throw new Exception($"Không tìm thấy truyện với StoryID {storyID}");
+            }
+            if (storyDetail.comments != null && storyDetail.comments.Any())
+            {
+                storyDetail.comments = BuildCommentTree(storyDetail.comments);
+            }
+
+            return storyDetail;
+        }
+
+        private List<CommentDto> BuildCommentTree(List<CommentDto> comments)
+        {
+            var commentMap = comments.ToDictionary(c => c.CommentID, c => c);
+            var rootComments = new List<CommentDto>();
+
+            foreach (var comment in comments)
+            {
+                if (comment.Reply == null)
+                {
+                    // Nếu không có reply, đây là comment gốc
+                    rootComments.Add(comment);
+                }
+                else if (commentMap.ContainsKey(comment.Reply.Value))
+                {
+                    // Nếu có reply và comment cha tồn tại, thêm vào danh sách con của comment cha
+                    var parentComment = commentMap[comment.Reply.Value];
+                    parentComment.ChildComments.Add(comment);
+                }
+                else
+                {
+                    // Nếu reply trỏ đến comment không tồn tại trong danh sách, thêm vào rootComments
+                    rootComments.Add(comment);
+                }
+            }
+
+            // Sắp xếp comment gốc theo thời gian giảm dần (mới nhất trước)
+            rootComments.Sort((a, b) => b.CreatedAt.CompareTo(a.CreatedAt));
+            foreach (var comment in rootComments)
+            {
+                SortChildComments(comment);
+            }
+
+            return rootComments;
+        }
+
+        private void SortChildComments(CommentDto comment)
+        {
+            if (comment.ChildComments != null && comment.ChildComments.Any())
+            {
+                comment.ChildComments.Sort((a, b) => a.CreatedAt.CompareTo(b.CreatedAt));
+                foreach (var child in comment.ChildComments)
+                {
+                    SortChildComments(child); 
+                }
+            }
+        }
+
         #endregion
     }
 }

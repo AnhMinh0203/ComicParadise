@@ -18,6 +18,8 @@ namespace ComicParadise.DataContext.Database
         public DbSet<Category> Categories { get; set; }
         public DbSet<StoryCategoriesMapping> StoryCategoriesMapping { get; set; }
         public DbSet<Chapter> Chapters { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

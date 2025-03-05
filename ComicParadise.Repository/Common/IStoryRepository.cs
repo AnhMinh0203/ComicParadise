@@ -12,5 +12,6 @@ namespace ComicParadise.Repository.Common
         Task<string> AddStoryAsync(CreateStoryDto createStoryDto);
         Task<List<StoryInfor>> GetStoriesAsync();
         Task<string> UpdateStatusAsync(string status, int storyID);
+        Task<StoryDetail> GetStoryByIdAsync(int storyID);
     }
 }

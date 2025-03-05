@@ -12,7 +12,7 @@ namespace ComicParadise.DataContext.Utils
         public string Message { get; set; }
         public T? Data { get; set; }
 
-        public BaseResponse(bool isSuccess, T data)
+        public BaseResponse(bool isSuccess, T? data)
         {
             IsSuccess = isSuccess;
             Data = data;
