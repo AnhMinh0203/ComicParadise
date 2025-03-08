@@ -8,7 +8,7 @@ import { catchError, Observable } from 'rxjs';
 export class commentService {
   serviceUri: any;
   constructor(private http: HttpClient) {
-    this.serviceUri =`${environment.apiUrl}/Comment`;
+    this.serviceUri = `${environment.apiUrl}/Comment`;
   }
 
   postComment(comment: any) {
@@ -20,6 +20,37 @@ export class commentService {
         })
       );
   }
+
+  updateReaction(reaction: any) {
+    var apiUrl = `${this.serviceUri}/Update-reaction`;
+    return this.http.post(apiUrl, reaction)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  updateStatusComment(commentStatus: any) {
+    var apiUrl = `${this.serviceUri}/Update-status-comment`;
+    return this.http.post(apiUrl, commentStatus)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  deleteComment(commentID: number) {
+    var apiUrl = `${this.serviceUri}/Delete-comment?commentID=${commentID}`;
+    return this.http.delete(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
 
   // getStories() {
   //   var apiUrl = `${this.serviceUri}/Get-all-stories`;

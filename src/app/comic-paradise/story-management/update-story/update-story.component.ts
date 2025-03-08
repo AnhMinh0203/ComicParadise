@@ -14,6 +14,7 @@ import { commentService } from '../../service/comment.service';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
+import { chapterService } from '../../service/chapter.service';
 
 
 @Component({
@@ -32,15 +33,17 @@ import { Menu } from 'primeng/menu';
 export class UpdateStoryComponent {
   storyID: number | null = null;
   chapterNumber: any;
+  chapterName:any;
   title: any;
   author: any;
   categories: any;
   categoriesSelect: any;
   description: any;
   publisher: any;
+  chapters:any;
   coverImage: any;
   coverImageDisplay: any;
-  chapterContent: any;
+  chapterContentUpload: any;
   editorInstance: any;
 
   isAddChapter: boolean = false;
@@ -53,6 +56,7 @@ export class UpdateStoryComponent {
   typeMangaOptions: any[] = [{ label: 'PDF', value: 'Pdf' }, { label: 'Ảnh', value: 'Imgs' }];
   selectStoryType: any;
   selectMangaType: any;
+  selectedComment: any;
 
   comments: any[] = [];
   commentInput: any;
@@ -61,9 +65,6 @@ export class UpdateStoryComponent {
   hoverLike: boolean = false;
   hoverDislike: boolean = false;
   commentSelections: MenuItem[] | undefined;
-  //
-  index: any;
-  showValue: any;
 
   constructor(
     private http: HttpClient,
@@ -72,6 +73,7 @@ export class UpdateStoryComponent {
     private _storyService: storyService,
     private _categoryService: categoryService,
     private _commentService: commentService,
+    private _chapterService: chapterService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private activatedRoute: ActivatedRoute,
@@ -83,15 +85,15 @@ export class UpdateStoryComponent {
       const id = params.get('id');
       if (id) {
         this.storyID = +id;
-        console.log('Story ID:', this.storyID);
+        // console.log('Story ID:', this.storyID);
         this.getStoryDetail(this.storyID);
       }
     });
     this.getCategories();
     this.commentSelections = [
-      { label: 'Gỡ', icon: 'pi pi-delete-left', command: () => this.onHideComment() },
-      { label: 'Khóa bình luận', icon: 'pi pi-pen-to-square', command: () => this.onLockComment() },
-      { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDeleteComment() }
+      { label: 'Ẩn / Bỏ ẩn', icon: 'pi pi-delete-left', command: () => this.onUpdateStatusComment(this.selectedComment) },
+      { label: 'Khóa bình luận', icon: 'pi pi-pen-to-square', command: () => this.onLockComment(this.selectedComment) },
+      { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDeleteComment(this.selectedComment) }
     ];
   }
 
@@ -124,11 +126,8 @@ export class UpdateStoryComponent {
     }
   }
 
-  toggleReply(comment: any) {
-    comment.isReplying = !comment.isReplying;
-  }
-
   getStoryDetail(storyID: number) {
+    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
       console.log(res);
       this.author = res.data.author;
@@ -141,17 +140,25 @@ export class UpdateStoryComponent {
 
       this.coverImageDisplay = res.data.coverImage;
       this.description = res.data.description;
-
-      this.comments = res.data.comments.map((comment: any) => ({
-        key: comment.commentID.toString(),
-        label: comment.username || 'Người dùng',
-        avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
-        content: comment.content,
-        time: this.getTimeAgo(comment.createdAt),
-        likes: comment.likes,
-        disLikes: comment.disLikes,
-        children: this.mapChildComments(comment.childComments)
-      }));
+      this.chapters = res.data.chapters;
+      this.comments = res.data.comments.map((comment: any) => {
+        // Tìm reaction của user hiện tại trong danh sách reactions
+        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === currentUserId);
+        return {
+          commentID: comment.commentID.toString(),
+          label: comment.username || 'Người dùng',
+          avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
+          content: comment.content,
+          time: this.getTimeAgo(comment.createdAt),
+          status: comment.status,
+          likes: comment.likes,
+          disLikes: comment.disLikes,
+          children: this.mapChildComments(comment.childComments),
+          reactions: comment.reactions,
+          isLiked: userReaction ? userReaction.isLike : false,
+          isDisliked: userReaction ? !userReaction.isLike : false, // Nếu userReaction tồn tại nhưng `isLike` là false -> là dislike
+        };
+      });
     });
   }
 
@@ -192,7 +199,7 @@ export class UpdateStoryComponent {
   resetForm() {
     this.chapterNumber = '';
     this.title = '';
-    this.chapterContent = '';
+    this.chapterContentUpload = '';
     if (this.editorInstance) {
       this.editorInstance.setText(''); // Xóa nội dung trong Quill Editor
     }
@@ -292,7 +299,7 @@ export class UpdateStoryComponent {
       }
     });
   }
-  private getTimeAgo(createdAt: string): string {
+  getTimeAgo(createdAt: string): string {
     const now = new Date();
     const commentTime = new Date(createdAt);
 
@@ -324,18 +331,30 @@ export class UpdateStoryComponent {
     }
   }
 
-  // Hàm chuyển đổi danh sách comments thành cấu trúc cây
-  private mapChildComments(childComments: any[]): any[] {
-    if (!childComments || childComments.length === 0) return [];
-    return childComments.map((child: any) => ({
-      key: child.commentID.toString(),
-      label: child.username || 'Người dùng',
-      avatar: child.username ? child.username.charAt(0).toUpperCase() : 'U',
-      content: child.content,
-      time: this.getTimeAgo(child.createdAt),
-      children: this.mapChildComments(child.childComments || [])
-    }));
+
+  mapChildComments(childComments: any[]): any[] {
+    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
+    return childComments.map((child: any) => {
+      // Tìm reaction của user hiện tại trong danh sách reactions của comment con
+      const userReaction = child.reactions.find((reaction: any) => reaction.userID === currentUserId);
+
+      return {
+        commentID: child.commentID.toString(),
+        label: child.username || 'Người dùng',
+        avatar: child.username ? child.username.charAt(0).toUpperCase() : 'U',
+        content: child.content,
+        time: this.getTimeAgo(child.createdAt),
+        status: child.status,
+        likes: child.likes,           // Số lượt like
+        disLikes: child.disLikes,    // Số lượt dislike
+        reactions: child.reactions,  // Danh sách reactions
+        isLiked: userReaction ? userReaction.isLike : false,        // User đã like chưa
+        isDisliked: userReaction ? !userReaction.isLike : false,    // User đã dislike chưa
+        children: this.mapChildComments(child.childComments || []), // Đệ quy cho comment con cấp sâu hơn
+      };
+    });
   }
+
   toggleExpand(comment: any): void {
     comment.expanded = !comment.expanded;
   }
@@ -355,7 +374,7 @@ export class UpdateStoryComponent {
       if (res && res.isSuccess == true) {
         var userName = JSON.parse(localStorage.getItem('user') || '{}').fullName
         const newComment = {
-          key: res.data.commentID,
+          commentID: res.data.commentID,
           label: userName,
           avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
           content: res.data.content,
@@ -372,26 +391,158 @@ export class UpdateStoryComponent {
   }
 
   onLike(comment: any) {
+    console.log(comment);
+    if (comment.isLiked) {
+      // Hủy like
+      comment.likes = (comment.likes || 0) - 1;
+    } else {
+      // Thêm like
+      comment.likes = (comment.likes || 0) + 1;
+      if (comment.isDisliked) {
+        // Nếu trước đó đã dislike thì giảm dislike
+        comment.disLikes = (comment.disLikes || 0) - 1;
+      }
+    }
+
     comment.isLiked = !comment.isLiked;
     if (comment.isLiked) {
       comment.isDisliked = false; // Không cho phép like & dislike cùng lúc
     }
+    const reaction = {
+      CommentId: comment.commentID,
+      UserId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      IsLike: true,
+      createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
+    };
+    this._commentService.updateReaction(reaction).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
   }
 
   onDislike(comment: any) {
+    if (comment.isDisliked) {
+      comment.disLikes = (comment.disLikes || 0) - 1;
+    } else {
+      comment.disLikes = (comment.disLikes || 0) + 1;
+      if (comment.isLiked) {
+        comment.likes = (comment.likes || 0) - 1;
+      }
+    }
+
     comment.isDisliked = !comment.isDisliked;
     if (comment.isDisliked) {
       comment.isLiked = false; // Không cho phép like & dislike cùng lúc
     }
+    const reaction = {
+      CommentId: comment.commentID,
+      UserId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      IsLike: false,
+      createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
+    };
+    this._commentService.updateReaction(reaction).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
   }
 
-  onHideComment() {
+
+  toggleReply(comment: any) {
+    comment.isReplying = !comment.isReplying;
+  }
+
+  replyComment(comment: any) {
+    console.log(comment);
+    const responseComment = {
+      StoryID: this.storyID,
+      UserID: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      Content: this.commentInput,
+      CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
+      Status: "Visible",
+      Reply: comment.commentID,
+    };
+
+    this._commentService.postComment(responseComment).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        var userName = JSON.parse(localStorage.getItem('user') || '{}').fullName
+        const newResComment = {
+          commentID: res.data.commentID,
+          label: userName,
+          avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
+          content: res.data.content,
+          time: this.getTimeAgo(res.data.createdAt),
+          likes: 0,
+          disLikes: 0,
+          isLiked: false,
+          isDisliked: false
+        };
+        if (!comment.children) {
+          comment.children = [];
+        }
+
+        // Thêm newResComment vào children của comment cha
+        comment.children.push(newResComment);
+        this.toggleReply(comment);
+        this.commentInput = "";
+        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
+  }
+
+  setCurrentComment(comment: any) {
+    this.selectedComment = comment;
+  }
+
+  onUpdateStatusComment(comment: any) {
+    const newStatus = comment.status === "Visible" ? "Hidden" : "Visible";
+    const statusCommentRequest = {
+      commentID: comment.commentID,
+      status: newStatus
+    }
+    this._commentService.updateStatusComment(statusCommentRequest).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        comment.status = newStatus;
+        this.messageService.add({
+          severity: "success",
+          summary: "Thành công",
+          detail: `Bình luận đã được ${newStatus === "Visible" ? "hiển thị" : "ẩn"} thành công.`
+        });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
+  }
+
+  onLockComment(comment: any) {
 
   }
-  onLockComment() {
+  onDeleteComment(comment: any) {
+    this._commentService.deleteComment(comment.commentID).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        this.comments = this.comments.filter(c => c.commentID !== comment.commentID);
 
+        this.messageService.add({
+          severity: "success",
+          summary: "Thành công",
+          detail: `Xóa bình luận thành công`
+        });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
   }
-  onDeleteComment(){
 
+  // Navigate to chapter content
+  navigateToChapterContent(storyID:number,chapterNumber:number) {
+    console.log('Navigating to:', storyID, chapterNumber);
+    this.router.navigate(['/story-management/chapter-content',storyID,chapterNumber]);
   }
 }

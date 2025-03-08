@@ -78,9 +78,6 @@
           </div>
 
           <div class="add-chapter mb-5" *ngIf="isAddChapter">
-
-
-
             <!-- Title -->
             <div class="add-title d-flex my-3">
               <div class="d-flex flex-column ">
@@ -89,7 +86,7 @@
               </div>
               <div class="d-flex flex-column ms-3 " [style]="{ 'width': '100%' }">
                 <label class="block ">Tên chương</label>
-                <input type="text" pInputText [(ngModel)]="chapterNumber" />
+                <input type="text" pInputText [(ngModel)]="chapterName" />
               </div>
             </div>
 
@@ -132,63 +129,28 @@
 
           <div class="chapter-list">
             <div class="row">
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
-                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
-                  <div class="chapter-item-icon me-2">
-                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3" *ngFor="let chapter of chapters">
+                <div
+                  class="chapter-item d-flex align-items-center p-3 rounded shadow-sm transition"
+                  (click)="navigateToChapterContent(chapter.storyID, chapter.chapterID)"
+                >
+                  <!-- Icon chương -->
+                  <div class="chapter-item-icon me-3">
+                    <i class="pi pi-circle-fill text-danger chapter-icon"></i>
                   </div>
-                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
-                    <span class="chapter-number font-bold">#1</span>
-                    <span class="chapter-time text-700">4 giờ trước</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
-                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
-                  <div class="chapter-item-icon me-2">
-                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
-                  </div>
-                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
-                    <span class="chapter-number font-bold">#1</span>
-                    <span class="chapter-time text-700">4 giờ trước</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
-                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
-                  <div class="chapter-item-icon me-2">
-                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
-                  </div>
-                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
-                    <span class="chapter-number font-bold">#2</span>
-                    <span class="chapter-time text-700">4 giờ trước</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
-                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
-                  <div class="chapter-item-icon me-2">
-                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
-                  </div>
-                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
-                    <span class="chapter-number font-bold">#3</span>
-                    <span class="chapter-time text-700">02-03-2025</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3">
-                <div class="chapter-item d-flex align-items-center p-3 border border-secondary rounded">
-                  <div class="chapter-item-icon me-2">
-                    <i class="pi pi-circle-fill text-danger" style="font-size: 16px;"></i>
-                  </div>
-                  <div class="chapter-item-infor flex-grow-1 d-flex justify-content-between">
-                    <span class="chapter-number font-bold">#4</span>
-                    <span class="chapter-time text-700">02-03-2025</span>
+
+                  <!-- Thông tin chương -->
+                  <div class="chapter-item-infor flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="chapter-number fw-bold">#{{chapter.chapterNumber}}</span>
+                      <span class="chapter-time text-muted small">{{ getTimeAgo(chapter.createdAt) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
 
 
 
@@ -201,7 +163,6 @@
               [style]="{ 'width': '100%' }"></textarea>
 
             <div class="comment-input-actions d-flex justify-content-end">
-              <!-- <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary" /> -->
               <p-tag class="p-tag-hover p-2" value="Phản hồi" label="Primary" (click)="postComment()" />
 
             </div>
@@ -215,7 +176,8 @@
                   <p-avatar [label]="comment.avatar" styleClass="mr-2"
                     [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
                 </div>
-                <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
+                <div class="comment-item-content p-1" [ngClass]="{'comment-hidden': comment.status === 'Hidden'}"
+                  [style]="{ 'width': '100%' }">
                   <div class="comment-item-content-up d-flex flex-column">
                     <div class="comment-item-infor d-flex align-items-center p-1">
                       <div class="comment-name me-3 font-medium text-primary">{{ comment.label }}</div>
@@ -227,12 +189,12 @@
                     <div class="comment-item-actions d-flex align-items-center p-2">
                       <i [class.pi-thumbs-up]="!comment.isLiked" [class.pi-thumbs-up-fill]="comment.isLiked"
                         class="pi me-3" (click)="onLike(comment)">
-                        <span class="mx-1" *ngIf="comment.likes > 0">{{ comment.likes }}</span>
+                        <span class="mx-1 no-select" *ngIf="comment.likes > 0">{{ comment.likes }}</span>
                       </i>
 
                       <i [class.pi-thumbs-down]="!comment.isDisliked" [class.pi-thumbs-down-fill]="comment.isDisliked"
                         class="pi mx-1" (click)="onDislike(comment)">
-                        <span class="mx-1 me-5" *ngIf="comment.disLikes > 0">{{ comment.disLikes }}</span>
+                        <span class="mx-1 no-select " *ngIf="comment.disLikes > 0">{{ comment.disLikes }}</span>
                       </i>
 
                       <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi"
@@ -248,7 +210,7 @@
                       <div class="comment-input-actions d-flex justify-content-end">
                         <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary"
                           (click)="toggleReply(comment)" />
-                        <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" />
+                        <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" (click)="replyComment(comment)" />
 
                       </div>
                     </div>
@@ -286,10 +248,21 @@
                               <div class="comment-item-text p-1">
                                 {{ node.content }}
                               </div>
+
                               <div class="comment-item-actions d-flex align-items-center p-2">
-                                <i class="pi pi-thumbs-up me-3"><span class="mx-1">15</span></i>
-                                <i class="pi pi-thumbs-down"><span class="mx-1 me-4">1</span></i>
-                                <p-tag severity="secondary" value="Phản hồi" />
+                                <i [class.pi-thumbs-up]="!node.isLiked" [class.pi-thumbs-up-fill]="node.isLiked"
+                                  class="pi me-3" (click)="onLike(node)">
+                                  <span class="mx-1 no-select" *ngIf="node.likes > 0">{{ node.likes }}</span>
+                                </i>
+
+                                <i [class.pi-thumbs-down]="!node.isDisliked"
+                                  [class.pi-thumbs-down-fill]="node.isDisliked" class="pi mx-1"
+                                  (click)="onDislike(node)">
+                                  <span class="mx-1 no-select " *ngIf="node.disLikes > 0">{{ node.disLikes }}</span>
+                                </i>
+
+                                <!-- <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi"
+                                  [rounded]="true" (click)="toggleReply(node)" /> -->
                               </div>
                             </div>
                           </div>
@@ -305,7 +278,8 @@
                 <div class="comment-item-report p-2">
 
                   <p-menu #menu [model]="commentSelections" [popup]="true" appendTo="body" />
-                    <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)"></i>
+                  <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)"
+                    (click)="setCurrentComment(comment)"></i>
                 </div>
               </div>
             </div>
@@ -317,3 +291,13 @@
 
 
 </c-card>
+<!--
+<c-card>
+  <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+    <div *ngFor="let imageUrl of chapterContentDisplay.imageUrls">
+      <img [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+    </div>
+
+  </div>
+
+</c-card> -->

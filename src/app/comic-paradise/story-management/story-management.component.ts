@@ -92,6 +92,7 @@ export class StoryManagementComponent {
   isAddstoryPage: boolean = false;
   isInforstoryPage: boolean = false;
   isUpdateStoryPage: boolean = false;
+  isContentChapterPage: boolean = false;
 
   visible: boolean = false;
 
@@ -119,6 +120,7 @@ export class StoryManagementComponent {
       this.isAddstoryPage = this.router.url.includes('/story-management/add-story');
       this.isInforstoryPage = this.router.url.includes('/story-management/infor-story');
       this.isUpdateStoryPage = this.router.url.includes('/story-management/update-story');
+      this.isContentChapterPage = this.router.url.includes('/story-management/chapter-content');
     });
   }
 
@@ -150,8 +152,8 @@ export class StoryManagementComponent {
   }
 
   onPageChange(event: PaginatorState) {
-    this.first = event.first ?? 0;  // Đảm bảo giá trị không bị undefined
-    this.rows = event.rows ?? 10;   // Đảm bảo giá trị không bị undefined
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 10;
   }
 
   setCurrentStory(story: any){

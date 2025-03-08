@@ -31,3 +31,51 @@
 .comment-item-actions i:hover {
   transform: scale(1.2);
 }
+
+.no-select{
+  user-select: none;
+}
+.comment-item-text {
+  max-width: 100%; /* Giới hạn chiều rộng không vượt quá container */
+  overflow-wrap: break-word; /* Xuống dòng khi cần */
+  word-break: break-word; /* Ngắt từ khi cần */
+  white-space: pre-line; /* Giữ xuống dòng nhưng không làm tràn */
+}
+
+.comment-hidden {
+  opacity: 0.5;
+
+}
+
+
+/* Giao diện chương */
+.chapter-item {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+/* Hover vào chương */
+.chapter-item:hover {
+  background: #f0f1f1;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(2px);
+}
+
+/* Click vào chương */
+.chapter-item:active {
+  transform: scale(0.97);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon chương */
+.chapter-icon {
+  font-size: 18px;
+}
+
+/* Hiệu ứng thời gian */
+.chapter-time {
+  font-size: 14px;
+}

@@ -29,6 +29,13 @@ export const routes: Routes = [
         data: {
           title: 'Cập nhật truyện'
         }
+      },
+      {
+        path: 'chapter-content/:storyID/:chapterNumber',
+        loadComponent: () => import('./chapter-management/chapter-management.component').then(m => m.ChapterManagementComponent),
+        data: {
+          title: 'Nội dung chương'
+        }
       }
     ]
   }
