@@ -168,10 +168,10 @@ namespace ComicParadise.Repository
                                                        where sc.StoryID == storyID
                                                        select c).ToList(),
 
-                                         Chapters = (from ct in _context.Chapters
+/*                                         Chapters = (from ct in _context.Chapters
                                                      where ct.StoryID == storyID
                                                      orderby ct.ChapterNumber ascending
-                                                     select ct).ToList(),
+                                                     select ct).ToList(),*/
 
                                          comments = (from cm in _context.Comments
                                                      join u2 in _context.Users on cm.UserID equals u2.UserID into users
@@ -189,7 +189,11 @@ namespace ComicParadise.Repository
                                                          Reply = cm.Reply,
                                                          Likes = cm.Likes,
                                                          DisLikes = cm.DisLikes,
-                                                         ChildComments = new List<CommentDto>() 
+                                                         ChildComments = new List<CommentDto>(),
+                                                         Reactions = (from r in _context.Reactions
+                                                                      join u in _context.Users on r.UserID equals u.UserID
+                                                                      where r.CommentID == cm.CommentID
+                                                                      select r).ToList()
                                                      }).ToList()
                                      })
                                      .FirstOrDefaultAsync();

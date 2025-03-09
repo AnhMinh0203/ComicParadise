@@ -16,7 +16,6 @@ namespace ComicParadise.DataContext.Dto
         public string Type { get; set; }    
         public string Description { get; set; }
         public List<Category> Categories { get; set; }
-        public List<Chapter> Chapters { get; set; }
         public List<CommentDto> comments { get; set; }
     }
 }

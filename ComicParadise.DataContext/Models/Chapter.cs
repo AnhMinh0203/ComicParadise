@@ -13,9 +13,10 @@ namespace ComicParadise.DataContext.Models
         public int ChapterID { get; set; }
         public int StoryID { get; set; }
         public int ChapterNumber { get; set; }
+        public string ChapterType { get; set; }
         public string Title { get; set; }
-        public string Content { get; set; }
-        public string SourceUrl { get; set; }
+        public string? Content { get; set; }
+        public string? SourceUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

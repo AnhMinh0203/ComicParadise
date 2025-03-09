@@ -11,5 +11,6 @@ namespace ComicParadise.DataContext.Dto
     {
         public string? Username { get; set; }
         public List<CommentDto> ChildComments { get; set; } = new List<CommentDto>();
+        public List<Reaction> Reactions { get; set; }
     }
 }

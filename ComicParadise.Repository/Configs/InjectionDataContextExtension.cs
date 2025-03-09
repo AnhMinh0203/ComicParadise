@@ -18,6 +18,7 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IStoryRepository, StoryRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<IChapterRepository, ChapterRepository>();
         }
     }
 }
