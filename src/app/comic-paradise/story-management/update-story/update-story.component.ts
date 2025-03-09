@@ -31,7 +31,7 @@ import { chapterService } from '../../service/chapter.service';
   styleUrl: './update-story.component.scss'
 })
 export class UpdateStoryComponent {
-  storyID: number | null = null;
+  storyID: any | null = null;
   chapterNumber: any;
   chapterName:any;
   title: any;
@@ -53,7 +53,7 @@ export class UpdateStoryComponent {
   isAddMangaImgs: boolean = false;
 
   typeStoryOptions: any[] = [{ label: 'Tiểu thuyết', value: 'Novel' }, { label: 'Truyện tranh', value: 'Manga' }];
-  typeMangaOptions: any[] = [{ label: 'PDF', value: 'Pdf' }, { label: 'Ảnh', value: 'Imgs' }];
+  typeMangaOptions: any[] = [{ label: 'PDF', value: 'PDF' }, { label: 'Ảnh', value: 'Images' }];
   selectStoryType: any;
   selectMangaType: any;
   selectedComment: any;
@@ -65,6 +65,7 @@ export class UpdateStoryComponent {
   hoverLike: boolean = false;
   hoverDislike: boolean = false;
   commentSelections: MenuItem[] | undefined;
+  selectedContentImages:File[] = [];
 
   constructor(
     private http: HttpClient,
@@ -85,10 +86,12 @@ export class UpdateStoryComponent {
       const id = params.get('id');
       if (id) {
         this.storyID = +id;
-        // console.log('Story ID:', this.storyID);
+        this.getChaptersByStoryID(this.storyID);
+        this.getCommentsByStoryID(this.storyID);
         this.getStoryDetail(this.storyID);
       }
     });
+    this.getNextChapterNumber();
     this.getCategories();
     this.commentSelections = [
       { label: 'Ẩn / Bỏ ẩn', icon: 'pi pi-delete-left', command: () => this.onUpdateStatusComment(this.selectedComment) },
@@ -126,7 +129,19 @@ export class UpdateStoryComponent {
     }
   }
 
-  getStoryDetail(storyID: number) {
+  getChaptersByStoryID(storyID: number) {
+    return this._chapterService.getChaptersByStoryID(storyID).subscribe((res:any)=>{
+      this.chapters = res.data;
+    });
+  }
+
+  getCommentsByStoryID(storyID: number) {
+    return this._commentService.getCommentsByStoryID(storyID).subscribe((res:any)=>{
+      this.comments = res.data;
+    });
+  }
+
+  async getStoryDetail(storyID: number) {
     const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
       console.log(res);
@@ -140,8 +155,8 @@ export class UpdateStoryComponent {
 
       this.coverImageDisplay = res.data.coverImage;
       this.description = res.data.description;
-      this.chapters = res.data.chapters;
-      this.comments = res.data.comments.map((comment: any) => {
+
+      this.comments = this.comments.map((comment: any) => {
         // Tìm reaction của user hiện tại trong danh sách reactions
         const userReaction = comment.reactions.find((reaction: any) => reaction.userID === currentUserId);
         return {
@@ -181,15 +196,6 @@ export class UpdateStoryComponent {
       this.selectMangaType = this.typeMangaOptions[1].value
       this.isAddMangaPdf
     }
-  }
-
-  confirmAddNovel() {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Thành công',
-      detail: 'Thêm chương mới thành công'
-    });
-    return;
   }
 
   closeNovelForm() {
@@ -237,11 +243,11 @@ export class UpdateStoryComponent {
 
 
   onRemoveChildrenImg(event: any) {
-
+    this.selectedContentImages = this.selectedContentImages.filter(img => img !== event.file);
   }
 
   onUploadChildrenImg(event: any) {
-
+    this.selectedContentImages = [...event.files];
   }
 
   navigateTostoryManagement() {
@@ -544,5 +550,40 @@ export class UpdateStoryComponent {
   navigateToChapterContent(storyID:number,chapterNumber:number) {
     console.log('Navigating to:', storyID, chapterNumber);
     this.router.navigate(['/story-management/chapter-content',storyID,chapterNumber]);
+  }
+
+  getNextChapterNumber(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this._chapterService.getNextChapterNumber(this.storyID).subscribe(
+        (res: any) => {
+          if (res && res.isSuccess === true) {
+            this.chapterNumber = res.data;
+            resolve(this.chapterNumber); // Trả về số chương tiếp theo
+          } else {
+            reject('Không thể lấy số chương tiếp theo');
+          }
+        },
+        (error) => reject(error) // Xử lý lỗi API
+      );
+    });
+  }
+
+
+  async postChapter(){
+    const chapter = {
+      StoryID: this.storyID,
+      ChapterNumber: this.chapterNumber,
+      Title: this.title,
+      ChapterType: this.selectMangaType,
+      ImageFiles: this.selectedContentImages
+    };
+
+    this._chapterService.postChapter(chapter).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        this.messageService.add({ severity: "success", summary: "Success", detail: res.data });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Error", detail: res.data });
+      }
+    });
   }
 }

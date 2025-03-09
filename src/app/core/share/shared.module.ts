@@ -20,7 +20,8 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TextareaModule } from 'primeng/textarea';
 import { HttpClient } from '@angular/common/http';
-
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 // ---
 
@@ -62,7 +63,9 @@ import { TreeModule } from 'primeng/tree';
     FormModule,
     AvatarModule,
     TagModule,
-    TreeModule
+    TreeModule,
+    InputGroupAddonModule,
+    InputGroupModule
   ],
   exports: [
     CommonModule,
@@ -88,7 +91,9 @@ import { TreeModule } from 'primeng/tree';
     FormModule,
     AvatarModule,
     TagModule,
-    TreeModule
+    TreeModule,
+    InputGroupAddonModule,
+    InputGroupModule
   ],
 })
 export class SharedModule { }

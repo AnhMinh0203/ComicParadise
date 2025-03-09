@@ -51,7 +51,10 @@ export class commentService {
       );
   }
 
-
+  getCommentsByStoryID(storyID:number){
+    var apiUrl = `${this.serviceUri}/Get-comments-by-storyID?storyID=${storyID}`;
+    return this.http.get(apiUrl);
+  }
   // getStories() {
   //   var apiUrl = `${this.serviceUri}/Get-all-stories`;
   //   return this.http.get(apiUrl)

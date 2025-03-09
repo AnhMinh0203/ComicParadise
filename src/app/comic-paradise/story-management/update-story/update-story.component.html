@@ -102,12 +102,12 @@
                 optionValue="value" aria-labelledby="basic" />
 
 
-              <div class="my-3" *ngIf="selectMangaType === 'Pdf'">
+              <div class="my-3" *ngIf="selectMangaType === 'PDF'">
                 <label cLabel for="formFile">Tải tệp truyện (pdf)</label>
                 <input cFormControl id="formFile" type="file" accept="application/pdf" />
               </div>
 
-              <div class="my-3" *ngIf="selectMangaType === 'Imgs'">
+              <div class="my-3" *ngIf="selectMangaType === 'Images'">
                 <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
                   [auto]="true" chooseLabel="Tải trang truyện" (onSelect)="onUploadChildrenImg($event)"
                   (onRemove)="onRemoveChildrenImg($event)">
@@ -123,17 +123,15 @@
             <!-- Actions novel -->
             <div class="add-novel-actions d-flex justify-content-end">
               <p-button label="Hủy" severity="secondary" (click)="closeNovelForm()" />
-              <p-button label="Xác nhận" severity="success" [ngClass]="'ms-2'" (click)="confirmAddNovel()" />
+              <p-button label="Xác nhận" severity="success" [ngClass]="'ms-2'" (click)="postChapter()" />
             </div>
           </div>
 
           <div class="chapter-list">
             <div class="row">
               <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3" *ngFor="let chapter of chapters">
-                <div
-                  class="chapter-item d-flex align-items-center p-3 rounded shadow-sm transition"
-                  (click)="navigateToChapterContent(chapter.storyID, chapter.chapterID)"
-                >
+                <div class="chapter-item d-flex align-items-center p-3 rounded shadow-sm transition"
+                  (click)="navigateToChapterContent(chapter.storyID, chapter.chapterID)">
                   <!-- Icon chương -->
                   <div class="chapter-item-icon me-3">
                     <i class="pi pi-circle-fill text-danger chapter-icon"></i>
@@ -150,10 +148,6 @@
               </div>
             </div>
           </div>
-
-
-
-
         </p-card>
 
         <h6 class="mt-5"><b>4. Bình luận</b></h6>
@@ -288,16 +282,4 @@
       </div>
     </div>
   </c-card-body>
-
-
 </c-card>
-<!--
-<c-card>
-  <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
-    <div *ngFor="let imageUrl of chapterContentDisplay.imageUrls">
-      <img [src]="imageUrl" alt="Chapter Image" style="width:100%;">
-    </div>
-
-  </div>
-
-</c-card> -->
