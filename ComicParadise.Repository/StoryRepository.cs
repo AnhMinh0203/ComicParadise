@@ -173,7 +173,7 @@ namespace ComicParadise.Repository
                                                      orderby ct.ChapterNumber ascending
                                                      select ct).ToList(),*/
 
-                                         comments = (from cm in _context.Comments
+                                        /* comments = (from cm in _context.Comments
                                                      join u2 in _context.Users on cm.UserID equals u2.UserID into users
                                                      from u2 in users.DefaultIfEmpty()
                                                      where cm.StoryID == storyID
@@ -194,7 +194,7 @@ namespace ComicParadise.Repository
                                                                       join u in _context.Users on r.UserID equals u.UserID
                                                                       where r.CommentID == cm.CommentID
                                                                       select r).ToList()
-                                                     }).ToList()
+                                                     }).ToList()*/
                                      })
                                      .FirstOrDefaultAsync();
 
@@ -258,5 +258,8 @@ namespace ComicParadise.Repository
         }
 
         #endregion
+
+
+        
     }
 }

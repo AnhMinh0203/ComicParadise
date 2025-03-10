@@ -31,9 +31,9 @@ namespace ComicParadise.Api.Controllers
         }
 
         [HttpGet("Get-chapter-content")]
-        public async Task<ActionResult> GetChapterContent (int storyID, int chapterID)
+        public async Task<ActionResult> GetChapterContent (int storyID, int chapterNumber)
         {
-            var result = await _chapterRepository.GetChapterContentAsync(storyID,chapterID);
+            var result = await _chapterRepository.GetChapterContentAsync(storyID, chapterNumber);
             return Ok(new BaseResponse<ChapterContentDto>(true, result));
         }
 
@@ -45,11 +45,33 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<List<Chapter>>(true, result));
         }
 
-/*        [HttpGet("Get-chapter-page-by-page-number")]
-        public async Task<ActionResult> GetChapterPageByPageNumber(int storyID, int chapterID, int pageNumber)
+        [HttpDelete("Delete-chapter-page")]
+        public async Task<ActionResult> DeleteChapterPage(int storyID, int chapterNumber, int chapterPage)
         {
-            var result = await _chapterRepository.GetChapterPageByPageNumberAsync(storyID, chapterID,pageNumber);
+            var result = await _chapterRepository.DeleteChapterPageAsync(storyID, chapterNumber, chapterPage);
+            return Ok(new BaseResponse<string>(true,result));
+        }
+
+        [HttpPost("Replace-chapter-page")]
+        public async Task<ActionResult> ReplaceChapterPage(ChapterPageRequest request)
+        {
+            var result = await _chapterRepository.ReplaceChapterPageAsync(request);
             return Ok(new BaseResponse<string>(true, result));
-        }*/
+        }
+
+        [HttpPost("Add-chapter-page")]
+        public async Task<ActionResult> AddChapterPage(ChapterPageRequest request)
+        {
+            var result = await _chapterRepository.AddChapterPageAsync(request);
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+
+        /*        [HttpGet("Get-chapter-page-by-page-number")]
+                public async Task<ActionResult> GetChapterPageByPageNumber(int storyID, int chapterID, int pageNumber)
+                {
+                    var result = await _chapterRepository.GetChapterPageByPageNumberAsync(storyID, chapterID,pageNumber);
+                    return Ok(new BaseResponse<string>(true, result));
+                }*/
     }
 }

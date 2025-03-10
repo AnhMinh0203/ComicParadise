@@ -12,8 +12,11 @@ namespace ComicParadise.Repository.Common
     {
         Task<int> GetNextChapterNumberAsync(int storyID);
         Task<string> PostChapterAsync(PostChapterDto chapterDto);
-        Task<ChapterContentDto?> GetChapterContentAsync(int storyID, int chapterID);
+        Task<ChapterContentDto?> GetChapterContentAsync(int storyID, int chapterNumber);
         Task<List<Chapter>> GetChaptersByStoryIDAsync(int storyID);
         Task<string> GetChapterPageByPageNumberAsync(int storyID, int chapterID, int pageNumber);
+        Task<string> DeleteChapterPageAsync(int storyID, int chapterNumber, int chapterPage);
+        Task<string> ReplaceChapterPageAsync(ChapterPageRequest request);
+        Task<string> AddChapterPageAsync(ChapterPageRequest request);
     }
 }
