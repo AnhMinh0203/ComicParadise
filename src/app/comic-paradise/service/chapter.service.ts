@@ -17,7 +17,7 @@ export class chapterService {
   }
 
   getChapterContent(storyId: number, chapterNumber: number): Observable<any> {
-    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterID=${chapterNumber}`;
+    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}`;
     return this.http.get(apiUrl);
   }
 
@@ -45,10 +45,30 @@ export class chapterService {
     return this.http.post(apiUrl, formData);
   }
 
-  // getChapterPageByPageNumber()
-
   getChapterPageByPageNumber(storyID: number, chapterID: number, pageNumber:number): Observable<any> {
     var apiUrl = `${this.serviceUri}/Get-chapter-page-by-page-number?storyID==${storyID}&chapterID=${chapterID}&pageNumber=${pageNumber}`;
     return this.http.get(apiUrl);
+  }
+
+  deleteChapterPage(storyId: number, chapterNumber: number, pageNumber: number): Observable<any> {
+    return this.http.delete(`${this.serviceUri}/Delete-chapter-page?storyID=${storyId}&chapterNumber=${chapterNumber}&chapterPage=${pageNumber}`);
+  }
+
+  replaceChapterPage(model:any): Observable<any> {
+    const formData = new FormData();
+    formData.append('storyID', model.storyID);
+    formData.append('chapterNumber', model.chapterNumber);
+    formData.append('chapterPage', model.chapterPage);
+    formData.append('newPage', model.file);
+    return this.http.post(`${this.serviceUri}/Replace-chapter-page?storyID=${model.storyId}&chapterNumber=${model.chapterNumber}&chapterPage=${model.pageNumber}`, formData);
+  }
+
+  addChapterPage(model: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('storyID', model.storyID);
+    formData.append('chapterNumber', model.chapterNumber);
+    if (model.chapterPage) formData.append('chapterPage', model.chapterPage);
+    formData.append('newPage', model.file);
+    return this.http.post(`${this.serviceUri}/Add-chapter-page?storyID=${model.storyId}&chapterNumber=${model.chapterNumber}`, formData);
   }
 }

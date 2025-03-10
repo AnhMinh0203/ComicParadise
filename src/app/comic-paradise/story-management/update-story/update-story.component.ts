@@ -149,9 +149,10 @@ export class UpdateStoryComponent {
       this.title = res.data.title;
       this.selectStoryType = res.data.type;
 
-      this.categoriesSelect = this.categories.filter((category: any) =>
-        res.data.categories.some((c: any) => c.categoryID === category.categoryID)
+      this.categoriesSelect = (this.categories || []).filter((category: any) =>
+        res.data.categories?.some((c: any) => c.categoryID === category.categoryID)
       );
+
 
       this.coverImageDisplay = res.data.coverImage;
       this.description = res.data.description;

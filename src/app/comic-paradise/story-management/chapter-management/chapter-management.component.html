@@ -1,59 +1,84 @@
-<div class="row">
-  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
-    <!-- Tìm kiếm -->
+<p-panel>
+  <p-toast />
+  <p-confirmdialog />
+  <div class="row">
+    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 border-end">
+      <div class="chapter-total-number">
+        <p>Tổng số trang: <b>{{ pageImages ? pageImages.length : 0 }}</b></p>
 
-     <div class="chapter-action-search mb-2">
-      <p-inputgroup>
-        <p-inputnumber [(ngModel)]="pageNumber" inputId="integeronly" placeholder="Nhập số trang muốn tìm" />
-        <p-inputgroup-addon>
-          <p-button icon="pi pi-search" severity="secondary" variant="text" (click)="scrollToPage()" />
-        </p-inputgroup-addon>
-      </p-inputgroup>
-    </div>
+      </div>
 
-
-    <!-- Xóa 1 trang -->
-    <div class="chapter-action-delete mb-2">
-      <p-inputgroup>
-        <p-inputnumber inputId="integeronly" placeholder="Nhập số trang cần xóa" />
-        <p-inputgroup-addon>
-          <p-button icon="pi pi-trash" severity="danger" variant="text" />
-        </p-inputgroup-addon>
-      </p-inputgroup>
-    </div>
-
-    <!-- Thay thế 1 trang -->
-    <div class="chapter-action-replace d-flex flex-column mb-2">
-      <div class="chapter-action-replace mb-2">
+      <!-- Tìm kiếm -->
+      <div class="chapter-action-search mb-2">
         <p-inputgroup>
-          <p-inputnumber inputId="integeronly" placeholder="Nhập số trang cần thay" />
+          <p-inputnumber [(ngModel)]="pageNumber" inputId="integeronly" placeholder="Nhập số trang muốn tìm" />
           <p-inputgroup-addon>
-            <p-button icon="pi pi-send" severity="info" variant="text" />
+            <p-button icon="pi pi-search" severity="secondary" variant="text" (click)="scrollToPage()" />
           </p-inputgroup-addon>
         </p-inputgroup>
       </div>
-      <div class="d-flex justify-content-start">
-        <p-fileupload #fu mode="basic" chooseLabel="Chọn trang mới" chooseIcon="pi pi-upload"
-          name="demo[]" url="https://www.primefaces.org/cdn/api/upload.php" accept="image/*" maxFileSize="1000000" />
+
+
+      <!-- Xóa 1 trang -->
+      <div class="chapter-action-delete mb-2">
+        <p-inputgroup>
+          <p-inputnumber [(ngModel)]="deletePageNumber" inputId="integeronly" placeholder="Nhập số trang muốn xóa" />
+          <p-inputgroup-addon>
+            <p-button icon="pi pi-trash" severity="danger" variant="text" (click)="deletePage($event)" />
+          </p-inputgroup-addon>
+        </p-inputgroup>
+      </div>
+
+      <!-- Thay thế 1 trang -->
+      <div class="chapter-action-replace d-flex flex-column mb-2">
+        <div class="chapter-action-replace mb-2">
+          <p-inputgroup>
+            <p-inputnumber inputId="integeronly" [(ngModel)]="pageNumberReplace" placeholder="Nhập số trang cần thay" />
+            <p-inputgroup-addon>
+              <p-button icon="pi pi-send" severity="info" variant="text" (click)="replaceChapterPage($event)" />
+            </p-inputgroup-addon>
+          </p-inputgroup>
+        </div>
+        <div class="d-flex justify-content-start">
+          <p-fileupload #fu mode="basic" chooseLabel="Chọn trang mới" chooseIcon="pi pi-upload" name="demo[]"
+            accept="image/*" maxFileSize="1000000" (onSelect)="onFileToReplaceSelected($event)" />
+        </div>
+      </div>
+
+      <!-- Thêm 1 trang -->
+      <div class="chapter-action-add d-flex flex-column mb-2">
+        <div class="chapter-action-add mb-2">
+          <p-inputgroup>
+            <p-inputnumber [(ngModel)]="pageNumberAdd" inputId="integeronly"
+              placeholder="Nhập vị trí trang mới (tùy chọn)" />
+            <p-inputgroup-addon>
+              <p-button icon="pi pi-plus" severity="success" variant="text" (click)="addChapterPage($event)" />
+            </p-inputgroup-addon>
+          </p-inputgroup>
+        </div>
+        <div class="d-flex justify-content-start">
+          <p-fileupload #fuAdd mode="basic" chooseLabel="Chọn trang mới" chooseIcon="pi pi-upload" name="demo[]"
+            accept="image/*" maxFileSize="1000000" (onSelect)="onFileToAddSelected($event)" />
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8">
-    <div *ngIf="chapterContent">
-      <!-- Hiển thị PDF -->
-      <!-- <div *ngIf="chapterContent.chapterType === 'PDF'">
+    <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8">
+      <div *ngIf="chapterContent">
+        <!-- Hiển thị PDF -->
+        <!-- <div *ngIf="chapterContent.chapterType === 'PDF'">
         <iframe [src]="chapterContent.pdfUrl | safe" width="100%" height="600px"></iframe>
       </div> -->
 
-      <div *ngIf="chapterContent" [style.max-height.px]="600" [style.overflow-y]="'auto'">
-        <!-- Hiển thị danh sách ảnh -->
-        <div *ngIf="chapterContent.chapterType === 'Images'">
-          <div *ngFor="let imageUrl of chapterContent.imageUrls">
-            <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+        <div *ngIf="chapterContent" [style.max-height.px]="600" [style.overflow-y]="'auto'">
+          <!-- Hiển thị danh sách ảnh -->
+          <div *ngIf="chapterContent.chapterType === 'Images'">
+            <div *ngFor="let imageUrl of chapterContent.imageUrls">
+              <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</p-panel>
