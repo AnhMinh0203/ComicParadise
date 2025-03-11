@@ -322,9 +322,8 @@ namespace ComicParadise.Repository
                     }).ToList();
                     _context.StoryCategoriesMapping.AddRange(newStoryCategories);
                 }
-                // Lưu thay đổi vào database
-                await _context.SaveChangesAsync();
 
+                await _context.SaveChangesAsync();
                 return "Cập nhật truyện thành công!";
             }
             catch (DbUpdateException dbEx)
@@ -339,6 +338,24 @@ namespace ComicParadise.Repository
             {
                 return $"Lỗi hệ thống: {ex.Message}";
             }
+
+        }
+        #endregion
+
+        #region Delete story
+        public async Task<string> DeleteStoryAsync (int storyID)
+        {
+            var story = await _context.Stories
+                            .FirstOrDefaultAsync(s => s.StoryID == storyID);
+            if (story == null)
+            {
+                return "Truyện không tồn tại";
+            }
+
+            _context.Stories.Remove(story);
+            await _context.SaveChangesAsync();
+
+            return "Xóa truyện thành công";
 
         }
         #endregion

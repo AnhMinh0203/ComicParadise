@@ -1,6 +1,7 @@
 ﻿using ComicParadise.DataContext.Dto;
 using ComicParadise.DataContext.Models;
 using ComicParadise.DataContext.Utils;
+using ComicParadise.Repository;
 using ComicParadise.Repository.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,6 +48,13 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult> UpdateStory(UpdateStoryDto updateStoryDto)
         {
             var result = await _storyRepository.UpdateStoryAsync(updateStoryDto);
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+        [HttpDelete("Delete-story")]
+        public async Task<ActionResult> DeleteStory(int storyID)
+        {
+            var result = await _storyRepository.DeleteStoryAsync(storyID);
             return Ok(new BaseResponse<string>(true, result));
         }
     }
