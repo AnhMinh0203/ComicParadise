@@ -128,10 +128,20 @@ export class StoryManagementComponent {
   ngOnInit() {
     this.loadStories();
     this.items = [
-      { label: 'Xem nội dung', icon: 'pi pi-file-check', command: () => this.onDetail() },
-      { label: 'Gỡ', icon: 'pi pi-delete-left', command: () => this.updateStatus("Rejected",this.selectedStory?.storyID) },
+      { label: 'Xem nội dung', icon: 'pi pi-file-check', command: () => this.onDetail(this.selectedStory?.storyID) },
+      {
+        label: 'Gỡ / Hủy gỡ',
+        icon: 'pi pi-delete-left',
+        command: () => {
+          if (this.selectedStory) {
+            // Đổi trạng thái dựa vào trạng thái hiện tại
+            const newStatus = this.selectedStory.status === "Rejected" ? "Approved" : "Rejected";
+            this.updateStatus(newStatus, this.selectedStory.storyID);
+          }
+        }
+      },
       { label: 'Cập nhật', icon: 'pi pi-pen-to-square', command: () => this.onEdit(this.selectedStory.storyID) },
-      { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDelete() }
+      { label: 'Xóa', icon: 'pi pi-trash', command: (event: any) => this.onDelete(this.selectedStory.storyID, event) }
     ];
   }
   exportExcel() {
@@ -143,12 +153,12 @@ export class StoryManagementComponent {
     this.router.navigate(['/story-management/add-story']);
   }
 
-  navigateToInforStory() {
-    this.router.navigate(['/story-management/infor-story']);
+  navigateToInforStory(storyID: number) {
+    this.router.navigate(['/story-management/infor-story', storyID]);
   }
 
-  navigateToUpdateStory(storyID:number) {
-    this.router.navigate(['/story-management/update-story',storyID]);
+  navigateToUpdateStory(storyID: number) {
+    this.router.navigate(['/story-management/update-story', storyID]);
   }
 
   onPageChange(event: PaginatorState) {
@@ -156,7 +166,7 @@ export class StoryManagementComponent {
     this.rows = event.rows ?? 10;
   }
 
-  setCurrentStory(story: any){
+  setCurrentStory(story: any) {
     this.selectedStory = story;
   }
 
@@ -169,7 +179,7 @@ export class StoryManagementComponent {
       case 'Rejected':
         return 'danger';
       default:
-        return undefined; // Trả về undefined để tránh lỗi
+        return undefined;
     }
   }
 
@@ -213,29 +223,59 @@ export class StoryManagementComponent {
   loadStories() {
     this._storyService.getStories().subscribe((res: any) => {
       if (res) {
-        console.log(res);
         this.stories = res.data;
       }
     });
   }
 
-
-  onRefresh() {
-    console.log('Refresh clicked');
-    // Thêm logic reload dữ liệu nếu cần
-  }
-
-  onEdit(storyID:number) {
+  onEdit(storyID: number) {
     this.navigateToUpdateStory(storyID);
   }
 
-  onDelete() {
-    console.log('Delete clicked');
-    // Thêm logic xóa
+
+  onDelete(storyID: number, event: Event) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Bạn có chắc muốn xóa truyện này ?',
+      header: 'Cảnh báo',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Hủy bỏ',
+      rejectButtonProps: {
+        label: 'Hủy bỏ',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Xác nhận',
+        severity: 'danger',
+      },
+
+      accept: () => {
+        this._storyService.deleteStory(storyID).subscribe((res: any) => {
+          if (res && res.isSuccess == true) {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Thành công',
+              detail: res.data
+            });
+            this.loadStories();
+            return;
+          }
+          else {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Thất bại',
+              detail: res.data
+            });
+            return;
+          }
+        });
+      }
+    });
   }
 
-  onDetail() {
-    this.navigateToInforStory();
+  onDetail(storyID: number) {
+    this.navigateToInforStory(storyID);
   }
 
   updateStatus(status: string, storyID: number) {
@@ -250,7 +290,7 @@ export class StoryManagementComponent {
         this.loadStories();
         return;
       }
-      else{
+      else {
         this.messageService.add({
           severity: 'warn',
           summary: 'Thất bại',

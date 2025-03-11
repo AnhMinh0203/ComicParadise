@@ -23,7 +23,9 @@
               [options]="typeStoryOptions"
               [(ngModel)]="selectStoryType" optionLabel="label"
               (click)="onTypeChange($event)"
-              optionValue="value" aria-labelledby="basic"   [disabled]="chapters.length > 0"/>
+              optionValue="value" aria-labelledby="basic"
+              [disabled]="(chapters && chapters.length > 0)"
+              />
           </div>
         </div>
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">

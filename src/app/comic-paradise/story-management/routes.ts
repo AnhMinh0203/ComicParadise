@@ -17,7 +17,7 @@ export const routes: Routes = [
         }
       },
       {
-        path: 'infor-story',
+        path: 'infor-story/:id',
         loadComponent: () => import('./infor-story/infor-story.component').then(m => m.InforStoryComponent),
         data: {
           title: 'Xem nội dung'

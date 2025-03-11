@@ -40,7 +40,7 @@ export class UpdateStoryComponent {
   categoriesSelect: any;
   description: any;
   publisher: any;
-  chapters: any;
+  chapters: any[] = [];
   coverImage: any;
   coverImageDisplay: any;
   chapterContentUpload: any;
@@ -82,12 +82,12 @@ export class UpdateStoryComponent {
   ) { }
 
   ngOnInit() {
-    this.activatedRoute.paramMap.subscribe(params => {
+    this.activatedRoute.paramMap.subscribe(async params => {
       const id = params.get('id');
       if (id) {
         this.storyID = +id;
         this.getChaptersByStoryID(this.storyID);
-        this.getCommentsByStoryID(this.storyID);
+        await this.getCommentsByStoryID(this.storyID);
         this.getStoryDetail(this.storyID);
       }
     });
@@ -135,7 +135,7 @@ export class UpdateStoryComponent {
     });
   }
 
-  getCommentsByStoryID(storyID: number) {
+  async getCommentsByStoryID(storyID: number) {
     return this._commentService.getCommentsByStoryID(storyID).subscribe((res: any) => {
       this.comments = res.data;
     });
@@ -305,12 +305,12 @@ export class UpdateStoryComponent {
         content: child.content,
         time: this.getTimeAgo(child.createdAt),
         status: child.status,
-        likes: child.likes,           // Số lượt like
-        disLikes: child.disLikes,    // Số lượt dislike
-        reactions: child.reactions,  // Danh sách reactions
-        isLiked: userReaction ? userReaction.isLike : false,        // User đã like chưa
-        isDisliked: userReaction ? !userReaction.isLike : false,    // User đã dislike chưa
-        children: this.mapChildComments(child.childComments || []), // Đệ quy cho comment con cấp sâu hơn
+        likes: child.likes,
+        disLikes: child.disLikes,
+        reactions: child.reactions,
+        isLiked: userReaction ? userReaction.isLike : false,
+        isDisliked: userReaction ? !userReaction.isLike : false,
+        children: this.mapChildComments(child.childComments || []),
       };
     });
   }

@@ -60,4 +60,8 @@ export class storyService {
         })
       );
   }
+
+  deleteStory(storyID: number): Observable<any> {
+    return this.http.delete(`${this.serviceUri}/Delete-story?storyID=${storyID}`);
+  }
 }

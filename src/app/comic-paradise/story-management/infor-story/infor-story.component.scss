@@ -107,48 +107,84 @@
   width: 100% !important;
 }
 
-// Comment
-.comments-container {
-  padding: 20px;
+// --- Comment --- //
+.like-icon, .dislike-icon {
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
 }
 
-.comment-list .p-panel {
-  background-color: var(--surface-50);
-  border: 1px solid var(--surface-200);
+/* Khi hover vào */
+.comment-item-actions i {
+  transition: transform 0.2s ease, color 0.2s ease;
+  cursor: pointer;
 }
 
-.comment-content {
-  padding: 10px 0;
-  line-height: 1.5;
+.comment-item-actions i:hover {
+  transform: scale(1.2);
 }
 
-.comment-meta {
-  color: var(--text-700);
-  font-size: 0.9rem;
+.no-select{
+  user-select: none;
+}
+.comment-item-text {
+  max-width: 100%; /* Giới hạn chiều rộng không vượt quá container */
+  overflow-wrap: break-word; /* Xuống dòng khi cần */
+  word-break: break-word; /* Ngắt từ khi cần */
+  white-space: pre-line; /* Giữ xuống dòng nhưng không làm tràn */
 }
 
-.reply-form .p-inputtext {
-  min-height: 80px;
+.comment-hidden {
+  opacity: 0.5;
+
 }
 
-.replies .p-panel {
-  margin-left: 20px; /* Indent replies */
+
+/* Giao diện chương */
+.chapter-item {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
-.negative-padding{
-  padding: -10px;
+/* Hover vào chương */
+.chapter-item:hover {
+  background: #f0f1f1;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(2px);
 }
 
-.comment-name {
-  font-weight: 500; // In đậm vừa phải (medium bold, tương đương font-medium trong PrimeNG)
-  color: #007bff; // Màu xanh dương (tương tự text-primary trong PrimeNG)
-  margin-right: 1rem; // Giữ khoảng cách me-3 (16px)
+/* Click vào chương */
+.chapter-item:active {
+  transform: scale(0.97);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.comment-time {
-  font-size: 0.8rem; // Kích thước chữ nhỏ hơn (14px, tương đương text-sm trong PrimeNG)
-  color: #666; // Màu xám nhạt (tương tự text-700 trong PrimeNG)
+/* Icon chương */
+.chapter-icon {
+  font-size: 18px;
 }
+
+/* Hiệu ứng thời gian */
+.chapter-time {
+  font-size: 14px;
+}
+
+.p-tag-hover {
+  outline: 1px solid transparent;
+  transition: outline 0.2s ease-in-out, transform 0.1s ease-in-out;
+  user-select: none;
+}
+
+.p-tag-hover:hover {
+  outline: 1px solid #6b6d6e;
+}
+
+.p-tag-hover:active {
+  transform: scale(0.95);
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
