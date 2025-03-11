@@ -51,5 +51,13 @@ export class storyService {
       );
   }
 
-
+  updateStory(model: any){
+    const apiUrl = `${this.serviceUri}/Update-story`;
+    return this.http.post(apiUrl, model)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 }

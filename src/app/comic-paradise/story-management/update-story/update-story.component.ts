@@ -33,14 +33,14 @@ import { chapterService } from '../../service/chapter.service';
 export class UpdateStoryComponent {
   storyID: any | null = null;
   chapterNumber: any;
-  chapterName:any;
+  chapterName: any;
   title: any;
   author: any;
   categories: any;
   categoriesSelect: any;
   description: any;
   publisher: any;
-  chapters:any;
+  chapters: any;
   coverImage: any;
   coverImageDisplay: any;
   chapterContentUpload: any;
@@ -65,7 +65,7 @@ export class UpdateStoryComponent {
   hoverLike: boolean = false;
   hoverDislike: boolean = false;
   commentSelections: MenuItem[] | undefined;
-  selectedContentImages:File[] = [];
+  selectedContentImages: File[] = [];
 
   constructor(
     private http: HttpClient,
@@ -130,13 +130,13 @@ export class UpdateStoryComponent {
   }
 
   getChaptersByStoryID(storyID: number) {
-    return this._chapterService.getChaptersByStoryID(storyID).subscribe((res:any)=>{
+    return this._chapterService.getChaptersByStoryID(storyID).subscribe((res: any) => {
       this.chapters = res.data;
     });
   }
 
   getCommentsByStoryID(storyID: number) {
-    return this._commentService.getCommentsByStoryID(storyID).subscribe((res:any)=>{
+    return this._commentService.getCommentsByStoryID(storyID).subscribe((res: any) => {
       this.comments = res.data;
     });
   }
@@ -259,53 +259,6 @@ export class UpdateStoryComponent {
     this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: message });
   }
 
-  updateStory() {
-    if (!this.title || this.title.trim() === "") {
-      this.showWarning("Tên truyện không được để trống!");
-      return;
-    }
-    if (!this.author || this.author.trim() === "") {
-      this.showWarning("Tên tác giả không được để trống!");
-      return;
-    }
-    if (!this.selectStoryType) {
-      this.showWarning("Vui lòng chọn danh mục!");
-      return;
-    }
-    if (!this.coverImage) {
-      this.showWarning("Vui lòng chọn ảnh bìa cho truyện!");
-      return;
-    }
-
-    const formData = new FormData();
-    const publishID = JSON.parse(localStorage.getItem('user') || '{}').userId;
-
-    formData.append("Title", this.title);
-    formData.append("Author", this.author);
-    formData.append("PublisherID", publishID);
-    formData.append("Type", this.selectStoryType);
-    // formData.append("CategoryIDs", this.categoriesSelect.map((c:any) => c.categoryID));
-
-    this.categoriesSelect.forEach((c: any) => {
-      formData.append("CategoryIDs", c.categoryID);
-    });
-
-    formData.append("Description", this.description);
-
-    // Gửi ảnh chính (primary image)
-    if (this.coverImage) {
-      formData.append("CoverImage", this.coverImage);
-    }
-
-    //  Gửi request xuống BE
-    this._storyService.addStory(formData).subscribe((res: any) => {
-      if (res && res.isSuccess == true) {
-        this.messageService.add({ severity: "success", summary: "Success", detail: res.data });
-      } else {
-        this.messageService.add({ severity: "error", summary: "Error", detail: res.data });
-      }
-    });
-  }
   getTimeAgo(createdAt: string): string {
     const now = new Date();
     const commentTime = new Date(createdAt);
@@ -413,7 +366,7 @@ export class UpdateStoryComponent {
 
     comment.isLiked = !comment.isLiked;
     if (comment.isLiked) {
-      comment.isDisliked = false; // Không cho phép like & dislike cùng lúc
+      comment.isDisliked = false;
     }
     const reaction = {
       CommentId: comment.commentID,
@@ -442,7 +395,7 @@ export class UpdateStoryComponent {
 
     comment.isDisliked = !comment.isDisliked;
     if (comment.isDisliked) {
-      comment.isLiked = false; // Không cho phép like & dislike cùng lúc
+      comment.isLiked = false;
     }
     const reaction = {
       CommentId: comment.commentID,
@@ -548,9 +501,9 @@ export class UpdateStoryComponent {
   }
 
   // Navigate to chapter content
-  navigateToChapterContent(storyID:number,chapterNumber:number) {
+  navigateToChapterContent(storyID: number, chapterNumber: number) {
     console.log('Navigating to:', storyID, chapterNumber);
-    this.router.navigate(['/story-management/chapter-content',storyID,chapterNumber]);
+    this.router.navigate(['/story-management/chapter-content', storyID, chapterNumber]);
   }
 
   getNextChapterNumber(): Promise<number> {
@@ -570,7 +523,7 @@ export class UpdateStoryComponent {
   }
 
 
-  async postChapter(){
+  async postChapter() {
     const chapter = {
       StoryID: this.storyID,
       ChapterNumber: this.chapterNumber,
@@ -586,5 +539,39 @@ export class UpdateStoryComponent {
         this.messageService.add({ severity: "error", summary: "Error", detail: res.data });
       }
     });
+  }
+
+  // --- Story infor ---//
+  updateStory() {
+    const formData = new FormData();
+    formData.append("StoryID", this.storyID);
+    formData.append("Type", this.selectStoryType);
+    formData.append("Title", this.title);
+    formData.append("Author", this.author);
+    formData.append("CoverImage", this.coverImage);
+    this.categoriesSelect.forEach((c: any) => {
+      formData.append("CategoryIDs", c.categoryID.toString());
+    });
+    formData.append("Description", this.description);
+
+    var test = this.categoriesSelect.map((c: any) => c.categoryID);
+    //  Gửi request xuống BE
+    this._storyService.updateStory(formData).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        this.messageService.add({ severity: "success", summary: "Success", detail: res.data });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Error", detail: res.data });
+      }
+    });
+  }
+
+  onTypeChange(event: any) {
+    if (this.chapters.length > 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Không hợp lệ',
+        detail: 'Không thể đổi loại truyện khi đã có chương!'
+      });
+    }
   }
 }

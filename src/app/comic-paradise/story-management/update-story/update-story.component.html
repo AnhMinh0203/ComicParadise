@@ -19,8 +19,11 @@
         <h6><b>1. Thông tin truyện</b></h6>
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
           <div class="flex justify-center">
-            <p-selectbutton [options]="typeStoryOptions" [(ngModel)]="selectStoryType" optionLabel="label"
-              optionValue="value" aria-labelledby="basic" />
+            <p-selectbutton
+              [options]="typeStoryOptions"
+              [(ngModel)]="selectStoryType" optionLabel="label"
+              (click)="onTypeChange($event)"
+              optionValue="value" aria-labelledby="basic"   [disabled]="chapters.length > 0"/>
           </div>
         </div>
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
