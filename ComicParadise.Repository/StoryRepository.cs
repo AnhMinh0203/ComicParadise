@@ -31,7 +31,7 @@ namespace ComicParadise.Repository
         }
 
         #region Add story
-        public async Task<string> AddStoryAsync(CreateStoryDto createStoryDto)
+        public async Task<string> AddStoryAsync(AddStoryDto createStoryDto)
         {
             try
             {
@@ -108,17 +108,17 @@ namespace ComicParadise.Repository
             try
             {
                 List<StoryInfor> listStories = await (from s in _context.Stories
-                                         join u in _context.Users on s.PublisherID equals u.UserID
-                                         join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
-                                         select new StoryInfor
-                                         {
-                                             StoryID = s.StoryID,
-                                             Title = s.Title,
-                                             CoverImage = s.CoverImage,
-                                             Status = s.Status,
-                                             PublisherName = u.Username,
-                                             TotalChapter = chapters.Count()
-                                         })
+                                                      join u in _context.Users on s.PublisherID equals u.UserID
+                                                      join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
+                                                      select new StoryInfor
+                                                      {
+                                                          StoryID = s.StoryID,
+                                                          Title = s.Title,
+                                                          CoverImage = s.CoverImage,
+                                                          Status = s.Status,
+                                                          PublisherName = u.Username,
+                                                          TotalChapter = chapters.Count()
+                                                      })
                                          .ToListAsync();
                 return listStories;
             }
@@ -168,33 +168,33 @@ namespace ComicParadise.Repository
                                                        where sc.StoryID == storyID
                                                        select c).ToList(),
 
-/*                                         Chapters = (from ct in _context.Chapters
-                                                     where ct.StoryID == storyID
-                                                     orderby ct.ChapterNumber ascending
-                                                     select ct).ToList(),*/
+                                         /*                                         Chapters = (from ct in _context.Chapters
+                                                                                              where ct.StoryID == storyID
+                                                                                              orderby ct.ChapterNumber ascending
+                                                                                              select ct).ToList(),*/
 
-                                        /* comments = (from cm in _context.Comments
-                                                     join u2 in _context.Users on cm.UserID equals u2.UserID into users
-                                                     from u2 in users.DefaultIfEmpty()
-                                                     where cm.StoryID == storyID
-                                                     select new CommentDto
-                                                     {
-                                                         CommentID = cm.CommentID,
-                                                         StoryID = cm.StoryID,
-                                                         UserID = cm.UserID,
-                                                         Username = u2 != null ? u2.Username : "Người dùng ẩn danh",
-                                                         Content = cm.Content,
-                                                         CreatedAt = cm.CreatedAt,
-                                                         Status = cm.Status,
-                                                         Reply = cm.Reply,
-                                                         Likes = cm.Likes,
-                                                         DisLikes = cm.DisLikes,
-                                                         ChildComments = new List<CommentDto>(),
-                                                         Reactions = (from r in _context.Reactions
-                                                                      join u in _context.Users on r.UserID equals u.UserID
-                                                                      where r.CommentID == cm.CommentID
-                                                                      select r).ToList()
-                                                     }).ToList()*/
+                                         /* comments = (from cm in _context.Comments
+                                                      join u2 in _context.Users on cm.UserID equals u2.UserID into users
+                                                      from u2 in users.DefaultIfEmpty()
+                                                      where cm.StoryID == storyID
+                                                      select new CommentDto
+                                                      {
+                                                          CommentID = cm.CommentID,
+                                                          StoryID = cm.StoryID,
+                                                          UserID = cm.UserID,
+                                                          Username = u2 != null ? u2.Username : "Người dùng ẩn danh",
+                                                          Content = cm.Content,
+                                                          CreatedAt = cm.CreatedAt,
+                                                          Status = cm.Status,
+                                                          Reply = cm.Reply,
+                                                          Likes = cm.Likes,
+                                                          DisLikes = cm.DisLikes,
+                                                          ChildComments = new List<CommentDto>(),
+                                                          Reactions = (from r in _context.Reactions
+                                                                       join u in _context.Users on r.UserID equals u.UserID
+                                                                       where r.CommentID == cm.CommentID
+                                                                       select r).ToList()
+                                                      }).ToList()*/
                                      })
                                      .FirstOrDefaultAsync();
 
@@ -252,14 +252,96 @@ namespace ComicParadise.Repository
                 comment.ChildComments.Sort((a, b) => a.CreatedAt.CompareTo(b.CreatedAt));
                 foreach (var child in comment.ChildComments)
                 {
-                    SortChildComments(child); 
+                    SortChildComments(child);
                 }
             }
         }
 
         #endregion
 
+        #region Update story infor
+        public async Task<string> UpdateStoryAsync(UpdateStoryDto storyDto)
+        {
+            try
+            {
+                var story = await _context.Stories
+                                .FirstOrDefaultAsync(s => s.StoryID == storyDto.StoryID);
 
-        
+                if (story == null)
+                {
+                    throw new Exception("Truyện không tồn tại");
+                }
+
+                if (!string.IsNullOrEmpty(storyDto.Title) && story.Title != storyDto.Title)
+                {
+                    story.Title = storyDto.Title;
+                }
+                if (!string.IsNullOrEmpty(storyDto.Author) && story.Author != storyDto.Author)
+                {
+                    story.Author = storyDto.Author;
+                }
+                if (!string.IsNullOrEmpty(storyDto.Type) && story.Type != storyDto.Type)
+                {
+                    story.Type = storyDto.Type;
+                }
+                if (!string.IsNullOrEmpty(storyDto.Description) && story.Description != storyDto.Description)
+                {
+                    story.Description = storyDto.Description;
+                }
+
+
+                if (storyDto.CoverImage != null && storyDto.CoverImage.Length > 0)
+                {
+                    // Xóa ảnh bìa cũ trên Azure Blob Storage (nếu có)
+                    var containerCoverImg = _blobServiceClient.GetBlobContainerClient(_containerCoverImg);
+                    if (!string.IsNullOrEmpty(story.CoverImage))
+                    {
+                        string oldBlobName = new Uri(story.CoverImage).AbsolutePath.Substring(1);
+                        var oldBlobClient = containerCoverImg.GetBlobClient(oldBlobName);
+                        await oldBlobClient.DeleteIfExistsAsync();
+                    }
+
+                    // Tải ảnh bìa mới lên
+                    string newCoverImageUrl = await UploadFileToAzure(storyDto.CoverImage, containerCoverImg);
+                    story.CoverImage = newCoverImageUrl;
+                }
+
+                if (storyDto.CategoryIDs != null && storyDto.CategoryIDs.Any())
+                {
+                    // Xóa các mapping cũ
+                    var existingCategories = await _context.StoryCategoriesMapping
+                        .Where(sc => sc.StoryID == story.StoryID)
+                        .ToListAsync();
+                    _context.StoryCategoriesMapping.RemoveRange(existingCategories);
+
+                    // Thêm các mapping mới
+                    var newStoryCategories = storyDto.CategoryIDs.Select(categoryId => new StoryCategoriesMapping
+                    {
+                        StoryID = story.StoryID,
+                        CategoryID = categoryId
+                    }).ToList();
+                    _context.StoryCategoriesMapping.AddRange(newStoryCategories);
+                }
+                // Lưu thay đổi vào database
+                await _context.SaveChangesAsync();
+
+                return "Cập nhật truyện thành công!";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (Azure.RequestFailedException azEx)
+            {
+                return $"Lỗi upload ảnh lên cloud: {azEx.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
+
+        }
+        #endregion
+
     }
 }

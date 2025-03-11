@@ -17,7 +17,7 @@ namespace ComicParadise.Api.Controllers
         }
 
         [HttpPost("Add-story")]
-        public async Task<ActionResult> AddStory (CreateStoryDto dto)
+        public async Task<ActionResult> AddStory (AddStoryDto dto)
         {
             var result = await _storyRepository.AddStoryAsync(dto);
             return Ok(new BaseResponse<string> (true, result));
@@ -41,6 +41,13 @@ namespace ComicParadise.Api.Controllers
         {
             var result = await _storyRepository.GetStoryByIdAsync(storyID);
             return Ok(new BaseResponse<StoryDetail>(true,result));  
+        }
+
+        [HttpPost("Update-story")]
+        public async Task<ActionResult> UpdateStory(UpdateStoryDto updateStoryDto)
+        {
+            var result = await _storyRepository.UpdateStoryAsync(updateStoryDto);
+            return Ok(new BaseResponse<string>(true, result));
         }
     }
 }

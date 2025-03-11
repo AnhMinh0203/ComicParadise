@@ -9,9 +9,10 @@ namespace ComicParadise.Repository.Common
 {
     public interface IStoryRepository
     {
-        Task<string> AddStoryAsync(CreateStoryDto createStoryDto);
+        Task<string> AddStoryAsync(AddStoryDto createStoryDto);
         Task<List<StoryInfor>> GetStoriesAsync();
         Task<string> UpdateStatusAsync(string status, int storyID);
         Task<StoryDetail> GetStoryByIdAsync(int storyID);
+        Task<string> UpdateStoryAsync(UpdateStoryDto storyDto);
     }
 }
