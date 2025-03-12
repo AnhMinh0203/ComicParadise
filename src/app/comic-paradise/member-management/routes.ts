@@ -2,15 +2,15 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./customer-management.component').then(m => m.CustomerManagementComponent),
+    loadComponent: () => import('./member-management.component').then(m => m.MemberManagementComponent),
     data: {
       title: 'Quản lý thành viên'
     },
     children: [
       // Thêm route con ở đây
       {
-        path: 'add-customer',
-        loadComponent: () => import('./add-customer/add-customer.component').then(m => m.AddCustomerComponent),
+        path: 'add-member',
+        loadComponent: () => import('./add-member/add-member.component').then(m => m.AddMemberComponent),
         data: {
           title: 'Thêm khách hàng'
         }

@@ -55,33 +55,4 @@ export class commentService {
     var apiUrl = `${this.serviceUri}/Get-comments-by-storyID?storyID=${storyID}`;
     return this.http.get(apiUrl);
   }
-  // getStories() {
-  //   var apiUrl = `${this.serviceUri}/Get-all-stories`;
-  //   return this.http.get(apiUrl)
-  //     .pipe(
-  //       catchError((error: any) => {
-  //         throw error;
-  //       })
-  //     );
-  // }
-
-  // updateStatus (status: string, commentID: number){
-  //   const apiUrl = `${this.serviceUri}/Update-status?status=${status}&commentID=${commentID}`;
-  //   return this.http.post(apiUrl,null)
-  //     .pipe(
-  //       catchError((error: any) => {
-  //         throw error;
-  //       })
-  //     );
-  // }
-
-  // getcommentById(commentID:number){
-  //   const apiUrl = `${this.serviceUri}/Get-Comment-by-id?commentID=${commentID}`;
-  //   return this.http.get(apiUrl)
-  //     .pipe(
-  //       catchError((error: any) => {
-  //         throw error;
-  //       })
-  //     );
-  // }
 }

@@ -2,6 +2,23 @@
   <p-toast />
   <p-confirmdialog />
   <div class="row">
+    <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8">
+      <div *ngIf="chapterContent">
+        <!-- Hiển thị PDF -->
+        <!-- <div *ngIf="chapterContent.chapterType === 'PDF'">
+        <iframe [src]="chapterContent.pdfUrl | safe" width="100%" height="600px"></iframe>
+      </div> -->
+
+        <div *ngIf="chapterContent" [style.max-height.px]="600" [style.overflow-y]="'auto'">
+          <!-- Hiển thị danh sách ảnh -->
+          <div *ngIf="chapterContent.chapterType === 'Images'">
+            <div *ngFor="let imageUrl of chapterContent.imageUrls">
+              <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 border-end">
       <div class="chapter-total-number">
         <p>Tổng số trang: <b>{{ pageImages ? pageImages.length : 0 }}</b></p>
@@ -59,24 +76,6 @@
         <div class="d-flex justify-content-start">
           <p-fileupload #fuAdd mode="basic" chooseLabel="Chọn trang mới" chooseIcon="pi pi-upload" name="demo[]"
             accept="image/*" maxFileSize="1000000" (onSelect)="onFileToAddSelected($event)" />
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8">
-      <div *ngIf="chapterContent">
-        <!-- Hiển thị PDF -->
-        <!-- <div *ngIf="chapterContent.chapterType === 'PDF'">
-        <iframe [src]="chapterContent.pdfUrl | safe" width="100%" height="600px"></iframe>
-      </div> -->
-
-        <div *ngIf="chapterContent" [style.max-height.px]="600" [style.overflow-y]="'auto'">
-          <!-- Hiển thị danh sách ảnh -->
-          <div *ngIf="chapterContent.chapterType === 'Images'">
-            <div *ngFor="let imageUrl of chapterContent.imageUrls">
-              <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
-            </div>
-          </div>
         </div>
       </div>
     </div>

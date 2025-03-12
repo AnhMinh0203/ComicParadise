@@ -97,10 +97,10 @@ export class DefaultHeaderComponent extends HeaderComponent {
       from: 'Ryan Miller',
       avatar: '4.jpg',
       status: 'info',
-      title: 'Customer Feedback Results',
+      title: 'member Feedback Results',
       time: '3 days ago',
       link: 'apps/email/inbox/message',
-      message: 'Our latest customer feedback is in. Let\'s analyze and discuss improvements for an even better service...'
+      message: 'Our latest member feedback is in. Let\'s analyze and discuss improvements for an even better service...'
     }
   ];
 

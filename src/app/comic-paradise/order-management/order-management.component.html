@@ -100,31 +100,31 @@
             </th>
           </tr>
         </ng-template>
-        <ng-template #body let-customer>
+        <ng-template #body let-member>
           <tr>
             <td>
-              {{ customer.Id }}
+              {{ member.Id }}
             </td>
             <td>
               <div class="flex items-center gap-2">
                 <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
-                  [class]="'flag flag-' + customer.name" style="width: 20px" />
-                <span>{{ customer.name }}</span>
+                  [class]="'flag flag-' + member.name" style="width: 20px" />
+                <span>{{ member.name }}</span>
               </div>
             </td>
             <td>
               <div class="flex items-center gap-2">
 
-                <span>{{ customer.phone }}</span>
+                <span>{{ member.phone }}</span>
               </div>
             </td>
             <td>
-              <p-tag [value]="customer.status" [severity]="getSeverity(customer.status)" />
+              <p-tag [value]="member.status" [severity]="getSeverity(member.status)" />
             </td>
             <td>
               <i class="pi" [ngClass]="{
-                          'text-green-500 pi-check-circle': customer.verified,
-                          'text-red-500 pi-times-circle': !customer.verified
+                          'text-green-500 pi-check-circle': member.verified,
+                          'text-red-500 pi-times-circle': !member.verified
                       }"></i>
             </td>
             <td> <!-- Cột hành động -->
@@ -194,7 +194,7 @@
     [resizable]="false"
     [contentStyle]="{'padding': ' 0px 40px'}">
     <c-card-body class="p-4">
-      <div class="customer-infor">
+      <div class="member-infor">
         <h5>Thông tin khách hàng</h5>
         <p-panel>
           <p><strong>Tên: </strong>Nguyễn Văn A</p>

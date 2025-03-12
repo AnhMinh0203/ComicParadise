@@ -30,3 +30,7 @@
   color: #007bff;
   transform: scale(1.2);
 }
+
+:host ::ng-deep .format-input input {
+  width: 100%;
+}

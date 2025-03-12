@@ -26,7 +26,7 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Quản lý thành viên',
-    url: '/customer-management',
+    url: '/member-management',
     iconComponent: { name: 'cil-user' }
   },
   {

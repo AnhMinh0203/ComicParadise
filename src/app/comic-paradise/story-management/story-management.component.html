@@ -28,8 +28,8 @@
             <div>
               <c-input-group class="mb-3">
                 <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
-                  placeholder="Nhập tên truyện" />
-                <button cButton color="secondary" id="button-addon2" type="button" variant="outline">
+                  placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+                <button cButton color="secondary" id="button-addon2" type="button" variant="outline" (click)="searchStory()">
                   Tìm kiếm
                 </button>
               </c-input-group>

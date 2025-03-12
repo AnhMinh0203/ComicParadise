@@ -100,7 +100,7 @@ export class StoryManagementComponent {
   title = 'User';
 
 
-  value: any;
+  keySearch: any;
 
 
   stories!: Story[];
@@ -297,6 +297,20 @@ export class StoryManagementComponent {
           detail: res.data
         });
         return;
+      }
+    });
+  }
+  searchStory() {
+    this._storyService.searchStories(this.keySearch).subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        this.stories = res.data;
+      }
+      else {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Thông báo',
+          detail: 'Truyện không tồn tại'
+        });
       }
     });
   }

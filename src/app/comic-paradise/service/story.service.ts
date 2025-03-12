@@ -64,4 +64,8 @@ export class storyService {
   deleteStory(storyID: number): Observable<any> {
     return this.http.delete(`${this.serviceUri}/Delete-story?storyID=${storyID}`);
   }
+
+  searchStories(title: string): Observable<any> {
+    return this.http.get(`${this.serviceUri}/Search-stories?title=${title}`);
+  }
 }
