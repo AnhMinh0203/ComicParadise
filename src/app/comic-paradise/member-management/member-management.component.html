@@ -48,7 +48,7 @@
           </th>
 
           <th>
-            <p-dropdown [(ngModel)]="selectedRoles" [options]="roleOptions" placeholder="Chọn một giá trị"
+            <p-dropdown [(ngModel)]="selectedRoles" [options]="roleOptions" placeholder="Chọn quyền"
               [showClear]="true" [style]="{'min-width': '10rem'}"
               (onChange)="dt2.filter($event.value, 'role', 'equals')" appendTo="body">
             </p-dropdown>
@@ -104,7 +104,6 @@
 
 <!-- member detail -->
 <div class="card flex justify-center">
-  <!-- <p-button (click)="showDialog()" label="Show" /> -->
   <p-dialog header="Chi tiết thành viên" [(visible)]="visibleUpdateForm" [modal]="true"
     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw' }" [draggable]="false"
     [resizable]="false">
@@ -127,26 +126,26 @@
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
               <div class="d-flex my-2 justify-content-between align-items-center">
                 <label for="comment" class=" fw-semibold">Quyền bình luận</label>
-                <p-toggleswitch [(ngModel)]="isComment" class="mt-2" />
+                <p-toggleswitch [(ngModel)]="selectedMember.isComment" class="mt-2" />
               </div>
 
               <div class="d-flex my-2 justify-content-between align-items-center">
                 <label for="comment" class=" fw-semibold">Khóa tài khoản</label>
-                <p-toggleswitch [(ngModel)]="isLock" class="mt-2" />
+                <p-toggleswitch [(ngModel)]="selectedMember.isLock" class="mt-2" />
               </div>
             </div>
 
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
               <div class="d-flex flex-column">
                 <label for="username" class="block mt-3">Họ và tên</label>
-                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="username" />
+                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="selectedMember.username" />
               </div>
             </div>
 
             <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
               <div class="d-flex flex-column">
                 <label for="gender" class="block mt-3">Email</label>
-                <input pInputText id="email" aria-describedby="email-help" [(ngModel)]="email" />
+                <input pInputText id="email" aria-describedby="email-help" [(ngModel)]="selectedMember.email" />
               </div>
             </div>
 
@@ -154,7 +153,7 @@
             <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
               <div class="d-flex flex-column">
                 <label for="phone" class="block mt-3">Số điện thoại</label>
-                <input pInputText id="phone" aria-describedby="username-help" [(ngModel)]="phone" />
+                <input pInputText id="phone" aria-describedby="username-help" [(ngModel)]="selectedMember.phone" />
               </div>
             </div>
 
@@ -164,12 +163,12 @@
                 <label for="dob" class="block mt-3 ">Loại tài khoản</label>
                 <div class="d-flex my-2">
                   <div class="flex items-center">
-                    <p-radiobutton value="Reader" [(ngModel)]="typeAccount" inputId="ingredient1" />
+                    <p-radiobutton value="Reader" [(ngModel)]="selectedMember.role" inputId="ingredient1" />
                     <label for="ingredient1" class="mx-2">Độc giả</label>
                   </div>
 
                   <div class="flex items-center ms-5">
-                    <p-radiobutton value="Publisher" [(ngModel)]="typeAccount" inputId="ingredient2" />
+                    <p-radiobutton value="Publisher" [(ngModel)]="selectedMember.role" inputId="ingredient2" />
                     <label for="ingredient2" class="mx-2">Tác giả</label>
                   </div>
                 </div>
@@ -179,14 +178,15 @@
             <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 ">
               <div class="d-flex flex-column">
                 <label for="createdDate" class="block mt-3">Tham gia ngày</label>
-                <input pInputText id="createdDate" readonly aria-describedby="date-help" [(ngModel)]="createdDate" />
+                <input pInputText id="createdDate" readonly aria-describedby="date-help" value="{{ selectedMember.createdAt | date:'dd-MM-yyyy' }}
+                " />
               </div>
             </div>
 
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
-              <div class="d-flex flex-column">
-                <label for="address" class="block mt-3">Mật khẩu</label>
-                <p-password [(ngModel)]="password" [feedback]="false" [toggleMask]="true" styleClass="w-100 format-input" class=" format-input w-100"  />
+              <div class="d-flex flex-column"  *ngIf="isChangePassword" [@togglePassword]>
+                <label for="address" class="block mt-3">Mật khẩu mới</label>
+                <p-password [(ngModel)]="newPassword" [feedback]="false" [toggleMask]="true" styleClass="w-100 format-input" class=" format-input w-100"  />
 
                 <label for="address" class="block mt-3">Xác nhận mật khẩu</label>
                 <p-password [(ngModel)]="comfirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-100 format-input" class=" format-input w-100"  />
@@ -197,7 +197,8 @@
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
               <div class="d-flex flex-column">
                 <div class="d-flex justify-content-end mt-5">
-                  <p-button label="Xác nhận" (click)="updateMember()" styleClass="w-100 format-input" class=" format-input w-100"/>
+                  <p-button label="Đổi mật khẩu" (click)="onChangePassword()" styleClass="w-100 format-input" class=" format-input w-100 me-2"/>
+                  <p-button label="Cập nhật" (click)="updateMember()" styleClass="w-100 format-input" class=" format-input w-100 ms-2"/>
                 </div>
               </div>
             </div>
@@ -207,3 +208,41 @@
     </div>
   </p-dialog>
 </div>
+
+<!-- Reading histories -->
+<div class="card flex justify-center">
+  <p-dialog [(visible)]="visibleReadingHistoryForm" [modal]="true" [closable]="true"
+    [header]="'Lịch sử đọc truyện'" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"   [style]="{ width: '80vw', height: '80vh' }"   [baseZIndex]="10000">
+
+    <ng-container *ngIf="historyStories.length > 0; else noData">
+      <p-listbox [options]="historyStories" optionLabel="title" [style]="{width: '100%',height: '100%'}">
+        <ng-template let-story pTemplate="item" [style]="{width: '100%',height: '100%'}">
+          <div class="d-flex justify-content-between w-100 items-center gap-3 p-2 border-b border-gray-200">
+
+            <div>
+              <div class="font-semibold text-lg text-gray-800"><b>{{ story.title }}</b></div>
+              <div class="text-sm text-gray-500">Lượt xem: {{ story.views  }}</div>
+
+              <div class="text-sm text-gray-500">Ngày đọc: {{ story.lastReadAt | date:'dd/MM/yyyy' }}</div>
+            </div>
+            <img [src]="story.coverImage" alt="Thumbnail"
+              class="rounded-md object-cover shadow-sm border border-gray-300"
+              style="width: 56px; height: 80px;">
+
+          </div>
+        </ng-template>
+      </p-listbox>
+    </ng-container>
+
+    <ng-template #noData>
+      <div class="text-center p-4">
+        <p class="text-gray-500 text-sm">Không có lịch sử đọc.</p>
+      </div>
+    </ng-template>
+
+    <p-footer class="flex justify-end">
+      <button pButton label="Đóng" icon="pi pi-times" class="p-button-text p-button-sm" (click)="visibleReadingHistoryForm = false"></button>
+    </p-footer>
+  </p-dialog>
+</div>
+

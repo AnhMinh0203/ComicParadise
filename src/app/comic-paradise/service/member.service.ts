@@ -31,8 +31,38 @@ export class memberService {
       );
   }
 
-  exportExcel(){
+  exportExcel() {
     var apiUrl = `${this.serviceUri}/Export-excel-member`;
-    return this.http.get(apiUrl, {responseType: 'blob'});
+    return this.http.get(apiUrl, { responseType: 'blob' });
+  }
+
+  updateMember(member: any) {
+    var apiUrl = `${this.serviceUri}/Update-member`;
+    return this.http.post(apiUrl, member)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  getReadingHistories(memberID: any) {
+    var apiUrl = `${this.serviceUri}/Get-reading-histories?userID=${memberID}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  deleteMember(memberID: any) {
+    var apiUrl = `${this.serviceUri}/Delete-member?userID=${memberID}`;
+    return this.http.delete(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
   }
 }

@@ -153,7 +153,7 @@ export class AddstoryComponent {
     }
 
     const formData = new FormData();
-    const publishID = JSON.parse(localStorage.getItem('user') || '{}').userId;
+    const publishID = JSON.parse(localStorage.getItem('user') || '{}').userID;
 
     formData.append("Title", this.title);
     formData.append("Author", this.author);

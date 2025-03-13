@@ -29,9 +29,12 @@ import { memberService } from '../service/member.service';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { PasswordModule } from 'primeng/password';
+import { Password, PasswordModule } from 'primeng/password';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { trigger, state, style, transition, animate } from '@angular/animations';
+import { ListboxModule } from 'primeng/listbox';
+
 
 @Component({
   selector: 'app-member-management',
@@ -62,10 +65,22 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
     MultiSelectModule,
     PasswordModule,
     RadioButtonModule,
-    ToggleSwitchModule
+    ToggleSwitchModule,
+    ListboxModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './member-management.component.html',
+  animations: [
+    trigger('togglePassword', [
+      transition(':enter', [
+        style({ opacity: 0, height: '0px' }),
+        animate('300ms ease-in-out', style({ opacity: 1, height: '*' }))
+      ]),
+      transition(':leave', [
+        animate('500ms ease-in-out', style({ opacity: 0, height: '0px' }))
+      ])
+    ])
+  ],
   styleUrl: './member-management.component.scss'
 })
 export class MemberManagementComponent {
@@ -73,6 +88,7 @@ export class MemberManagementComponent {
   rows: number = 10;
   isAddMemberPage: boolean = false;
   visibleUpdateForm: boolean = false;
+  visibleReadingHistoryForm: boolean = false;
   value: any;
 
   uploadedFiles: any[] = [];
@@ -89,14 +105,16 @@ export class MemberManagementComponent {
 
   typeAccount: any;
   email: any;
-  password: any;
+  newPassword: any;
   phone: any;
   username: any;
   comfirmPassword: any;
   primaryImgDisplay: any;
-  createdDate:any;
-  isComment:any;
-  isLock:any;
+  createdDate: any;
+  isComment: any;
+  isLock: any;
+  isChangePassword: boolean = false;
+  historyStories: any[] = [];
 
   constructor(
     private router: Router,
@@ -113,7 +131,7 @@ export class MemberManagementComponent {
   }
 
   selectedRoles: any;
-  selectedMember: any;
+  selectedMember: any = {};
 
   roleOptions = [
     { label: 'Reader', value: 'Reader' },
@@ -134,13 +152,13 @@ export class MemberManagementComponent {
       {
         icon: 'pi pi-history',
         command: () => {
-          this.messageService.add({ severity: 'success', summary: 'Update', detail: 'Data Updated' });
+          this.getReadingHistories();
         }
       },
       {
         icon: 'pi pi-trash',
-        command: () => {
-          this.messageService.add({ severity: 'error', summary: 'Delete', detail: 'Data Deleted' });
+        command: (event:any) => {
+          this.deleteMember(event);
         }
       }
     ];
@@ -175,20 +193,56 @@ export class MemberManagementComponent {
 
   setCurrentMember(member: any) {
     this.selectedMember = member;
+    this.primaryImgDisplay = this.selectedMember.avatar;
   }
 
-  showFormUpdateMemberInfor () {
+  showFormUpdateMemberInfor() {
     this.visibleUpdateForm = true;
   }
 
+  showFormReadingHistory() {
+    this.visibleReadingHistoryForm;
+  }
+
   updateMember() {
-    alert("Cập nhật thông tin thành công");
+    const formData = new FormData();
+    formData.append("userID", this.selectedMember.userID);
+    formData.append("username", this.selectedMember.username);
+    formData.append("phone", this.selectedMember.phone);
+    formData.append("email", this.selectedMember.email);
+    formData.append("role", this.selectedMember.role);
+    formData.append("status", "Active");
+    formData.append("isComment", this.selectedMember.isComment.toString());
+    formData.append("isLock", this.selectedMember.isLock.toString());
+
+    if (this.newPassword && this.newPassword != this.comfirmPassword) {
+      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Mật khẩu không khớp' });
+      return;
+    }
+    else {
+      formData.append("password", this.newPassword);
+    }
+
+    if (this.primaryImg) {
+      formData.append("avatar", this.primaryImg);
+    }
+
+    this._memberService.updateMember(formData).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+      }
+      else {
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+      }
+
+      this.getAllMembers();
+    });
   }
 
   onUpload(event: any) {
     const file = event.files[0];
     const maxSizeKB = 1000;
-    if (file.size / 1024 > maxSizeKB) { // 1mb
+    if (file.size / 1024 > maxSizeKB) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Cảnh báo',
@@ -205,8 +259,57 @@ export class MemberManagementComponent {
     reader.readAsDataURL(file);
   }
 
+  onChangePassword() {
+    this.isChangePassword = !this.isChangePassword;
+    if (!this.isChangePassword) {
+      this.newPassword = '';
+      this.comfirmPassword = '';
+    }
+  }
 
+  getReadingHistories() {
+    this._memberService.getReadingHistories(this.selectedMember.userID).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.historyStories = res.data;
+      }
+      else {
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+      }
+    });
+    this.visibleReadingHistoryForm = true;
+  }
 
+  deleteMember(event: Event) {
+    this.confirmationService.confirm({
+        target: event.target as EventTarget,
+        message: 'Xác nhận xóa người dùng này ?',
+        header: 'Cảnh báo',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectButtonProps: {
+            label: 'Hủy',
+            severity: 'secondary',
+            outlined: true,
+        },
+        acceptButtonProps: {
+            label: 'Xác nhận',
+            severity: 'danger',
+        },
+
+        accept: () => {
+            this._memberService.deleteMember(this.selectedMember.userID).subscribe((res: any) => {
+                if (res && res.isSuccess) {
+                    this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+                    this.getAllMembers();
+                }
+                else {
+                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+                }
+            });
+        }
+
+    });
+}
 
 
   // ----

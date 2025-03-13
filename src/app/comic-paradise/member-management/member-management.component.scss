@@ -23,3 +23,7 @@
 :host ::ng-deep .format-input input {
   width: 100%;
 }
+::ng-deep .p-listbox-list-container {
+  max-height: none !important;
+  height: 100% !important;
+}
