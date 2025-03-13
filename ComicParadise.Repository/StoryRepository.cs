@@ -360,5 +360,33 @@ namespace ComicParadise.Repository
         }
         #endregion
 
+        #region Search story
+        public async Task<List<StoryInfor>> SearchStoryAsync (string title)
+        {
+            try
+            {
+                List<StoryInfor> listStories = await (from s in _context.Stories
+                                                      join u in _context.Users on s.PublisherID equals u.UserID
+                                                      join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
+                                                      where s.Title.Contains(title)
+                                                      select new StoryInfor
+                                                      {
+                                                          StoryID = s.StoryID,
+                                                          Title = s.Title,
+                                                          CoverImage = s.CoverImage,
+                                                          Status = s.Status,
+                                                          PublisherName = u.Username,
+                                                          TotalChapter = chapters.Count()
+                                                      })
+                                         .ToListAsync();
+                return listStories;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        #endregion
+
     }
 }

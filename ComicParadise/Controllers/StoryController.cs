@@ -57,5 +57,12 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.DeleteStoryAsync(storyID);
             return Ok(new BaseResponse<string>(true, result));
         }
+
+        [HttpGet("Search-stories")]
+        public async Task<ActionResult> SearchStory(string title)
+        {
+            var result = await _storyRepository.SearchStoryAsync(title);
+            return Ok(new BaseResponse<List<StoryInfor>>(true, result));
+        }
     }
 }

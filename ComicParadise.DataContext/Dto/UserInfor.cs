@@ -8,8 +8,9 @@ namespace ComicParadise.DataContext.Dto
 {
     public class UserInfor
     {
-        public int UserId { get; set; }
-        public string? FullName { get; set; }
+        public int UserID { get; set; }
+        public string? Username { get; set; }
         public string? Identifier { get; set; }
     }
+
 }

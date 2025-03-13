@@ -1,4 +1,6 @@
-﻿using ComicParadise.DataContext.Utils;
+﻿using ComicParadise.DataContext.Dto;
+using ComicParadise.DataContext.Models;
+using ComicParadise.DataContext.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,11 @@ namespace ComicParadise.Repository.Common
 {
     public interface IMemberRepository
     {
-        Task<List<UserAuthen>> GetAllMembersAsync();
-/*        Task<UserAuthen> GetSpesifycMemberAsync();*/
+        Task<List<User>> GetAllMembersAsync();
+        Task<string> AddMemberAsync(AddMemberDto addMemberDto);
+        Task<byte[]> ExportExcelAsync();
+        Task<string> UpdateMemberAsync(UpdateMemberDto user);
+        Task<IQueryable<ReadingHistoryDTO>> GetReadingHistoryAsync(int userID);
+        Task<string> DeleteMemberAsync(int userID);
     }
 }

@@ -21,6 +21,7 @@ namespace ComicParadise.DataContext.Database
         public DbSet<ChapterImage> ChapterImages { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
+        public DbSet<ReadingHistory> ReadingHistories { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,6 +29,9 @@ namespace ComicParadise.DataContext.Database
             // Định nghĩa khóa chính tổng hợp (Composite Primary Key) cho bảng StoryCategoriesMapping
             modelBuilder.Entity<StoryCategoriesMapping>()
                 .HasKey(sc => new { sc.StoryID, sc.CategoryID });
+
+            modelBuilder.Entity<ReadingHistory>()
+               .HasKey(h => new { h.HistoryID });
 
             base.OnModelCreating(modelBuilder);
         }

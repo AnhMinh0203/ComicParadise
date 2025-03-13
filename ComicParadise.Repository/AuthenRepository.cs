@@ -95,8 +95,8 @@ namespace ComicParadise.Repository
                 var token = tokenRespon.GenerateJwtToken(userAuthen, userAuthen.UserId);
                 UserInfor userInfor = new UserInfor
                 {
-                    UserId = userAuthen.UserId,
-                    FullName = userAuthen.FullName,
+                    UserID = userAuthen.UserId,
+                    Username = userAuthen.FullName,
                     Identifier = userAuthen.Identifier ,
 
                 };
