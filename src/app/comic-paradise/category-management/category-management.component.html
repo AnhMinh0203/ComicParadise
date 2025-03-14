@@ -1,0 +1,88 @@
+<c-card>
+  <c-card-header>
+    <h5>Quản lý chuyên mục</h5>
+  </c-card-header>
+  <c-card-body>
+
+    <div class="d-flex justify-content-start">
+      <p-toast />
+      <p-confirmdialog />
+      <p-button class="me-3" icon="pi pi-plus" label="Thêm chuyên mục" [outlined]="true" severity="success"
+        (click)="showAddCategoryInfor()" />
+
+    </div>
+    <hr>
+
+    <div class="d-flex justify-content-between">
+      <div>
+        <p-button icon="pi pi-refresh" (click)="reloadCategories()"/>
+      </div>
+      <div>
+        <c-input-group class="mb-3">
+          <input aria-describedby="button-addon2" aria-label="Nhập tên chuyên mục" cFormControl
+            placeholder="Nhập tên chuyên mục" [(ngModel)]="searchText" />
+          <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
+            (click)="searchCategory()">
+            Tìm kiếm
+          </button>
+        </c-input-group>
+      </div>
+    </div>
+
+    <p-table [value]="categories" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
+      [rowsPerPageOptions]="[5, 10, 20]">
+      <ng-template #header>
+        <tr>
+          <th style="width:15%">Mã danh mục</th>
+          <th style="width:20%">Tên danh mục</th>
+          <th style="width:35%">Mô tả</th>
+          <th style="width:10%">Hành động</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-category>
+        <tr>
+          <td>{{ category.categoryID }}</td>
+          <td>{{ category.categoryName }}</td>
+          <td>{{ category.description }}</td>
+          <td>
+            <div style=" position: relative;">
+              <p-speeddial [model]="actions" direction="right" (click)="setCurrentCategory(category)" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </c-card-body>
+</c-card>
+
+
+<!-- Add or Update category -->
+<p-dialog [(visible)]="isVisibleAddOrUpdate" [modal]="true" [closable]="true" [style]="{ width: '60vw' }"
+  [responsive]="true">
+
+  <ng-template pTemplate="header">
+    <h4 class="m-0">{{ isEdit ? 'Cập nhật chuyên mục' : 'Thêm chuyên mục' }}</h4>
+  </ng-template>
+
+  <div class="p-fluid">
+    <!-- Nhập Tên Category -->
+    <div class="d-flex flex-column">
+      <label for="categoryName" class="font-bold">Tên Category</label>
+      <input type="text" pInputText [ngModel]="isEdit ? categorySelected.categoryName : categoryName"
+        (ngModelChange)="isEdit ? categorySelected.categoryName = $event : categoryName = $event" />
+    </div>
+
+    <!-- Nhập Mô tả -->
+    <div class="d-flex flex-column mt-2">
+      <label for="description" class="font-bold">Mô tả</label>
+      <textarea rows="5" cols="30" pTextarea [ngModel]="isEdit ? categorySelected.description : categoryDesc"
+        (ngModelChange)="isEdit ? categorySelected.description = $event : categoryDesc = $event">
+      </textarea>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mt-3">
+    <p-button [label]="isEdit? 'Cập nhật' : 'Thêm mới'" [icon]=" isEdit ? 'pi pi-check' : 'pi pi-plus'"
+      class="p-button-primary" (click)="isEdit? updateCategory(): addCategory()" />
+  </div>
+</p-dialog>

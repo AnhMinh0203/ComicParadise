@@ -31,7 +31,7 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Quản lý chuyên mục',
-    url: '/blog-management',
+    url: '/category-management',
     iconComponent: { name: 'cil-bookmark' }
   },
   {

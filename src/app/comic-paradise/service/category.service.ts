@@ -20,4 +20,44 @@ export class categoryService {
         })
       );
   }
+
+  searchCategories(searchKey: string) {
+    var apiUrl = `${this.serviceUri}/Search-categories?categoryName=${searchKey}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  addCategory(category: any) {
+    var apiUrl = `${this.serviceUri}/Add-category`;
+    return this.http.post(apiUrl, category)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  updateCategory(category: any) {
+    var apiUrl = `${this.serviceUri}/Update-category`;
+    return this.http.post(apiUrl, category)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  deleteCategory(categoryID: number) {
+    var apiUrl = `${this.serviceUri}/Delete-category?categoryID=${categoryID}`;
+    return this.http.delete(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 }

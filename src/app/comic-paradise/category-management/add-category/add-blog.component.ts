@@ -15,7 +15,7 @@ import { SelectModule } from 'primeng/select';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-add-blog',
+  selector: 'app-add-category',
   imports: [
     ButtonModule,
     CardModule,
@@ -32,10 +32,10 @@ import { Router } from '@angular/router';
 
 
   ],
-  templateUrl: './add-blog.component.html',
-  styleUrl: './add-blog.component.scss'
+  templateUrl: './add-category.component.html',
+  styleUrl: './add-category.component.scss'
 })
-export class AddBlogComponent {
+export class CategoryBlogComponent {
   uploadedFiles: any[] = [];
   primaryImg: any;
   imageSrc: string = '';
@@ -78,7 +78,7 @@ export class AddBlogComponent {
         toolbar: this.toolbarOptions
       },
       theme: 'snow',
-      placeholder: 'Nhập nội dung blog...',
+      placeholder: 'Nhập nội dung category...',
     });
   }
 
@@ -95,7 +95,7 @@ export class AddBlogComponent {
   }
 
   navigateToBlogManagement() {
-    this.router.navigate(['/blog-management']);
+    this.router.navigate(['/category-management']);
   }
 
 }

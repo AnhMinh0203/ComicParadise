@@ -40,8 +40,8 @@ export const routes: Routes = [
         loadChildren: () => import('./comic-paradise/member-management/routes').then((m) => m.routes)
       },
       {
-        path: 'blog-management',
-        loadChildren: () => import('./comic-paradise/blog-management/routes').then((m) => m.routes)
+        path: 'category-management',
+        loadChildren: () => import('./comic-paradise/category-management/routes').then((m) => m.routes)
       },
       {
         path: 'statistical-report-management',
