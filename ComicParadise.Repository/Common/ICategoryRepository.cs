@@ -1,4 +1,5 @@
-﻿using ComicParadise.DataContext.Models;
+﻿using ComicParadise.DataContext.Dto;
+using ComicParadise.DataContext.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,9 @@ namespace ComicParadise.Repository.Common
     public interface ICategoryRepository
     {
         Task<List<Category>> GetAllCategoriesAsync();
+        Task<List<Category>?> SearchCategoryAsync(string? categoryName);
+        Task<string> AddCategoryAsync(CategoryDto categoryDto);
+        Task<string> UpdateCategoryAsync(Category categoryParam);
+        Task<string> DeleteCategoryAsync(int categoryID);
     }
 }

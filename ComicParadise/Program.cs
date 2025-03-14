@@ -1,6 +1,7 @@
 using Azure.Storage.Blobs;
 using ComicParadise.DataContext.Database;
 using ComicParadise.Repository.Configs;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureCloud"))
 );
+
+// Mapping attribute
+/*builder.Services.AddAutoMapper(typeof(Program));*/
+
 
 // Add cross
 builder.Services.AddCors(options =>
