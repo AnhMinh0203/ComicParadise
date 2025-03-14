@@ -1,29 +1,110 @@
-<div class="my-2">
-  <p-card header="Báo cáo thống kê"></p-card>
+<div class="row my-2">
+
+  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 mb-3">
+    <div class="d-flex report-item">
+
+      <div class="ml-4">
+        <p class="text-gray-600">Tổng đầu truyện</p>
+        <p class="text-xl font-semibold">1,230</p>
+      </div>
+      <div class="book-icon"></div>
+    </div>
+  </div>
+
+  <!-- Tổng thành viên -->
+  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 mb-3">
+    <div class="d-flex report-item">
+      <div class="ml-4">
+        <p class="text-gray-600">Tổng thành viên</p>
+        <p class="text-xl font-semibold">15,890</p>
+      </div>
+      <div class="member-icon"></div>
+    </div>
+  </div>
+
+  <!-- Tổng danh mục -->
+  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 mb-3">
+    <div class="d-flex report-item">
+      <div class="ml-4">
+        <p class="text-gray-600">Tổng danh mục</p>
+        <p class="text-xl font-semibold">34</p>
+      </div>
+      <div class="category-icon"></div>
+    </div>
+  </div>
 </div>
+
 
 <p-tabs value="0">
   <p-tablist>
-    <p-tab value="0">Tất cả</p-tab>
-    <p-tab value="1">Người dùng</p-tab>
-    <p-tab value="2">Đơn hàng</p-tab>
-    <p-tab value="3">category</p-tab>
+    <p-tab value="0">Truyện</p-tab>
+    <p-tab value="1">Thành viên</p-tab>
+
   </p-tablist>
 
   <p-tabpanels>
     <p-tabpanel value="0">
+
+      <div class="p-3 mb-5 ">
+        <!-- Actions -->
+        <div class="d-flex justify-content-between">
+          <div class="d-flex ">
+            <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help"
+              (click)="exportExcel()" />
+            <!-- <p-button icon="pi pi-refresh" (click)="reloadStoriesReport()" /> -->
+          </div>
+
+          <div>
+            <c-input-group class="mb-3">
+              <input aria-describedby="button-addon2" aria-label="Nhập tên chuyên mục" cFormControl
+                placeholder="Nhập tên chuyên mục" [(ngModel)]="searchText" />
+              <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
+                (click)="searchStory()">
+                Tìm kiếm
+              </button>
+            </c-input-group>
+          </div>
+        </div>
+
+        <!-- Data -->
+        <p-table [value]="stories" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
+          [rowsPerPageOptions]="[5, 10, 20]">
+          <ng-template #header>
+            <tr>
+              <th pSortableColumn="storyID">Mã truyện <p-sortIcon field="storyID" /></th>
+              <th pSortableColumn="title">Tên truyện <p-sortIcon field="title" /></th>
+              <th pSortableColumn="totalChapter">Số chương <p-sortIcon field="totalChapter" /></th>
+              <th pSortableColumn="views">Lượt xem <p-sortIcon field="views" /></th>
+              <th pSortableColumn="likes">Lượt thích <p-sortIcon field="likes" /></th>
+              <th pSortableColumn="createdAt">Ngày tạo <p-sortIcon field="createdAt" /></th>
+              <th>Hành động </th>
+
+            </tr>
+          </ng-template>
+          <ng-template #body let-story>
+            <tr>
+              <td>{{ story.storyID }}</td>
+              <td>{{ story.title }}</td>
+              <td>{{ story.totalChapter }}</td>
+              <td>{{ story.views }}</td>
+              <td>{{ story.likes }}</td>
+              <td>{{ story.createdAt | date:'dd/MM/yyyy' }}</td>
+
+              <td>
+                <i class="pi pi-pen-to-square"></i>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- Chart -->
       <div class="card">
-        <p-chart type="bar" [data]="data" [options]="options" class="h-[30rem]" />
+        <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
       </div>
     </p-tabpanel>
     <p-tabpanel value="1">
       <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
-    </p-tabpanel>
-    <p-tabpanel value="2">
-      <p-chart type="line" [data]="dataForOrder" [options]="optionForOrder" class="h-[30rem]" />
-    </p-tabpanel>
-    <p-tabpanel value="3">
-      <p-chart type="bar" [data]="basicData" [options]="basicOptions" class="h-[30rem]" />
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>

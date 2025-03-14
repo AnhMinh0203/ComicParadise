@@ -27,6 +27,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
 
 import { PanelModule } from 'primeng/panel';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { reportService } from '../service/report.service';
 
 @Component({
   selector: 'app-statistical-report-management',
@@ -53,137 +57,82 @@ import { PanelModule } from 'primeng/panel';
     DialogModule,
     PanelModule
   ],
+  providers: [ConfirmationService, MessageService],
   templateUrl: './statistical-report-management.component.html',
   styleUrls: ['./statistical-report-management.component.scss']
 })
 export class StatisticalReportManagementComponent {
-  data: any;
-  options: any;
-
   basicData: any;
   basicOptions: any;
 
-  dataForOrder: any;
-  optionForOrder: any;
+  // ---
+  customers!: any[];
+  searchText!: string;
+  stories: any[] = [];
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService,
+    private _reportService: reportService
+
+  ) {
+
+  }
+
+  reloadStoriesReport() { }
+  searchStory() { }
+
   ngOnInit() {
-    // Data for report all (Chồng lên nhau)
-    this.data = {
-      labels: ['January', 'February', 'March', 'April', 'May'],  // Các tháng
-      datasets: [
-        {
-          label: 'Sales',
-          data: [65, 59, 80, 81, 56],  // Dữ liệu cho Sales
-          borderColor: '#42A5F5',  // Màu đường viền
-          backgroundColor: 'rgba(66, 165, 245, 0.6)',  // Màu nền
-          borderWidth: 2,  // Độ dày của đường viền
-          fill: true  // Màu nền phía dưới
-        },
-        {
-          label: 'Revenue',
-          data: [28, 48, 40, 19, 86],  // Dữ liệu cho Revenue
-          borderColor: '#66BB6A',  // Màu đường viền
-          backgroundColor: 'rgba(102, 187, 106, 0.6)',  // Màu nền
-          borderWidth: 2,
-          fill: true
-        },
-        {
-          label: 'Profit',
-          data: [18, 48, 77, 9, 100],  // Dữ liệu cho Profit
-          borderColor: '#FF7043',  // Màu đường viền
-          backgroundColor: 'rgba(255, 112, 67, 0.6)',  // Màu nền
-          borderWidth: 2,
-          fill: true
-        }
-      ]
-    };
+    this.getReportStory();
+    // this.basicData = {
+    //   labels: ['January', 'February', 'March', 'April', 'May'],
+    //   datasets: [
+    //     {
+    //       label: 'Sales',
+    //       data: [65, 59, 80, 81, 56],
+    //       borderColor: '#42A5F5',  // Màu đường viền
+    //       backgroundColor: 'rgba(66, 165, 245, 0.6)',  // Màu nền
+    //       borderWidth: 2,  // Đặt độ dày cho đường viền
+    //       fill: true  // Nếu muốn nền bên dưới đường
+    //     },
+    //     {
+    //       label: 'Revenue',
+    //       data: [28, 48, 40, 19, 86],
+    //       borderColor: '#66BB6A',  // Màu đường viền
+    //       backgroundColor: 'rgba(102, 187, 106, 0.6)',  // Màu nền
+    //       borderWidth: 2,  // Đặt độ dày cho đường viền
+    //       fill: true  // Nếu muốn nền bên dưới đường
+    //     }
+    //   ]
+    // };
 
-    this.options = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'top',  // Đặt vị trí của legend
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,  // Đảm bảo trục Y bắt đầu từ 0
-          stacked: true,  // Chồng các cột lại với nhau
-        },
-        x: {
-          stacked: true,  // Chồng các cột lại với nhau
-        }
-      }
-    };
+    // // Cấu hình cho chart (Giữ nguyên cấu hình cho báo cáo người dùng)
+    // this.basicOptions = {
+    //   responsive: true,
+    //   plugins: {
+    //     legend: {
+    //       position: 'top'
+    //     }
+    //   },
+    //   scales: {
+    //     y: {
+    //       stacked: false,  // Không chồng các cột lại với nhau
+    //     },
+    //     x: {
+    //       stacked: false,  // Không chồng các cột lại với nhau
+    //     }
+    //   }
+    // };
+  }
 
-    // Data for report user (Giữ nguyên dữ liệu)
-    this.basicData = {
-      labels: ['January', 'February', 'March', 'April', 'May'],
-      datasets: [
-        {
-          label: 'Sales',
-          data: [65, 59, 80, 81, 56],
-          borderColor: '#42A5F5',  // Màu đường viền
-          backgroundColor: 'rgba(66, 165, 245, 0.6)',  // Màu nền
-          borderWidth: 2,  // Đặt độ dày cho đường viền
-          fill: true  // Nếu muốn nền bên dưới đường
-        },
-        {
-          label: 'Revenue',
-          data: [28, 48, 40, 19, 86],
-          borderColor: '#66BB6A',  // Màu đường viền
-          backgroundColor: 'rgba(102, 187, 106, 0.6)',  // Màu nền
-          borderWidth: 2,  // Đặt độ dày cho đường viền
-          fill: true  // Nếu muốn nền bên dưới đường
-        }
-      ]
-    };
+  getReportStory() {
+    this._reportService.getReportStory().subscribe((res: any) => {
+      console.log(res);
+      this.stories = res.data;
+    });
+  }
+  exportExcel(){
 
-    // Cấu hình cho chart (Giữ nguyên cấu hình cho báo cáo người dùng)
-    this.basicOptions = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'top'
-        }
-      },
-      scales: {
-        y: {
-          stacked: false,  // Không chồng các cột lại với nhau
-        },
-        x: {
-          stacked: false,  // Không chồng các cột lại với nhau
-        }
-      }
-    };
-
-    this.dataForOrder = {
-      labels: ['January', 'February', 'March', 'April', 'May'],  // Các tháng
-      datasets: [
-        {
-          label: 'Orders',  // Dữ liệu cho Orders
-          data: [65, 59, 80, 81, 56],  // Dữ liệu cho Orders
-          borderColor: '#FF7043',  // Màu đường viền
-          backgroundColor: 'rgba(255, 112, 67, 0.2)',  // Màu nền phía dưới đường
-          borderWidth: 2,  // Độ dày của đường viền
-          fill: true,  // Tô màu nền dưới đường,
-          tension: 0.4
-        }
-      ]
-    };
-
-    // Các tùy chọn cho biểu đồ
-    this.optionForOrder = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'top'  // Đặt vị trí của legend
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true  // Đảm bảo trục Y bắt đầu từ 0
-        }
-      }
-    };
   }
 }

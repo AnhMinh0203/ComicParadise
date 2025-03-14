@@ -1,0 +1,92 @@
+.book-icon {
+  width: 100px;
+  height: 100px;
+  background-image: url('../../icons/book_12743716.gif');
+  background-size: cover;
+}
+
+.member-icon {
+  width: 100px;
+  height: 100px;
+  background-image: url('../../icons/add_17644526.gif');
+  background-size: cover;
+}
+
+.category-icon{
+  width: 100px;
+  height: 100px;
+  background-image: url('../../icons/category_12743716.gif');
+  background-size: cover;
+}
+
+.format-panel{
+  background: #fff;
+}
+
+.report-item {
+  background: #fff; /* Màu nền trắng */
+  border-radius: 12px; /* Bo góc mềm mại */
+  padding: 20px; /* Khoảng cách bên trong */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Căn icon và text về 2 bên */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover Effect */
+.report-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.report-item p {
+  margin: 0; /* Xóa khoảng cách mặc định của thẻ <p> */
+  font-weight: 600; /* Làm đậm chữ */
+}
+
+.report-item .text-gray-600 {
+  font-size: 14px; /* Chữ nhỏ hơn cho phần mô tả */
+  color: #6b7280; /* Màu xám nhạt */
+}
+
+.report-item .font-semibold {
+  font-size: 22px; /* Chữ số to hơn */
+  font-weight: 700; /* Làm đậm chữ số */
+  color: #1f2937; /* Màu chữ tối */
+}
+
+
+
+
+.report-item:nth-child(1) {
+  border-left: 5px solid #10b981;
+}
+
+.report-item:nth-child(2) {
+  border-left: 5px solid #10b981;
+}
+
+.report-item:nth-child(3) {
+  border-left: 5px solid #10b981;
+}
+
+.book-icon, .member-icon, .category-icon {
+  width: 80px;
+  height: 80px;
+  background-size: contain; /* Giữ tỉ lệ ảnh */
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.pi-pen-to-square {
+  padding: 10px; /* Thêm padding để tạo không gian xung quanh icon */
+  border-radius: 50%; /* Làm tròn */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Hiệu ứng mượt */
+}
+
+.pi-pen-to-square:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Màu nền khi hover */
+
+  cursor: pointer; /* Đổi thành con trỏ tay */
+}
