@@ -20,11 +20,6 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-inbox' }
   },
   {
-    name: 'Quản lý đơn hàng',
-    url: '/order-management',
-    iconComponent: { name: 'cil-basket' }
-  },
-  {
     name: 'Quản lý thành viên',
     url: '/member-management',
     iconComponent: { name: 'cil-user' }

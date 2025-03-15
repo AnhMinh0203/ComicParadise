@@ -187,19 +187,23 @@ export class InforStoryComponent {
 
   // --- Comment ---//
   postComment() {
+    alert('post comment');
     const comment = {
       StoryID: this.storyID,
-      UserID: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
       Content: this.commentInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",
       Reply: this.replyingCommentId,
     };
 
+    console.log(comment);
+
     this._commentService.postComment(comment).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         var userName = JSON.parse(localStorage.getItem('user') || '{}').fullName
         const newComment = {
+          userID: JSON.parse(localStorage.getItem('user') || '{}').userID,
           commentID: res.data.commentID,
           label: userName,
           avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
@@ -236,7 +240,7 @@ export class InforStoryComponent {
     }
     const reaction = {
       CommentId: comment.commentID,
-      UserId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      UserId: JSON.parse(localStorage.getItem('user') || '{}').userID,
       IsLike: true,
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
@@ -265,7 +269,7 @@ export class InforStoryComponent {
     }
     const reaction = {
       CommentId: comment.commentID,
-      UserId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      UserId: JSON.parse(localStorage.getItem('user') || '{}').userID,
       IsLike: false,
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
@@ -287,7 +291,7 @@ export class InforStoryComponent {
     console.log(comment);
     const responseComment = {
       StoryID: this.storyID,
-      UserID: JSON.parse(localStorage.getItem('user') || '{}').userId,
+      UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
       Content: this.commentInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",

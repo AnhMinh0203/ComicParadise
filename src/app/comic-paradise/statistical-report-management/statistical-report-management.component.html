@@ -5,7 +5,7 @@
 
       <div class="ml-4">
         <p class="text-gray-600">Tổng đầu truyện</p>
-        <p class="text-xl font-semibold">1,230</p>
+        <p class="text-xl font-semibold">{{totalStories}}</p>
       </div>
       <div class="book-icon"></div>
     </div>
@@ -16,7 +16,7 @@
     <div class="d-flex report-item">
       <div class="ml-4">
         <p class="text-gray-600">Tổng thành viên</p>
-        <p class="text-xl font-semibold">15,890</p>
+        <p class="text-xl font-semibold">{{totalMembers}}</p>
       </div>
       <div class="member-icon"></div>
     </div>
@@ -27,7 +27,7 @@
     <div class="d-flex report-item">
       <div class="ml-4">
         <p class="text-gray-600">Tổng danh mục</p>
-        <p class="text-xl font-semibold">34</p>
+        <p class="text-xl font-semibold">{{totalStories}}</p>
       </div>
       <div class="category-icon"></div>
     </div>
@@ -50,14 +50,14 @@
         <div class="d-flex justify-content-between">
           <div class="d-flex ">
             <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help"
-              (click)="exportExcel()" />
+              (click)="exportStoryReportExcel()" />
             <!-- <p-button icon="pi pi-refresh" (click)="reloadStoriesReport()" /> -->
           </div>
 
           <div>
             <c-input-group class="mb-3">
               <input aria-describedby="button-addon2" aria-label="Nhập tên chuyên mục" cFormControl
-                placeholder="Nhập tên chuyên mục" [(ngModel)]="searchText" />
+                placeholder="Nhập tên chuyên mục" [(ngModel)]="keySearch" />
               <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
                 (click)="searchStory()">
                 Tìm kiếm
@@ -91,7 +91,7 @@
               <td>{{ story.createdAt | date:'dd/MM/yyyy' }}</td>
 
               <td>
-                <i class="pi pi-pen-to-square"></i>
+                <i class="pi pi-pen-to-square" (click)="getStoryDetail(story.storyID)"></i>
               </td>
             </tr>
           </ng-template>
@@ -108,3 +108,40 @@
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>
+
+<!-- Infor story -->
+<p-dialog header="Chi tiết truyện" [(visible)]="isDisplayStoryInfor" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw' }" [draggable]="false"
+  [resizable]="false">
+  <div class="row">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3 mb-4">
+      <div class="story-cover-img d-flex justify-content-center">
+        <img [src]="coverImageDisplay" [alt]="'Test'" class="shadow-4 w-100 story-img" />
+      </div>
+
+      <div class="story-actions mt-3">
+        <div class="story-actions-up w-100 d-flex my-2">
+          <p-button label="1.1k" severity="danger" icon="pi pi-heart" [style]="{width: '100%'}"
+            class="flex-grow-1 me-1 border border-danger rounded" />
+          <p-button label="15k" severity="secondary" icon="pi pi-eye" [style]="{width: '100%'}"
+            class="flex-grow-1 ms-1 border border-secondary rounded" />
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
+      <div class="story-infor-detail">
+        <h2 class="story-title">{{this.title}}</h2>
+        <p class="story-author"><strong>Tác giả:</strong> {{this.author}}</p>
+        <div class="d-flex align-items-center flex-wrap">
+          <strong class="me-2">Thể loại:</strong>
+          <ng-container *ngFor="let cate of categoriesSelect">
+            <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1" />
+          </ng-container>
+        </div>
+
+        <p class="story-status"><strong>Trạng thái:</strong> Đang tiến hành</p>
+        <p class="story-description">{{this.description}}</p>
+      </div>
+    </div>
+  </div>
+</p-dialog>

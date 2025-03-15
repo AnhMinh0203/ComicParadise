@@ -21,5 +21,32 @@ export class reportService {
       );
   }
 
+  searchReportStory(title: string) {
+    var apiUrl = `${this.serviceUri}/Search-report-story?title=${title}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  exportStoryReportExcel() {
+    var apiUrl = `${this.serviceUri}/Export-report-story-excel`;
+    return this.http.get(apiUrl, { responseType: 'blob' });
+  }
+
+  getTotalStories(){
+    var apiUrl = `${this.serviceUri}/Get-total-stories`;
+    return this.http.get(apiUrl);
+  }
+  getTotalMembers(){
+    var apiUrl = `${this.serviceUri}/Get-total-members`;
+    return this.http.get(apiUrl);
+  }
+  getTotalCategories(){
+    var apiUrl = `${this.serviceUri}/Get-total-categories`;
+    return this.http.get(apiUrl);
+  }
 
 }
