@@ -36,6 +36,11 @@ export class reportService {
     return this.http.get(apiUrl, { responseType: 'blob' });
   }
 
+  exportMemberReportExcel() {
+    var apiUrl = `${this.serviceUri}/Export-report-member-excel`;
+    return this.http.get(apiUrl, { responseType: 'blob' });
+  }
+
   getTotalStories(){
     var apiUrl = `${this.serviceUri}/Get-total-stories`;
     return this.http.get(apiUrl);
@@ -49,4 +54,13 @@ export class reportService {
     return this.http.get(apiUrl);
   }
 
+  getChartReportStory (typeReport:string){
+    var apiUrl = `${this.serviceUri}/Get-chart-story-report?type=${typeReport}`;
+    return this.http.get(apiUrl);
+  }
+
+  getChartReportMember (typeReport:string){
+    var apiUrl = `${this.serviceUri}/Get-chart-member-report?type=${typeReport}`;
+    return this.http.get(apiUrl);
+  }
 }

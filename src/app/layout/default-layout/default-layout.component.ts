@@ -17,6 +17,7 @@ import {
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems } from './_nav';
+import { ImageModule } from 'primeng/image';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -44,7 +45,8 @@ function isOverflown(element: HTMLElement) {
         ShadowOnScrollDirective,
         ContainerComponent,
         RouterOutlet,
-        DefaultFooterComponent
+        DefaultFooterComponent,
+        ImageModule
     ]
 })
 export class DefaultLayoutComponent {

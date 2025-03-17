@@ -27,7 +27,7 @@
     <div class="d-flex report-item">
       <div class="ml-4">
         <p class="text-gray-600">Tổng danh mục</p>
-        <p class="text-xl font-semibold">{{totalStories}}</p>
+        <p class="text-xl font-semibold">{{totalCategories}}</p>
       </div>
       <div class="category-icon"></div>
     </div>
@@ -98,13 +98,120 @@
         </p-table>
       </div>
 
+      <!-- Option report -->
+      <div class="d-flex justify-content-end my-3">
+        <p-select [options]="typeReports" [(ngModel)]="selectedTypeReport" optionLabel="name"
+          [style]="{ width: '220px' }" (onChange)="onStoryReportTypeChange()" />
+      </div>
       <!-- Chart -->
       <div class="card">
-        <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
+        <p-chart type="bar" [data]="reportStoryData" [options]="reportStoryOption" />
       </div>
     </p-tabpanel>
+
     <p-tabpanel value="1">
-      <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
+      <div class="p-3 mb-5 ">
+        <div class="d-flex justify-content-start">
+          <p-toast />
+          <p-confirmdialog />
+          <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help"
+          (click)="exportMemberReportExcel()" />
+        </div>
+
+        <p-table #dt2 [value]="members" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
+          [globalFilterFields]="['userID', 'userName', 'email', 'phone','role']">
+          <ng-template #header>
+            <tr>
+              <th style="width: 20%;">Mã TV</th>
+              <th style="width: 20%;">Tên TV</th>
+              <th style="width: 20%;">Email</th>
+              <th style="width: 20%;">Số điện thoại</th>
+              <th style="width: 10%;">Quyền</th>
+              <th style="width: 25%;">Ngày tạo</th>
+
+            </tr>
+            <tr>
+              <th style="width: 10%;">
+                <p-columnFilter type="text" field="userID" styleClass="custom-width" placeholder="Nhập mã TV"
+                  [style]="{'min-width': '10rem'}" ariaLabel="Filter Name"></p-columnFilter>
+              </th>
+
+              <th>
+                <p-columnFilter type="text" field="username" placeholder="Nhập tên TV" [style]="{'min-width': '10rem'}"
+                  ariaLabel="Filter Country"></p-columnFilter>
+              </th>
+
+              <th>
+                <p-columnFilter type="text" field="email" placeholder="Nhập email" [style]="{'min-width': '10rem'}"
+                  ariaLabel="Filter Country"></p-columnFilter>
+              </th>
+
+              <th>
+                <p-columnFilter type="text" field="phone" placeholder="Nhập SĐT" [style]="{'min-width': '10rem'}"
+                  ariaLabel="Filter Country"></p-columnFilter>
+              </th>
+
+              <th>
+                <p-dropdown [(ngModel)]="selectedRoles" [options]="roleOptions" placeholder="Chọn quyền"
+                  [showClear]="true" [style]="{'min-width': '10rem'}"
+                  (onChange)="dt2.filter($event.value, 'role', 'equals')" appendTo="body">
+                </p-dropdown>
+              </th>
+              <th></th>
+
+            </tr>
+          </ng-template>
+          <ng-template #body let-member>
+            <tr>
+              <td>
+                <div class="ms-2">{{ member.userID }}</div>
+              </td>
+
+              <td>
+                <div class="flex gap-2">
+                  <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
+                    [class]="'flag flag-' + member.username" style="width: 20px" />
+                  <span>{{ member.username }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <span>{{ member.email }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <span>{{ member.phone }}</span>
+                </div>
+              </td>
+              <td>
+                <p-tag [value]="member.role" [severity]="getSeverity(member.role)" />
+              </td>
+              <td class="text-center">
+                <div class="flex gap-2">
+                  <span>{{ member.createdAt | date:'dd/MM/yyyy'}}</span>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="5">No Members found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- Option report -->
+      <div class="d-flex justify-content-end my-3">
+        <p-select [options]="typeReports" [(ngModel)]="selectedTypeReport" optionLabel="name"
+          [style]="{ width: '220px' }" (onChange)="onMemberReportTypeChange()" />
+      </div>
+      <!-- Chart -->
+      <div class="card">
+        <p-chart type="bar" [data]="reportMemberData" [options]="reportMemberOption" />
+      </div>
+
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>

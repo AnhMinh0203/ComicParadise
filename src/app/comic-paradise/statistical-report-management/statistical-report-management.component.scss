@@ -90,3 +90,34 @@
 
   cursor: pointer; /* Đổi thành con trỏ tay */
 }
+
+// member
+.custom-width {
+  width: 10%;
+}
+
+
+:host ::ng-deep p-columnFilter {
+  width: 100% !important;
+}
+
+:host ::ng-deep p-columnFilter input {
+  width: 100% !important;
+}
+
+:host ::ng-deep p-columnFilter p-dropdown {
+  width: 100% !important;
+}
+
+:host ::ng-deep p-columnFilter p-multiselect {
+  width: 100% !important;
+}
+
+
+:host ::ng-deep .format-input input {
+  width: 100%;
+}
+::ng-deep .p-listbox-list-container {
+  max-height: none !important;
+  height: 100% !important;
+}
