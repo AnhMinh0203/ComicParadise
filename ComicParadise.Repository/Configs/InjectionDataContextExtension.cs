@@ -21,9 +21,11 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<IStoryRepository, StoryRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IChapterRepository, ChapterRepository>();
+            services.AddScoped<IStatisticalReportRepository, StatisticalReportRepository>();
 
             // Register AutoMapper
             services.AddAutoMapper(typeof(CategoryProfile));
+            services.AddAutoMapper(typeof(ReportProfile));
         }
     }
 }

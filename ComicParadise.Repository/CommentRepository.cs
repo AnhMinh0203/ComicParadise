@@ -29,10 +29,10 @@ namespace ComicParadise.Repository
             {
                 var user = await _context.Users.FindAsync(comment.UserID);
                 var story = await _context.Stories.FindAsync(comment.StoryID);
-                if (user == null)
+/*                if (user == null)
                 {
                     return null;
-                }
+                }*/
                 if (story == null)
                 {
                     return null;

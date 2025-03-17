@@ -19,7 +19,7 @@ namespace ComicParadise.DataContext.Models
         public string? Avatar {  get; set; }
         public bool? IsComment { get; set; } = true;
         public bool? IsLock { get; set; } = false;
-        public DateTime? CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
     }
 }
