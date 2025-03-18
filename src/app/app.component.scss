@@ -1,0 +1,11 @@
+.content-wrapper img,
+.content-wrapper iframe {
+  width: 100%;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+}
+
+.content-wrapper iframe {
+  height: 400px;
+}

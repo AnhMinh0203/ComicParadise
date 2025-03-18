@@ -1,0 +1,39 @@
+<nav class="navbar d-flex justify-content-between aligh-items-center">
+
+  <!-- Logo -->
+  <div class="d-flex">
+    <div class="header-logo ">
+      <img src="../../../assets/images/logo-3.jpg" alt="Logo">
+    </div>
+    <!-- Right Side -->
+    <div class="navbar-right">
+      <a href="#">Trang chủ</a>
+      <a href="#">Thể loại</a>
+      <a href="#">Liên hệ</a>
+
+      <!-- Search Input -->
+      <div class="search-box">
+        <input type="text" placeholder="Tìm kiếm...">
+        <i class="pi pi-search"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-left">
+    <!-- Notification Icon -->
+    <div class="notification">
+      <i class="pi pi-bell"></i>
+    </div>
+
+    <!-- Toggle Theme Icon -->
+    <div class="toggle-theme ">
+      <i class="pi" [ngClass]="isDarkMode ? 'pi-moon' : 'pi-sun'" (click)="toggleTheme()"></i>
+    </div>
+
+    <!-- Avatar -->
+    <div class="avatar">
+      <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/asiyajavayant.png" class="mr-2"
+        size="large" shape="circle" />
+    </div>
+  </div>
+</nav>

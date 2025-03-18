@@ -1,0 +1,41 @@
+/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+:root {
+  // --primary-color: #007bff;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --transition-duration: 200ms;
+  --primary-color: #4CAF50; // Xanh lá nhạt
+  --text-color: #fff;
+  --transition-duration: 0.3s;
+  --dark-mode-item: #333;
+}
+
+.dark-theme {
+  --primary-color: #4da3ff;
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+
+
+}
+body.dark-mode {
+  --shadow-color: rgba(255, 255, 255, 0.15); // Dark mode
+}
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color var(--transition-duration),
+              color var(--transition-duration);
+}
+
+/* Áp dụng cho PrimeNG */
+// .dark-theme p-tablist {
+//   background: var(--background-color) !important;
+//   color: var(--text-color) !important;
+// }
+
+.dark-theme p-tabpanels,
+.dark-theme .p-tablist-tab-list{
+  color: var(--text-color) !important;
+  background: var(--dark-mode-item) !important;
+}

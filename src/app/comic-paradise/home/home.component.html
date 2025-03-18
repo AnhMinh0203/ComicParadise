@@ -1,0 +1,444 @@
+<app-navbar></app-navbar>
+<div class="container my-5 mt-100">
+  <div class="row">
+    <div class="my-2">
+      <div class="slide-container">
+        <p-carousel [value]="images" [numVisible]="1" [numScroll]="1" [circular]="true" [autoplayInterval]="3000"
+          [showNavigators]="false">
+          <ng-template let-image pTemplate="item">
+            <img [src]="image" alt="Slide Image" class="format-img">
+          </ng-template>
+        </p-carousel>
+      </div>
+
+    </div>
+
+
+    <div class="container my-3">
+      <h5>Cập nhật gần đây</h5>
+      <div class="row">
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item" (click)="test()">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/fe575b14-5ab1-4fc1-8deb-bf96e6c225c7.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                Studio Tùy Hứng Của Nghệ Sĩ Thiên Tàii sssssssssssssssssa
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/a746dc16-70cc-400f-8aa6-881591743984.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <h5 class="mt-5">Truyện đề cử</h5>
+      <div class="row">
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/fe575b14-5ab1-4fc1-8deb-bf96e6c225c7.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/fe575b14-5ab1-4fc1-8deb-bf96e6c225c7.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/fe575b14-5ab1-4fc1-8deb-bf96e6c225c7.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/fe575b14-5ab1-4fc1-8deb-bf96e6c225c7.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item">
+            <div class="story-item-img">
+              <img
+                [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                abc
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: 150
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> 50
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> 10k
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <p-tabs value="0">
+            <p-tablist>
+              <p-tab value="0">Top tháng</p-tab>
+              <p-tab value="1">Top tuần</p-tab>
+              <p-tab value="2">Top ngày</p-tab>
+            </p-tablist>
+            <p-tabpanels>
+              <p-tabpanel value="0">
+                <div class="row">
+                  <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3">
+                    <div class="top-item-img flex-grow-2 me-2">
+                      <img
+                        [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                        alt="Slide Image" class="w-100">
+                    </div>
+                    <div class="top-item-infor d-flex flex-column flex-grow-8">
+                      <div class="top-infor-name ">
+                        <h6>Studio Tùy Hứng Của Nghệ Sĩ Thiên Tài</h6>
+                      </div>
+                      <div class="top-infor-category mb-1 d-flex">
+                        <p-tag severity="secondary" value="Truyện hài" [rounded]="true" class="me-1 mt-1 custom-tag" />
+                        <p-tag severity="secondary" value="Truyện tranh" [rounded]="true"
+                          class="me-1 mt-1 custom-tag" />
+                      </div>
+
+                      <div class="top-infor-description d-flex ">
+                        <p>
+                          Kaiden - Một người dùng có khả năng bí ẩn ẩn giấu bên trong cơ thể của một con mèo đường phố.
+                          Anh ta sau đó được Jiwoo nhặt lên sau khi bị thương sau một trận chiến với người dùng khả năng
+                          khác. Anh ta có một tính cách bướng bỉnh và hách dịch. Jiwoo - một cậu học sinh trung học năng
+                          động và hay nói chuyện, yêu mèo. Anh ấy rất tốt bụng và dường như cũng có một khả năng đặc
+                          biệt.
+                        </p>
+                      </div>
+                      <div class="top-infor-reaction d-flex justify-content-between aligh-items-center">
+                        <div class="reaction-heart">
+                          <i class="pi pi-heart-fill"></i> 50
+                        </div>
+                        <div class="reaction-view">
+                          <i class="pi pi-eye"></i> 10k
+                        </div>
+                      </div>
+                      <div class="top-infor-read-now text-center d-flex justify-content-end">
+                        <button class="read-now-btn">Đọc Ngay</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3">
+                    <div class="top-item-img flex-grow-2 me-2">
+                      <img
+                        [src]="'https://comicparadise.blob.core.windows.net/cover-image/c60f6c9e-02f5-4c41-8269-5b85cda4892b.jpg'"
+                        alt="Slide Image" class="w-100">
+                    </div>
+                    <div class="top-item-infor d-flex flex-column flex-grow-8">
+                      <div class="top-infor-name ">
+                        <h6>Studio Tùy Hứng Của Nghệ Sĩ Thiên Tài</h6>
+                      </div>
+                      <div class="top-infor-category mb-1 d-flex">
+                        <p-tag severity="secondary" value="Truyện hài" [rounded]="true" class="me-1 mt-1 custom-tag" />
+                        <p-tag severity="secondary" value="Truyện tranh" [rounded]="true"
+                          class="me-1 mt-1 custom-tag" />
+                      </div>
+
+                      <div class="top-infor-description d-flex ">
+                        <p>
+                          Kaiden - Một người dùng có khả năng bí ẩn ẩn giấu bên trong cơ thể của một con mèo đường phố.
+                          Anh ta sau đó được Jiwoo nhặt lên sau khi bị thương sau một trận chiến với người dùng khả năng
+                          khác. Anh ta có một tính cách bướng bỉnh và hách dịch. Jiwoo - một cậu học sinh trung học năng
+                          động và hay nói chuyện, yêu mèo. Anh ấy rất tốt bụng và dường như cũng có một khả năng đặc
+                          biệt.
+                        </p>
+                      </div>
+                      <div class="top-infor-reaction d-flex justify-content-between aligh-items-center">
+                        <div class="reaction-heart">
+                          <i class="pi pi-heart-fill"></i> 50
+                        </div>
+                        <div class="reaction-view">
+                          <i class="pi pi-eye"></i> 10k
+                        </div>
+                      </div>
+                      <div class="top-infor-read-now text-center d-flex justify-content-end">
+                        <button class="read-now-btn">Đọc Ngay</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex my-2 top-next aligh-items-center justify-content-center">
+                  <div class="top-next-icon me-1">
+                    <i class="pi pi-angle-down"></i>
+                  </div>
+                  <div class="top-next-text">
+                    Xem thêm
+                  </div>
+
+                </div>
+              </p-tabpanel>
+              <p-tabpanel value="1">
+              </p-tabpanel>
+              <p-tabpanel value="2">
+
+              </p-tabpanel>
+            </p-tabpanels>
+          </p-tabs>
+        </div>
+
+      </div>
+
+
+
+
+    </div>
+  </div>
+
+</div>
+
+<app-footer></app-footer>
