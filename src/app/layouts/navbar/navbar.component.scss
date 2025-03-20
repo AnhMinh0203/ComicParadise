@@ -1,11 +1,10 @@
 /* Navbar Container */
 .navbar {
-  position: fixed; /* Cố định navbar */
-  top: 0; /* Gắn lên trên cùng */
+  position: fixed;
+  top: 0;
   left: 0;
-  width: 100%; /* Chiều rộng full */
-  z-index: 1000; /* Đảm bảo hiển thị trên mọi thành phần khác */
-
+  width: 100%;
+  z-index: 1000;
   background-color: #1a1a1a;
   padding: 6px 15px;
   color: white;
@@ -13,6 +12,7 @@
 }
 
 /* Left Side */
+.navbar-right,
 .navbar-left {
   display: flex;
   align-items: center;
@@ -71,21 +71,21 @@
   object-fit: cover;
 }
 
-/* Right Side */
-.navbar-right {
+/* Left Side */
+.navbar-left {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.navbar-right a {
+.navbar-left a {
   color: white;
   text-decoration: none;
   font-size: 16px;
   transition: 0.3s;
 }
 
-.navbar-right a:hover {
+.navbar-left a:hover {
   color: #2196F3;
 }
 
@@ -115,9 +115,9 @@
 
 // Logo
 .header-logo{
-  width: 200px; /* Điều chỉnh kích thước tổng thể */
-  height: 80px; /* Chiều cao cố định */
-  overflow: hidden; /* Cắt phần thừa của ảnh */
+  width: 200px;
+  height: 80px;
+  overflow: hidden;
 
 }
 .header-logo img {
@@ -125,28 +125,48 @@
   width: 100%;
 }
 
-//
-
 /* Style chung cho icon */
 .notification,
-.toggle-theme {
+.toggle-theme,
+.bar-mobile {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px; /* Kích thước ô vuông */
-  height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Viền mỏng */
-  border-radius: 50px; /* Bo góc nhẹ */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
   cursor: pointer;
-  padding: 5px;
   transition: all 0.3s ease-in-out;
+}
+.toggle-theme,
+.bar-mobile,
+.notification i{
+  padding: 10px;
 }
 
 /* Hiệu ứng hover */
 .notification:hover,
-.toggle-theme:hover {
+.toggle-theme:hover,
+.bar-mobile:hover {
   background-color: rgba(255, 255, 255, 0.1); /* Nhẹ sáng lên */
   border-color: rgba(255, 255, 255, 0.5); /* Viền sáng hơn */
   box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2); /* Đổ bóng nhẹ */
 }
 
+
+
+
+@media (max-width: 992px) {
+  .navbar-right,
+  .navbar-left {
+    display: none;
+  }
+
+  .bar-mobile {
+    display: block !important;
+  }
+}
+
+.bar-mobile {
+  display: none;
+  cursor: pointer;
+}

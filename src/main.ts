@@ -8,9 +8,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { routes } from './app/app.routes';
 import { importProvidersFrom } from '@angular/core';
-import { HomeComponent } from './app/comic-paradise/home/home.component';
+import { AppComponent } from './app/app.component';
 
-bootstrapApplication(HomeComponent, {
+bootstrapApplication(AppComponent, {
   ...appConfig, // giữ lại các cấu hình đã có trong appConfig
   providers: [
     ...appConfig.providers, // kết hợp providers đã có

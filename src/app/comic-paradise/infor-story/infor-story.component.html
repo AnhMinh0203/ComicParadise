@@ -1,203 +1,211 @@
-<p-card [styleClass]="'mb-2'">
-  <div class="row">
-    <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3 mb-4">
-      <div class="story-cover-img d-flex justify-content-center">
-        <img [src]="coverImageDisplay" [alt]="'Test'" class="shadow-4 story-img" />
-      </div>
+<div class=" container mt-100">
 
-      <div class="story-actions mt-3">
-        <div class="story-actions-up w-100 d-flex my-2">
-          <p-button label="1.1k" severity="danger" icon="pi pi-heart" [style]="{width: '100%'}"
-            class="flex-grow-1 me-1 border border-danger rounded" />
-          <p-button label="15k" severity="secondary" icon="pi pi-eye" [style]="{width: '100%'}"
-            class="flex-grow-1 ms-1 border border-secondary rounded" />
-        </div>
-        <div class="story-actions-down w-100 d-flex">
-          <p-button label="Đọc từ đầu" severity="success" icon="pi pi-book" [style]="{width: '100%'}"
-            class="flex-grow-1" (click)="navigateToChapterContent(storyID, 1)" />
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
-      <div class="story-infor-detail">
-        <h2 class="story-title">{{this.title}}</h2>
-        <p class="story-author"><strong>Tác giả:</strong> {{this.author}}</p>
-        <div class="d-flex align-items-center flex-wrap">
-          <strong class="me-2">Thể loại:</strong>
-          <ng-container *ngFor="let cate of categoriesSelect">
-            <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1" />
-          </ng-container>
-        </div>
-
-        <p class="story-status"><strong>Trạng thái:</strong> Đang tiến hành</p>
-        <p class="story-description">{{this.description}}</p>
-      </div>
-    </div>
-  </div>
-
-</p-card>
-
-
-<p-card header="Danh sách chương ({{ chapters.length }})" [styleClass]="'mb-2'">
-  <div class="chapter-list">
+  <p-card [styleClass]="'mb-2'">
     <div class="row">
-      <!-- Chỉ hiển thị số chương theo trạng thái showAllChapters -->
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3"
-        *ngFor="let chapter of (showAllChapters ? chapters : chapters.slice(0, maxChaptersToShow))">
-        <div class="chapter-item d-flex align-items-center p-3 rounded shadow-sm transition"
-          (click)="navigateToChapterContent(chapter.storyID, chapter.chapterNumber)">
-          <div class="chapter-item-icon me-3">
-            <i class="pi pi-circle-fill text-danger chapter-icon"></i>
-          </div>
+      <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3 mb-4">
+        <div class="story-cover-img d-flex justify-content-center">
+          <img
+            [src]="coverImageDisplay"
+            [alt]="'Test'" class="shadow-4 story-img" />
+        </div>
 
-          <div class="chapter-item-infor flex-grow-1">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="chapter-number fw-bold">#{{chapter.chapterNumber}}</span>
-              <span class="chapter-time text-muted small">{{ getTimeAgo(chapter.createdAt) }}</span>
-            </div>
+        <div class="story-actions mt-3">
+          <div class="story-actions-up w-100 d-flex my-2">
+            <p-button label="1.1k" severity="danger" icon="pi pi-heart" [style]="{width: '100%'}"
+              class="flex-grow-1 me-1 border border-danger rounded" />
+            <p-button label="15k" severity="secondary" icon="pi pi-eye" [style]="{width: '100%'}"
+              class="flex-grow-1 ms-1 border border-secondary rounded" />
+          </div>
+          <div class="story-actions-down w-100 d-flex">
+            <p-button label="Đọc từ đầu" severity="success" icon="pi pi-book" [style]="{width: '100%'}"
+              class="flex-grow-1" (click)="navigateToChapterContent(storyID, 1)" />
           </div>
         </div>
       </div>
-    </div>
+      <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
+        <div class="story-infor-detail">
+          <h2 class="story-title">{{this.title}}</h2>
+          <p class="story-author"><strong class="me-3">Tác giả:</strong> {{this.author}}</p>
+          <div class="d-flex align-items-center flex-wrap">
+            <strong class="me-2">Thể loại:</strong>
+            <p-tag severity="info" value="Hành động" [rounded]="true" class="m-1" />
+            <p-tag severity="info" value="Kinh dị" [rounded]="true" class="m-1" />
 
-    <!-- Nút "Xem thêm" hoặc "Thu gọn" -->
-    <div class="row">
-      <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-12">
-        <button pButton type="button" severity="success"  label="{{ showAllChapters ? 'Thu gọn' : 'Xem thêm' }}" [style]="{ 'width': '100%' }"
-          (click)="toggleChapterView()">
-        </button>
-      </div>
+            <ng-container *ngFor="let cate of categoriesSelect">
+              <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1" />
+            </ng-container>
+          </div>
 
-    </div>
-  </div>
-</p-card>
-
-
-
-
-<p-card header="Bình luận ({{ comments.length || 0 }})" [styleClass]="'mb-2'">
-  <div class="new-comment-input my-1">
-    <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
-      [style]="{ 'width': '100%' }"></textarea>
-
-    <div class="comment-input-actions d-flex justify-content-end">
-      <p-tag class="p-tag-hover p-2" value="Phản hồi" label="Primary" (click)="postComment()" />
-
-    </div>
-  </div>
-
-  <div class="comment-list">
-    <div class="mb-2">
-      <!-- Lặp qua danh sách comment gốc -->
-      <div class="comment-item d-flex my-3" *ngFor="let comment of comments">
-        <div class="comment-item-avatar p-1">
-          <p-avatar [label]="comment.avatar" styleClass="mr-2"
-            [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
+          <p class="story-status"><strong class="me-3">Trạng thái:</strong> Đang tiến hành</p>
+          <p class="story-description">{{this.description}}</p>
         </div>
-        <div class="comment-item-content p-1" [ngClass]="{'comment-hidden': comment.status === 'Hidden'}"
-          [style]="{ 'width': '100%' }">
-          <div class="comment-item-content-up d-flex flex-column">
-            <div class="comment-item-infor d-flex align-items-center p-1">
-              <div class="comment-name me-3 font-medium text-primary">{{ comment.label }}</div>
-              <div class="comment-time text-700 text-sm">{{ comment.time }}</div>
-            </div>
-            <div class="comment-item-text p-1">
-              {{ comment.content }}
-            </div>
-            <div class="comment-item-actions d-flex align-items-center p-2">
-              <i [class.pi-thumbs-up]="!comment.isLiked" [class.pi-thumbs-up-fill]="comment.isLiked" class="pi me-3"
-                (click)="onLike(comment)">
-                <span class="mx-1 no-select" *ngIf="comment.likes > 0">{{ comment.likes }}</span>
-              </i>
+      </div>
+    </div>
 
-              <i [class.pi-thumbs-down]="!comment.isDisliked" [class.pi-thumbs-down-fill]="comment.isDisliked"
-                class="pi mx-1" (click)="onDislike(comment)">
-                <span class="mx-1 no-select " *ngIf="comment.disLikes > 0">{{ comment.disLikes }}</span>
-              </i>
+  </p-card>
 
-              <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi" [rounded]="true"
-                (click)="toggleReply(comment)" />
+
+  <p-card header="Danh sách chương ({{ chapters.length }})" [styleClass]="'mb-2'">
+    <div class="chapter-list">
+      <div class="row">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3"
+          *ngFor="let chapter of (showAllChapters ? chapters : chapters.slice(0, maxChaptersToShow))">
+          <div class="chapter-item d-flex align-items-center p-3 rounded shadow-sm transition"
+            (click)="navigateToChapterContent(chapter.storyID, chapter.chapterNumber)">
+            <div class="chapter-item-icon me-3">
+              <i class="pi pi-circle-fill text-danger chapter-icon"></i>
             </div>
 
-
-
-            <div class="comment-input my-1" *ngIf="comment.isReplying">
-              <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
-                [style]="{ 'width': '100%' }"></textarea>
-
-              <div class="comment-input-actions d-flex justify-content-end">
-                <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary"
-                  (click)="toggleReply(comment)" />
-                <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" (click)="replyComment(comment)" />
-
+            <div class="chapter-item-infor flex-grow-1">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="chapter-number fw-bold" style="color: black;">#{{chapter.chapterNumber}}</span>
+                <span class="chapter-time text-muted small">{{ getTimeAgo(chapter.createdAt) }}</span>
               </div>
             </div>
-
-            <!-- Nút "> X phản hồi" nếu có comment con -->
-            <div>
-              <p-tag *ngIf="comment.children && comment.children.length > 0"
-                class="cursor-pointer text-secondary flex items-center gap-2  p-tag-hover" severity="secondary"
-                (click)="toggleExpand(comment)" [rounded]="true">
-                <i class="pi" [ngClass]="comment.expanded ? 'pi-angle-up' : 'pi-angle-down'"></i>
-                {{ comment.expanded ? 'Ẩn phản hồi' : comment.children.length + ' phản hồi' }}
-              </p-tag>
-            </div>
-
-
-          </div>
-          <!-- Hiển thị comment con nếu expanded = true -->
-          <div class="comment-item-content-down ms-n5"
-            *ngIf="comment.expanded && comment.children && comment.children.length > 0">
-            <p-tree [value]="comment.children" styleClass="w-full md:w-[30rem]"
-              [style]="{ padding: '0px', 'margin-left': '-15px' }">
-              <ng-template let-node pTemplate="default">
-
-                <div class="comment-item d-flex my-3">
-                  <div class="comment-item-avatar p-1">
-                    <p-avatar [label]="node.avatar" styleClass="mr-2"
-                      [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
-                  </div>
-                  <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
-                    <div class="comment-item-content-up d-flex flex-column">
-                      <div class="comment-item-infor d-flex align-items-center p-1">
-                        <div class="comment-name me-3 font-medium text-primary">{{ node.label }}</div>
-                        <div class="comment-time text-700 text-sm">{{ node.time }}</div>
-                      </div>
-                      <div class="comment-item-text p-1">
-                        {{ node.content }}
-                      </div>
-
-                      <div class="comment-item-actions d-flex align-items-center p-2">
-                        <i [class.pi-thumbs-up]="!node.isLiked" [class.pi-thumbs-up-fill]="node.isLiked" class="pi me-3"
-                          (click)="onLike(node)">
-                          <span class="mx-1 no-select" *ngIf="node.likes > 0">{{ node.likes }}</span>
-                        </i>
-
-                        <i [class.pi-thumbs-down]="!node.isDisliked" [class.pi-thumbs-down-fill]="node.isDisliked"
-                          class="pi mx-1" (click)="onDislike(node)">
-                          <span class="mx-1 no-select " *ngIf="node.disLikes > 0">{{ node.disLikes }}</span>
-                        </i>
-
-                        <!-- <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi"
-                            [rounded]="true" (click)="toggleReply(node)" /> -->
-                      </div>
-                    </div>
-                  </div>
-                  <div class="comment-item-report p-2">
-                    <i class="pi pi-ellipsis-v mt-3"></i>
-                  </div>
-                </div>
-
-              </ng-template>
-            </p-tree>
           </div>
         </div>
-        <div class="comment-item-report p-2">
+      </div>
 
-          <p-menu #menu [model]="commentSelections" [popup]="true" appendTo="body" />
-          <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)" (click)="setCurrentComment(comment)"></i>
+      <!-- Nút "Xem thêm" hoặc "Thu gọn" -->
+      <div class="row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-12">
+          <button pButton type="button" severity="success" label="{{ showAllChapters ? 'Thu gọn' : 'Xem thêm' }}"
+            [style]="{ 'width': '100%' }" (click)="toggleChapterView()">
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </p-card>
+
+
+
+
+  <p-card header="Bình luận (10)" [styleClass]="'mb-2'">
+    <div class="new-comment-input my-1">
+      <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
+        [style]="{ 'width': '100%' }"></textarea>
+
+      <div class="comment-input-actions d-flex justify-content-end">
+        <p-tag class="p-tag-hover p-2" value="Phản hồi" label="Primary" (click)="postComment()" />
+
+      </div>
+    </div>
+
+    <div class="comment-list">
+      <div class="mb-2">
+        <!-- Lặp qua danh sách comment gốc -->
+        <div class="comment-item d-flex my-3" *ngFor="let comment of comments">
+          <div class="comment-item-avatar p-1">
+            <p-avatar [label]="comment.avatar" styleClass="mr-2"
+              [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
+          </div>
+          <div class="comment-item-content p-1" [ngClass]="{'comment-hidden': comment.status === 'Hidden'}"
+            [style]="{ 'width': '100%' }">
+            <div class="comment-item-content-up d-flex flex-column">
+              <div class="comment-item-infor d-flex align-items-center p-1">
+                <div class="comment-name me-3 font-medium text-primary">{{ comment.label }}</div>
+                <div class="comment-time text-700 text-sm">{{ comment.time }}</div>
+              </div>
+              <div class="comment-item-text p-1">
+                {{ comment.content }}
+              </div>
+              <div class="comment-item-actions d-flex align-items-center p-2">
+                <i [class.pi-thumbs-up]="!comment.isLiked" [class.pi-thumbs-up-fill]="comment.isLiked" class="pi me-3"
+                  (click)="onLike(comment)">
+                  <span class="mx-1 no-select" *ngIf="comment.likes > 0">{{ comment.likes }}</span>
+                </i>
+
+                <i [class.pi-thumbs-down]="!comment.isDisliked" [class.pi-thumbs-down-fill]="comment.isDisliked"
+                  class="pi mx-1" (click)="onDislike(comment)">
+                  <span class="mx-1 no-select " *ngIf="comment.disLikes > 0">{{ comment.disLikes }}</span>
+                </i>
+
+                <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi" [rounded]="true"
+                  (click)="toggleReply(comment)" />
+              </div>
+
+
+
+              <div class="comment-input my-1" *ngIf="comment.isReplying">
+                <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
+                  [style]="{ 'width': '100%' }"></textarea>
+
+                <div class="comment-input-actions d-flex justify-content-end">
+                  <p-tag class="p-tag-hover me-2" value="Hủy" label="Secondary" severity="secondary"
+                    (click)="toggleReply(comment)" />
+                  <p-tag class="p-tag-hover" value="Phản hồi" label="Primary" (click)="replyComment(comment)" />
+
+                </div>
+              </div>
+
+              <!-- Nút "> X phản hồi" nếu có comment con -->
+              <div>
+                <!-- *ngIf="comment.children && comment.children.length > 0" -->
+                <p-tag class="cursor-pointer text-secondary flex items-center gap-2  p-tag-hover" severity="secondary"
+                  (click)="toggleExpand(comment)" [rounded]="true">
+                  <i class="pi" [ngClass]="comment.expanded ? 'pi-angle-up' : 'pi-angle-down'"></i>
+                  {{ comment.expanded ? 'Ẩn phản hồi' : comment.children.length + ' phản hồi' }}
+                </p-tag>
+              </div>
+
+
+            </div>
+            <!-- Hiển thị comment con nếu expanded = true -->
+            <div class="comment-item-content-down ms-n5"
+              *ngIf="comment.expanded && comment.children && comment.children.length > 0">
+              <p-tree [value]="comment.children" styleClass="w-full md:w-[30rem]"
+                [style]="{ padding: '0px', 'margin-left': '-15px' }">
+                <ng-template let-node pTemplate="default">
+
+                  <div class="comment-item d-flex my-3">
+                    <div class="comment-item-avatar p-1">
+                      <p-avatar [label]="node.avatar" styleClass="mr-2"
+                        [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }" shape="circle" />
+                    </div>
+                    <div class="comment-item-content p-1" [style]="{ 'width': '100%' }">
+                      <div class="comment-item-content-up d-flex flex-column">
+                        <div class="comment-item-infor d-flex align-items-center p-1">
+                          <div class="comment-name me-3 font-medium text-primary">{{ node.label }}</div>
+                          <div class="comment-time text-700 text-sm">{{ node.time }}</div>
+                        </div>
+                        <div class="comment-item-text p-1">
+                          {{ node.content }}
+                        </div>
+
+                        <div class="comment-item-actions d-flex align-items-center p-2">
+                          <i [class.pi-thumbs-up]="!node.isLiked" [class.pi-thumbs-up-fill]="node.isLiked"
+                            class="pi me-3" (click)="onLike(node)">
+                            <span class="mx-1 no-select" *ngIf="node.likes > 0">{{ node.likes }}</span>
+                          </i>
+
+                          <i [class.pi-thumbs-down]="!node.isDisliked" [class.pi-thumbs-down-fill]="node.isDisliked"
+                            class="pi mx-1" (click)="onDislike(node)">
+                            <span class="mx-1 no-select " *ngIf="node.disLikes > 0">{{ node.disLikes }}</span>
+                          </i>
+
+                          <!-- <p-tag severity="secondary" class="mx-4 p-tag-hover cursor-pointer" value="Phản hồi"
+                              [rounded]="true" (click)="toggleReply(node)" /> -->
+                        </div>
+                      </div>
+                    </div>
+                    <div class="comment-item-report p-2">
+                      <i class="pi pi-ellipsis-v mt-3"></i>
+                    </div>
+                  </div>
+
+                </ng-template>
+              </p-tree>
+            </div>
+          </div>
+          <div class="comment-item-report p-2">
+
+            <p-menu #menu [model]="commentSelections" [popup]="true" appendTo="body" />
+            <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)"
+              (click)="setCurrentComment(comment)"></i>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</p-card>
+  </p-card>
+</div>

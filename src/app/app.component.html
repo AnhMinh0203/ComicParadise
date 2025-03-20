@@ -1,18 +1,4 @@
-<div class="container">
-  <div id="editor" class="mb-5">
-    <h2>Demo Content</h2>
-    <p>Preset build with <code>snow</code> theme, and some common formats.</p>
-  </div>
-
-
-
-  <div class="row">
-    <div class="col col-2"></div>
-    <div class="col col-8">
-      <div class="content-wrapper" >
-        <div [innerHTML]="contentHtml"></div>
-      </div>
-    </div>
-    <div class="col col-2"></div>
-  </div>
-</div>
+<app-navbar></app-navbar>
+<app-sidebar></app-sidebar>
+<router-outlet></router-outlet>
+<app-footer></app-footer>

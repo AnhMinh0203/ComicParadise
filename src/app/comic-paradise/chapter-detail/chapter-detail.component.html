@@ -1,0 +1,11 @@
+<div class="container my-5">
+  <div class="d-flex justify-content-center ">
+    <div class="col-12 col-sm-12 col-md-8 col-lg-6 col-xl-6 mt-5">
+      <div *ngIf="chapterContent.chapterType === 'Images'">
+        <div *ngFor="let imageUrl of chapterContent.imageUrls">
+          <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

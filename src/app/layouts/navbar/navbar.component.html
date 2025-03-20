@@ -3,13 +3,16 @@
   <!-- Logo -->
   <div class="d-flex">
     <div class="header-logo ">
-      <img src="../../../assets/images/logo-3.jpg" alt="Logo">
+      <a href="#">
+        <img src="../../../assets/images/logo-3.jpg" href="#" alt="Logo">
+      </a>
     </div>
     <!-- Right Side -->
-    <div class="navbar-right">
+    <div class="navbar-left">
       <a href="#">Trang chủ</a>
-      <a href="#">Thể loại</a>
-      <a href="#">Liên hệ</a>
+      <!-- <a href="">Thể loại</a> -->
+      <p-megamenu [model]="items" />
+      <a href="">Liên hệ</a>
 
       <!-- Search Input -->
       <div class="search-box">
@@ -19,15 +22,19 @@
     </div>
   </div>
 
-  <div class="navbar-left">
+  <div class="bar-mobile mx-3" (click)="toggleSidebar()">
+    <i class="pi pi-bars"></i>
+  </div>
+
+  <div class="navbar-right">
     <!-- Notification Icon -->
     <div class="notification">
       <i class="pi pi-bell"></i>
     </div>
 
     <!-- Toggle Theme Icon -->
-    <div class="toggle-theme ">
-      <i class="pi" [ngClass]="isDarkMode ? 'pi-moon' : 'pi-sun'" (click)="toggleTheme()"></i>
+    <div class="toggle-theme " (click)="toggleTheme()">
+      <i class="pi" [ngClass]="isDarkMode ? 'pi-moon' : 'pi-sun'" ></i>
     </div>
 
     <!-- Avatar -->
@@ -37,3 +44,6 @@
     </div>
   </div>
 </nav>
+
+
+

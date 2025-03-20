@@ -1,9 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
+
 :root {
   // --primary-color: #007bff;
   --background-color: #ffffff;
   --text-color: #333333;
+  --text-color-dark-mode: #eae6e6;
   --transition-duration: 200ms;
   --primary-color: #4CAF50; // Xanh lá nhạt
   --text-color: #fff;
@@ -18,24 +20,54 @@
 
 
 }
+
 body.dark-mode {
   --shadow-color: rgba(255, 255, 255, 0.15); // Dark mode
 }
+
 body {
   background-color: var(--background-color);
   color: var(--text-color);
   transition: background-color var(--transition-duration),
-              color var(--transition-duration);
+    color var(--transition-duration);
 }
 
 /* Áp dụng cho PrimeNG */
-// .dark-theme p-tablist {
-//   background: var(--background-color) !important;
-//   color: var(--text-color) !important;
-// }
-
+.dark-theme,
+.dark-theme .p-card,
 .dark-theme p-tabpanels,
-.dark-theme .p-tablist-tab-list{
-  color: var(--text-color) !important;
+.dark-theme .p-tablist-tab-list {
+  color: var(--text-color-dark-mode) !important;
   background: var(--dark-mode-item) !important;
 }
+.p-tabpanels{
+  padding: 0px !important;
+}
+// megamenu cho thể loại
+.p-megamenu,
+.p-megamenu-overlay,
+.p-megamenu-item-link {
+  background: #1a1a1a !important;
+  border: none !important;
+}
+
+.p-megamenu-item-label {
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.p-megamenu-item-label:hover {
+  color: #2196F3 !important;
+}
+
+.p-megamenu-item-content:hover {
+  background: none !important;
+}
+
+.p-megamenu-overlay {
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3) !important;
+}
+
+

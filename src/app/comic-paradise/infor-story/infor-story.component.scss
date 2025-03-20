@@ -1,0 +1,220 @@
+.mt-100{
+  margin-top: 100px;
+}
+
+.container-chapter-story,
+.container-infor-story {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.story-cover-img {
+  text-align: center;
+}
+
+.story-img {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.story-img:hover {
+  transform: scale(1.05);
+}
+
+.story-infor-detail {
+  padding: 20px;
+}
+
+.story-title {
+  font-size: 2rem;
+  // color: #333;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.story-author, .story-genre, .story-status {
+  font-size: 1.1rem;
+  // color: #555;
+  margin: 5px 0;
+}
+
+.story-author strong, .story-genre strong, .story-status strong {
+  // color: #222;
+}
+
+.story-description {
+  font-size: 1rem;
+  // color: #666;
+  line-height: 1.6;
+  margin-top: 15px;
+}
+
+/* Style cho phần nút */
+.story-actions {
+  text-align: center;
+}
+
+.story-actions .btn {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.story-actions .btn i {
+  margin-right: 5px;
+}
+
+.story-actions .btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-outline-primary:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.story-actions-down {
+  width: 100% !important;
+}
+
+// --- Comment --- //
+.like-icon, .dislike-icon {
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+/* Khi hover vào */
+.comment-item-actions i {
+  transition: transform 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.comment-item-actions i:hover {
+  transform: scale(1.2);
+}
+
+.no-select{
+  user-select: none;
+}
+.comment-item-text {
+  max-width: 100%; /* Giới hạn chiều rộng không vượt quá container */
+  overflow-wrap: break-word; /* Xuống dòng khi cần */
+  word-break: break-word; /* Ngắt từ khi cần */
+  white-space: pre-line; /* Giữ xuống dòng nhưng không làm tràn */
+}
+
+.comment-hidden {
+  opacity: 0.5;
+
+}
+
+
+/* Giao diện chương */
+.chapter-item {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+/* Hover vào chương */
+.chapter-item:hover {
+  background: #f0f1f1;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(2px);
+}
+
+/* Click vào chương */
+.chapter-item:active {
+  transform: scale(0.97);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon chương */
+.chapter-icon {
+  font-size: 18px;
+}
+
+/* Hiệu ứng thời gian */
+.chapter-time {
+  font-size: 14px;
+}
+
+.p-tag-hover {
+  outline: 1px solid transparent;
+  transition: outline 0.2s ease-in-out, transform 0.1s ease-in-out;
+  user-select: none;
+}
+
+.p-tag-hover:hover {
+  outline: 1px solid #6b6d6e;
+}
+
+.p-tag-hover:active {
+  transform: scale(0.95);
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .story-infor-detail {
+    padding: 10px;
+  }
+  .story-title {
+    font-size: 1.5rem;
+  }
+  .story-img {
+    max-width: 100%; /* Tăng kích thước ảnh trên mobile */
+    width: 90%; /* Đảm bảo ảnh chiếm hết chiều rộng container */
+    margin: 0 auto; /* Căn giữa ảnh */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Tăng bóng cho đẹp hơn */
+  }
+  .story-cover-img {
+    padding: 0; /* Giảm padding để ảnh có thêm không gian */
+  }
+  .story-actions {
+    margin-top: 10px; /* Giảm mt-3 thành 10px để gọn hơn */
+  }
+  // .story-actions-up, .story-actions-down {
+  //   flex-direction: column; /* Xếp nút dọc trên mobile */
+  // }
+  // .story-actions-up .me-1, .story-actions-up .ms-1 {
+  //   margin: 5px 0; /* Điều chỉnh margin cho nút dọc */
+  // }
+}
+
