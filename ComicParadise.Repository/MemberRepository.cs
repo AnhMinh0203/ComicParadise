@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using AutoMapper.Execution;
+using Azure.Core;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using ComicParadise.DataContext.Database;
@@ -160,11 +161,11 @@ namespace ComicParadise.Repository
                 {
                     exsistUser.Role = user.Role;
                 }
-                if (user.IsComment.HasValue &&  exsistUser.IsComment != user.IsComment)
+                if (user.IsComment.HasValue && exsistUser.IsComment != user.IsComment)
                 {
                     exsistUser.IsComment = user.IsComment;
                 }
-                if (user.IsLock.HasValue &&  exsistUser.IsLock != user.IsLock)
+                if (user.IsLock.HasValue && exsistUser.IsLock != user.IsLock)
                 {
                     exsistUser.IsLock = user.IsLock;
                 }
@@ -213,26 +214,27 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get story history of member
-        public Task<IQueryable<ReadingHistoryDTO>> GetReadingHistoryAsync(int userID)
+        public Task<IQueryable<ReadingHistoryDto>> GetReadingHistoryAsync(int userID)
         {
             var result = from s in _context.Stories
-                                join rh in _context.ReadingHistories on s.StoryID equals rh.StoryID
-                                where rh.UserID == userID
-                                select new ReadingHistoryDTO { 
-                                    StoryID = s.StoryID,
-                                    Title = s.Title,
-                                    CoverImage = s.CoverImage,
-                                    Views = s.Views,
-                                    LastReadAt = rh.LastReadAt,
-                                };
+                         join rh in _context.ReadingHistories on s.StoryID equals rh.StoryID
+                         where rh.UserID == userID
+                         select new ReadingHistoryDto
+                         {
+                             StoryID = s.StoryID,
+                             Title = s.Title,
+                             CoverImage = s.CoverImage,
+                             Views = s.Views,
+                             LastReadAt = rh.LastReadAt,
+                         };
             return Task.FromResult(result);
         }
         #endregion
 
         #region Delete member 
-        public async Task<string> DeleteMemberAsync (int userID)
+        public async Task<string> DeleteMemberAsync(int userID)
         {
-            var member = await _context.Users.FirstOrDefaultAsync(x => x.UserID == userID); 
+            var member = await _context.Users.FirstOrDefaultAsync(x => x.UserID == userID);
             if (member == null)
             {
                 return "Thành viên không tồn tại";
@@ -242,5 +244,6 @@ namespace ComicParadise.Repository
             return "Xóa thành viên thành công";
         }
         #endregion
+
     }
 }

@@ -15,5 +15,6 @@ namespace ComicParadise.Repository.Common
         Task<string> AddCategoryAsync(CategoryDto categoryDto);
         Task<string> UpdateCategoryAsync(Category categoryParam);
         Task<string> DeleteCategoryAsync(int categoryID);
+        Task<IEnumerable<dynamic>> GetCategoriesForUserAsync();
     }
 }

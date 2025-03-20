@@ -16,5 +16,6 @@ namespace ComicParadise.Repository.Common
         Task<string> UpdateStoryAsync(UpdateStoryDto storyDto);
         Task<string> DeleteStoryAsync(int storyID);
         Task<List<StoryInfor>> SearchStoryAsync(string title);
+        Task<IEnumerable<dynamic>> GetCurrentUpdateStoriesAsync(int days);
     }
 }

@@ -64,5 +64,12 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.SearchStoryAsync(title);
             return Ok(new BaseResponse<List<StoryInfor>>(true, result));
         }
+
+        [HttpGet("Get-current-update-story")]
+        public async Task<ActionResult> GetCurrentUpdateStory(int days)
+        {
+            var result = await _storyRepository.GetCurrentUpdateStoriesAsync(days);
+            return Ok(new BaseResponse<IEnumerable<dynamic>>(true, result));
+        }
     }
 }

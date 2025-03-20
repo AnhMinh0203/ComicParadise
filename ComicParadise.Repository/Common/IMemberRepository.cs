@@ -15,7 +15,8 @@ namespace ComicParadise.Repository.Common
         Task<string> AddMemberAsync(AddMemberDto addMemberDto);
         Task<byte[]> ExportExcelAsync();
         Task<string> UpdateMemberAsync(UpdateMemberDto user);
-        Task<IQueryable<ReadingHistoryDTO>> GetReadingHistoryAsync(int userID);
+        Task<IQueryable<ReadingHistoryDto>> GetReadingHistoryAsync(int userID);
         Task<string> DeleteMemberAsync(int userID);
+
     }
 }

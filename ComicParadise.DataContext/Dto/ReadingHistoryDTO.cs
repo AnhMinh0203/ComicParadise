@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ComicParadise.DataContext.Dto
 {
-    public class ReadingHistoryDTO
+    public class ReadingHistoryDto
     {
         public int StoryID { get; set; }
         public string Title { get; set; }

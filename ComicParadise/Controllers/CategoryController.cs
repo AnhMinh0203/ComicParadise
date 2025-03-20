@@ -52,5 +52,12 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true,result));
         }
 
+        [HttpGet("Get-categories-for-user")]
+        public async Task<ActionResult> GetCategoriesForUser()
+        {
+            var result = await _categoryRepository.GetCategoriesForUserAsync();
+            return Ok(new BaseResponse<IEnumerable<dynamic>>(true, result));
+        }
+
     }
 }

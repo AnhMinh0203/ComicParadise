@@ -59,7 +59,7 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult> GetReadingHistory (int userID)
         {
             var result = await _memberRepository.GetReadingHistoryAsync(userID);
-            return Ok(new BaseResponse<IQueryable<ReadingHistoryDTO>>(true,result));
+            return Ok(new BaseResponse<IQueryable<ReadingHistoryDto>>(true,result));
         }
         [HttpDelete("Delete-member")]
         public async Task<ActionResult> DeleteMember(int userID)
@@ -67,6 +67,5 @@ namespace ComicParadise.Api.Controllers
             var result = await _memberRepository.DeleteMemberAsync(userID);
             return Ok(new BaseResponse<string>(true,result));
         }
-        
     }
 }

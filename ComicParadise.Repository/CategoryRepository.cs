@@ -41,26 +41,26 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Search category
-        public async Task<List<Category>?> SearchCategoryAsync (string? categoryName)
+        public async Task<List<Category>?> SearchCategoryAsync(string? categoryName)
         {
             if (string.IsNullOrEmpty(categoryName))
             {
                 return await _context.Categories.ToListAsync();
             }
-            return  await _context.Categories.Where(c => c.CategoryName.Contains(categoryName)).ToListAsync();
+            return await _context.Categories.Where(c => c.CategoryName.Contains(categoryName)).ToListAsync();
         }
         #endregion
 
         #region Add cateegory
-        public async Task<string> AddCategoryAsync (CategoryDto categoryDto)
+        public async Task<string> AddCategoryAsync(CategoryDto categoryDto)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync (c => c.CategoryName == categoryDto.CategoryName);
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryName == categoryDto.CategoryName);
             if (category != null)
             {
                 return "Tên chuyên mục đã tồn tại";
             }
             var newCategory = _mapper.Map<Category>(categoryDto); // Ánh xạ Dto sang Entity
-            _context.Categories.Add(newCategory); 
+            _context.Categories.Add(newCategory);
             await _context.SaveChangesAsync();
 
             return "Thêm chuyên mục thành công";
@@ -68,10 +68,10 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Update category
-        public async Task<string> UpdateCategoryAsync (Category categoryParam)
+        public async Task<string> UpdateCategoryAsync(Category categoryParam)
         {
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryID == categoryParam.CategoryID);
-            if(category == null)
+            if (category == null)
             {
                 return "Chuyên mục không tồn tại";
             }
@@ -84,9 +84,8 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-
         #region Delete category
-        public async Task<string> DeleteCategoryAsync (int categoryID)
+        public async Task<string> DeleteCategoryAsync(int categoryID)
         {
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryID == categoryID);
 
@@ -94,6 +93,24 @@ namespace ComicParadise.Repository
             await _context.SaveChangesAsync();
 
             return "Xóa chuyên mục thành công";
+        }
+        #endregion
+
+        #region Get categories for user side
+        public async Task<IEnumerable<dynamic>> GetCategoriesForUserAsync()
+        {
+            var result = await (from c in _context.Categories
+                                join cd in _context.CategoryDetails on c.CategoryID equals cd.CategoryID
+                                group cd by new { c.CategoryID, c.CategoryName } into cg
+                                select new
+                                {
+                                    label = cg.Key.CategoryName,
+                                    items = cg.Select(sub => new
+                                    {
+                                        label = sub.SubCategoryName
+                                    })
+                                }).AsNoTracking().ToListAsync();
+            return result;
         }
         #endregion
     }

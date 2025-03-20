@@ -22,16 +22,19 @@ namespace ComicParadise.DataContext.Database
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
         public DbSet<ReadingHistory> ReadingHistories { get; set; }
+        public DbSet<CategoryDetail> CategoryDetails { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Định nghĩa khóa chính tổng hợp (Composite Primary Key) cho bảng StoryCategoriesMapping
             modelBuilder.Entity<StoryCategoriesMapping>()
                 .HasKey(sc => new { sc.StoryID, sc.CategoryID });
 
             modelBuilder.Entity<ReadingHistory>()
                .HasKey(h => new { h.HistoryID });
+
+            modelBuilder.Entity<CategoryDetail>()
+               .HasKey(cd => new { cd.DetailID });
 
             base.OnModelCreating(modelBuilder);
         }

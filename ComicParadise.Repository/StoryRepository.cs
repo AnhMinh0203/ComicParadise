@@ -149,7 +149,6 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get story by ID
-
         public async Task<StoryDetail> GetStoryByIdAsync(int storyID)
         {
             var storyDetail = await (from s in _context.Stories
@@ -167,34 +166,6 @@ namespace ComicParadise.Repository
                                                        join c in _context.Categories on sc.CategoryID equals c.CategoryID
                                                        where sc.StoryID == storyID
                                                        select c).ToList(),
-
-                                         /*                                         Chapters = (from ct in _context.Chapters
-                                                                                              where ct.StoryID == storyID
-                                                                                              orderby ct.ChapterNumber ascending
-                                                                                              select ct).ToList(),*/
-
-                                         /* comments = (from cm in _context.Comments
-                                                      join u2 in _context.Users on cm.UserID equals u2.UserID into users
-                                                      from u2 in users.DefaultIfEmpty()
-                                                      where cm.StoryID == storyID
-                                                      select new CommentDto
-                                                      {
-                                                          CommentID = cm.CommentID,
-                                                          StoryID = cm.StoryID,
-                                                          UserID = cm.UserID,
-                                                          Username = u2 != null ? u2.Username : "Người dùng ẩn danh",
-                                                          Content = cm.Content,
-                                                          CreatedAt = cm.CreatedAt,
-                                                          Status = cm.Status,
-                                                          Reply = cm.Reply,
-                                                          Likes = cm.Likes,
-                                                          DisLikes = cm.DisLikes,
-                                                          ChildComments = new List<CommentDto>(),
-                                                          Reactions = (from r in _context.Reactions
-                                                                       join u in _context.Users on r.UserID equals u.UserID
-                                                                       where r.CommentID == cm.CommentID
-                                                                       select r).ToList()
-                                                      }).ToList()*/
                                      })
                                      .FirstOrDefaultAsync();
 
@@ -343,7 +314,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Delete story
-        public async Task<string> DeleteStoryAsync (int storyID)
+        public async Task<string> DeleteStoryAsync(int storyID)
         {
             var story = await _context.Stories
                             .FirstOrDefaultAsync(s => s.StoryID == storyID);
@@ -361,7 +332,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Search story
-        public async Task<List<StoryInfor>> SearchStoryAsync (string title)
+        public async Task<List<StoryInfor>> SearchStoryAsync(string title)
         {
             try
             {
@@ -388,5 +359,40 @@ namespace ComicParadise.Repository
         }
         #endregion
 
+        #region Get current update story
+        public async Task<IEnumerable<dynamic>> GetCurrentUpdateStoriesAsync(int days)
+        {
+            try
+            {
+                DateTime recentDate = DateTime.Now.AddDays(-days);
+
+                var listStories = await (from s in _context.Stories
+                                         let latestChapter = _context.Chapters
+                                             .Where(c => c.StoryID == s.StoryID)
+                                             .OrderByDescending(c => c.CreatedAt)
+                                             .FirstOrDefault()
+                                         where latestChapter != null && latestChapter.CreatedAt >= recentDate
+                                         select new
+                                         {
+                                             StoryID = s.StoryID,
+                                             Title = s.Title,
+                                             CoverImage = s.CoverImage,
+                                             Views = s.Views,
+                                             Likes = s.Likes,
+                                             LastestChapter = latestChapter.ChapterNumber,
+                                             CreatedAt = latestChapter.CreatedAt
+                                         })
+                                         .AsNoTracking()
+                                         .ToListAsync();
+
+                return listStories;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        #endregion
     }
 }
