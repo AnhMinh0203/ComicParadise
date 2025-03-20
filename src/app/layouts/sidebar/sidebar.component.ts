@@ -5,6 +5,9 @@ import { MegaMenuModule } from 'primeng/megamenu';
 import { MenuItem } from 'primeng/api';
 import { AccordionModule } from 'primeng/accordion';
 import { ThemeService } from '../../core/share/theme.service';
+import { categoryService } from '../service/category.service';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-sidebar',
@@ -21,34 +24,15 @@ export class SidebarComponent {
   visibleCategories: boolean = false;
   activeCategoryIndex: number | null = null;
 
-  items: MenuItem[] = [
-    {
-      label: 'Living Room',
-      items: [
-        { label: 'Accessories' },
-        { label: 'Armchair' },
-        { label: 'Coffee Table' },
-        { label: 'Couch' },
-        { label: 'TV Stand' },
-
-      ],
-    },
-    {
-      label: 'Bedroom',
-      items: [
-        { label: 'Bed' },
-        { label: 'Chaise lounge' },
-        { label: 'Cupboard' },
-        { label: 'Dresser' },
-        { label: 'Wardrobe' },
-      ],
-    },
-  ];
+  items: MenuItem[] = [];
   isDarkMode: boolean = false;
 
   constructor(
     private sidebarService: SidebarService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private _categoryService: categoryService,
+    private http: HttpClient,
+    private router: Router,
   ) {
     this.sidebarService.sidebarState$.subscribe(state => {
       this.isSidebarOpen = state;
@@ -56,7 +40,7 @@ export class SidebarComponent {
   }
 
   ngOnInit() {
-
+    this.getCategories();
   }
   closeSidebar() {
     this.sidebarService.toggleSidebar();
@@ -71,4 +55,16 @@ export class SidebarComponent {
     this.themeService.setDarkMode(this.isDarkMode);
   }
 
+  getCategories() {
+    this._categoryService.getCategories().subscribe((res: any) => {
+      if (res && res.isSuccess == true) {
+        this.items = res.data
+        console.log(res.data)
+      }
+    })
+  }
+
+  navigateToContact() {
+    this.router.navigate(['/about-us']);
+  }
 }

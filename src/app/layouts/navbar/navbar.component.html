@@ -4,7 +4,7 @@
   <div class="d-flex">
     <div class="header-logo ">
       <a href="#">
-        <img src="../../../assets/images/logo-3.jpg" href="#" alt="Logo">
+        <img src="../../../assets/images/logo.png" href="#" alt="Logo">
       </a>
     </div>
     <!-- Right Side -->
@@ -12,7 +12,7 @@
       <a href="#">Trang chủ</a>
       <!-- <a href="">Thể loại</a> -->
       <p-megamenu [model]="items" />
-      <a href="">Liên hệ</a>
+      <a (click)="navigateToContact()">Giới thiệu</a>
 
       <!-- Search Input -->
       <div class="search-box">
@@ -28,13 +28,14 @@
 
   <div class="navbar-right">
     <!-- Notification Icon -->
-    <div class="notification">
+    <div class="notification" (click)="showDialogNotify()">
       <i class="pi pi-bell"></i>
+      <span class="badge">3</span>
     </div>
 
     <!-- Toggle Theme Icon -->
     <div class="toggle-theme " (click)="toggleTheme()">
-      <i class="pi" [ngClass]="isDarkMode ? 'pi-moon' : 'pi-sun'" ></i>
+      <i class="pi" [ngClass]="isDarkMode ? 'pi-moon' : 'pi-sun'"></i>
     </div>
 
     <!-- Avatar -->
@@ -45,5 +46,66 @@
   </div>
 </nav>
 
+<!-- notify -->
+<p-dialog header="Thông báo" [(visible)]="visibleNotify" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <div class="d-flex justify-content-between noti-item p-2 my-2">
 
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar label="P" shape="circle" size="large"/>
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text">
+          abc
+        </div>
+        <div class="noti-time">
+          9 giờ trước
+        </div>
+      </div>
+    </div>
+    <div class="noti-action mx-2">
+      <i class="pi pi-ellipsis-h"></i>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between noti-item p-2 my-2">
 
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar label="P" shape="circle" size="large"/>
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text">
+          abc
+        </div>
+        <div class="noti-time">
+          9 giờ trước
+        </div>
+      </div>
+    </div>
+    <div class="noti-action mx-2">
+      <i class="pi pi-ellipsis-h"></i>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between noti-item p-2 my-2">
+
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar label="P" shape="circle" size="large"/>
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text">
+          abc
+        </div>
+        <div class="noti-time">
+          9 giờ trước
+        </div>
+      </div>
+    </div>
+    <div class="noti-action mx-2">
+      <i class="pi pi-ellipsis-h"></i>
+    </div>
+  </div>
+
+</p-dialog>

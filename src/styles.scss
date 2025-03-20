@@ -33,7 +33,9 @@ body {
 }
 
 /* Áp dụng cho PrimeNG */
-.dark-theme,
+
+.dark-theme .p-panel,
+.dark-theme .p-panel .p-panel-title,
 .dark-theme .p-card,
 .dark-theme p-tabpanels,
 .dark-theme .p-tablist-tab-list {

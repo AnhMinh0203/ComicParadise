@@ -87,6 +87,7 @@ export class HomeComponent {
     this.router.navigate(['/infor-story', storyID]);
   }
 
+
   getCurrentUpdateStories(){
     this._storyServce.getCurrentUpdateStories(7).subscribe((res:any)=>{
       if(res && res.isSuccess){
