@@ -383,8 +383,32 @@ namespace ComicParadise.Repository
                                              CreatedAt = latestChapter.CreatedAt
                                          })
                                          .AsNoTracking()
+                                         .Take(12)
                                          .ToListAsync();
 
+                if (!listStories.Any())
+                {
+                    listStories = await (from s in _context.Stories
+                                         let latestChapter = _context.Chapters
+                                                .Where(c => c.StoryID == s.StoryID)
+                                                .OrderByDescending(c => c.CreatedAt)
+                                                .FirstOrDefault()
+                                         where latestChapter != null
+                                         select new
+                                         {
+                                             StoryID = s.StoryID,
+                                             Title = s.Title,
+                                             CoverImage = s.CoverImage,
+                                             Views = s.Views,
+                                             Likes = s.Likes,
+                                             LastestChapter = latestChapter.ChapterNumber,
+                                             CreatedAt = latestChapter.CreatedAt
+                                         })
+                                         .OrderByDescending(s => s.Views)
+                                         .Take(12)
+                                         .AsNoTracking()
+                                         .ToListAsync();
+                }
                 return listStories;
             }
             catch (Exception ex)
@@ -392,7 +416,147 @@ namespace ComicParadise.Repository
                 throw new Exception(ex.Message);
             }
         }
+        #endregion
 
+        #region Get top stories 
+        public async Task<List<dynamic>> GetTopStoriesAsync(string topType)
+        {
+            try
+            {
+                DateTime now = DateTime.Now;
+                DateTime startDate;
+                DateTime endDate;
+                switch (topType.ToLower())
+                {
+                    case "day":
+                        startDate = now.Date;
+                        endDate = startDate.AddDays(1).AddSeconds(-1);
+                        break;
+                    case "week":
+                        startDate = now.Date.AddDays(-(int)now.DayOfWeek);
+                        endDate = startDate.AddDays(7).AddSeconds(-1);
+                        break;
+                    case "month":
+                        startDate = new DateTime(now.Year, now.Month, 1);
+                        endDate = startDate.AddMonths(1).AddSeconds(-1);
+                        break;
+                    default:
+                        throw new Exception("Invalid top type. Use 'day', 'week', or 'month'.");
+                }
+
+                var topStories = await (from s in _context.Stories
+                                        where s.CreatedAt >= startDate && s.CreatedAt <= endDate
+                                        select new
+                                        {
+                                            StoryID = s.StoryID,
+                                            Title = s.Title,
+                                            CoverImage = s.CoverImage,
+                                            Views = s.Views,
+                                            Likes = s.Likes,
+                                            Description = s.Description,
+                                            Categories = (from smc in _context.StoryCategoriesMapping
+                                                          join c in _context.Categories on smc.CategoryID equals c.CategoryID
+                                                          where smc.StoryID == s.StoryID
+                                                          select c.CategoryName).ToList()
+                                        })
+                                        .AsNoTracking()
+                                        .OrderByDescending(s => s.Views)
+                                        .Take(12)
+                                        .ToListAsync<dynamic>();
+
+                if (!topStories.Any())
+                {
+                    topStories = await (from s in _context.Stories
+                                        select new
+                                        {
+                                            StoryID = s.StoryID,
+                                            Title = s.Title,
+                                            CoverImage = s.CoverImage,
+                                            Views = s.Views,
+                                            Likes = s.Likes,
+                                            Description = s.Description,
+                                            Categories = (from smc in _context.StoryCategoriesMapping
+                                                          join c in _context.Categories on smc.CategoryID equals c.CategoryID
+                                                          where smc.StoryID == s.StoryID
+                                                          select c.CategoryName).ToList()
+                                        })
+                                        .AsNoTracking()
+                                        .OrderByDescending(s => s.Views)
+                                        .Take(10)
+                                        .ToListAsync<dynamic>();
+                }
+
+                return topStories;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        #endregion
+
+        #region Get advance stories
+        public async Task<List<dynamic>> GetAdvanceStories(int userID)
+        {
+            var userCategories = await (from h in _context.ReadingHistories
+                                        where h.UserID == userID
+                                        join smc in _context.StoryCategoriesMapping on h.StoryID equals smc.StoryID
+                                        select smc.CategoryID)
+                                       .Distinct()
+                                       .ToListAsync();
+            var recommendedStories = await (from s in _context.Stories
+                                            join smc in _context.StoryCategoriesMapping on s.StoryID equals smc.StoryID
+                                            where userCategories.Contains(smc.CategoryID)
+                                            let latestChapter = _context.Chapters
+                                                .Where(c => c.StoryID == s.StoryID)
+                                                .OrderByDescending(c => c.CreatedAt)
+                                                .FirstOrDefault()
+                                            where latestChapter != null
+                                            select new
+                                            {
+                                                StoryID = s.StoryID,
+                                                Title = s.Title,
+                                                CoverImage = s.CoverImage,
+                                                Views = s.Views,
+                                                Likes = s.Likes,
+                                                LastestChapter = latestChapter.ChapterNumber,
+                                            })
+                                            .AsNoTracking()
+                                            .Distinct()
+                                            .Take(12)
+                                            .ToListAsync<dynamic>();
+
+            if (!recommendedStories.Any())
+            {
+                recommendedStories = await (from s in _context.Stories
+                                            let latestChapter = _context.Chapters
+                                                .Where(c => c.StoryID == s.StoryID)
+                                                .OrderByDescending(c => c.CreatedAt)
+                                                .FirstOrDefault()
+                                            where latestChapter != null
+                                            select new
+                                            {
+                                                StoryID = s.StoryID,
+                                                Title = s.Title,
+                                                CoverImage = s.CoverImage,
+                                                Views = s.Views,
+                                                Likes = s.Likes,
+                                                Description = s.Description,
+                                                Categories = (from smc in _context.StoryCategoriesMapping
+                                                              join c in _context.Categories on smc.CategoryID equals c.CategoryID
+                                                              where smc.StoryID == s.StoryID
+                                                              select c.CategoryName).ToList(),
+                                                LastestChapter = latestChapter.ChapterNumber,
+                                            })
+                                            .AsNoTracking()
+                                            .OrderByDescending(s => s.Views)
+                                            .Take(12)
+                                            .ToListAsync<dynamic>();
+            }
+            return recommendedStories;
+        }
         #endregion
     }
 }

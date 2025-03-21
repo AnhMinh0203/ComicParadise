@@ -122,15 +122,37 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get chapter content
-        public async Task<ChapterContentDto?> GetChapterContentAsync(int storyID, int chapterNumber)
+        public async Task<ChapterContentDto?> GetChapterContentAsync(int storyID, int chapterNumber, int userID)
         {
+
+
             var chapter = await _context.Chapters
                                 .Where(c => c.StoryID == storyID && c.ChapterNumber == chapterNumber)
                                 .FirstOrDefaultAsync();
-            if (chapter == null)
+                if (chapter == null)
             {
                 return null;
             }
+
+            /* Cập nhật view */
+            var story = await _context.Stories.FirstOrDefaultAsync(s => s.StoryID == storyID);
+            if (story == null)
+            {
+                return null;
+            }
+            story.Views += 1;
+
+            /* Tạo lịch sử */
+            var readingHistory = new ReadingHistory
+            {
+                UserID = userID,
+                StoryID = storyID,
+                LastReadAt = DateTime.Now
+            };
+            _context.ReadingHistories.Add(readingHistory);   
+            await _context.SaveChangesAsync();
+
+
             ChapterContentDto chapterContentDto = new ChapterContentDto();
             chapterContentDto.ChapterType = chapter.ChapterType;
 
@@ -146,7 +168,6 @@ namespace ComicParadise.Repository
                                                      select ci.ImagePath).ToListAsync();
             }
             return chapterContentDto;
-
         }
 
         #endregion
@@ -327,7 +348,7 @@ namespace ComicParadise.Repository
                 await newBlobClient.UploadAsync(stream, new BlobHttpHeaders
                 {
                     ContentType = request.newPage.ContentType,
-                    CacheControl = "no-store, no-cache, must-revalidate" 
+                    CacheControl = "no-store, no-cache, must-revalidate"
                 });
             }
 
@@ -338,7 +359,7 @@ namespace ComicParadise.Repository
                     .ToListAsync();
                 foreach (var page in pagesToShift)
                 {
-                    page.Order += 1; 
+                    page.Order += 1;
                 }
             }
 

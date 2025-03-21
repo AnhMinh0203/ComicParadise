@@ -71,5 +71,20 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.GetCurrentUpdateStoriesAsync(days);
             return Ok(new BaseResponse<IEnumerable<dynamic>>(true, result));
         }
+
+
+        [HttpGet("Get-top-story")]
+        public async Task<ActionResult> GetTopStory(string topType)
+        {
+            var result = await _storyRepository.GetTopStoriesAsync(topType);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
+        [HttpGet("Get-advance-story")]
+        public async Task<ActionResult> GetAdvanceStory(int userID)
+        {
+            var result = await _storyRepository.GetAdvanceStories(userID);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
     }
 }
