@@ -1,55 +1,71 @@
+﻿using Amazon;
+using Amazon.S3;
 using Azure.Storage.Blobs;
 using ComicParadise.DataContext.Database;
+using ComicParadise.Repository;
 using ComicParadise.Repository.Configs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+/* Azure config */
 builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureCloud"))
 );
 
-// Mapping attribute
-/*builder.Services.AddAutoMapper(typeof(Program));*/
 
 
-// Add cross
+// CORS
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowAngular", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins) 
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); 
     });
 });
+
+/*builder.Services.AddSignalR();*/
 builder.Services.AddDataContextServices();
+
+
+/* AWS config */
+builder.Services.AddSwaggerGen();
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
+
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var awsConfig = configuration.GetSection("AWS");
+    var region = RegionEndpoint.GetBySystemName(awsConfig["Region"] ?? "us-east-1");
+    return new AmazonS3Client(awsConfig["AccessKey"], awsConfig["SecretKey"], region);
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
+app.UseCors("AllowAngular"); 
 app.UseAuthorization();
-app.UseCors("AllowAll");
+
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

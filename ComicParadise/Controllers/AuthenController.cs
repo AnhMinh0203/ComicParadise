@@ -23,5 +23,12 @@ namespace ComicParadise.Api.Controllers
             return Ok(response);
 
         }
+
+        [HttpPost("Register")]
+        public async Task<ActionResult> Register(RegisterModel register)
+        {
+            var response = await _authenRepository.RegisterAsync(register);
+            return Ok(new BaseResponse<string>(true,response));
+        }
     }
 }

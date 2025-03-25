@@ -10,5 +10,6 @@ namespace ComicParadise.Repository.Common
     public interface IAuthenRepository
     {
         Task<AuthenResponse> LoginAsync(SignInModel signInModel);
+        Task<string> RegisterAsync(RegisterModel registerModel);
     }
 }

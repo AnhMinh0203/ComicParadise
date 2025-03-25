@@ -50,9 +50,9 @@ namespace ComicParadise.Repository
                         .Select(u => new UserAuthen
                         {
                             UserId = u.UserID,
-                            FullName = u.Username ,
-                            Identifier = u.Phone ,
-                            PasswordHash = u.PasswordHash ,
+                            FullName = u.Username,
+                            Identifier = u.Phone,
+                            PasswordHash = u.PasswordHash,
                         })
                         .FirstOrDefaultAsync();
                 }
@@ -63,9 +63,9 @@ namespace ComicParadise.Repository
                         .Select(u => new UserAuthen
                         {
                             UserId = u.UserID,
-                            FullName = u.Username ,
-                            Identifier =  u.Email ,
-                            PasswordHash = u.PasswordHash ,
+                            FullName = u.Username,
+                            Identifier = u.Email,
+                            PasswordHash = u.PasswordHash,
                         })
                         .FirstOrDefaultAsync();
 
@@ -97,7 +97,7 @@ namespace ComicParadise.Repository
                 {
                     UserID = userAuthen.UserId,
                     Username = userAuthen.FullName,
-                    Identifier = userAuthen.Identifier ,
+                    Identifier = userAuthen.Identifier,
 
                 };
 
@@ -122,6 +122,46 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Register
-        #endregion
+        public async Task<string> RegisterAsync(RegisterModel registerModel)
+        {
+            try
+            {
+                var isExsistAccount = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerModel.Email || u.Phone == registerModel.Phone);
+                 if (isExsistAccount != null)
+                {
+                    return "Người dùng đã tồn tại";
+                };
+                string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                string hash = BCrypt.Net.BCrypt.HashPassword(registerModel.PasswordHash, salt);
+
+                var newUser = new User
+                {
+                    Username = registerModel.Username,
+                    Email = registerModel.Email,
+                    Phone = registerModel.Phone,
+                    PasswordHash = hash,
+                    Role = registerModel.Role,
+                    Status = "Active",
+                    Avatar = null,
+                    IsComment = true,
+                    IsLock = false,
+                    CreatedAt = DateTime.Now,
+                };
+
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                return "Tạo tài khoản thành công";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+
+        }
+
     }
+    #endregion
 }
+

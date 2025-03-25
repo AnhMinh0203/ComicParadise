@@ -29,7 +29,7 @@ namespace ComicParadise.Repository
             {
                 Subject = new ClaimsIdentity(new[]{
                    // Thêm thông tin userId vào token
-                    new Claim("userID", idUser.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, idUser.ToString()),
                     new Claim("userName", account.FullName),
                     new Claim("identifier", account.Identifier)
                 }),
@@ -41,7 +41,7 @@ namespace ComicParadise.Repository
         }
 
 
-        public Guid? ValidateJwtToken(string? token)
+        public int? ValidateJwtToken(string? token)
         {
             if (token == null) return null;
 
@@ -63,7 +63,7 @@ namespace ComicParadise.Repository
                 var jwtToken = (JwtSecurityToken)validatedToken;
 
                 // Lấy các giá trị từ Claims trong token.
-                var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "userId").Value);
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
                 var userName = jwtToken.Claims.First(x => x.Type == "userName").Value;
                 var email = jwtToken.Claims.First(x => x.Type == "identifier").Value;
 

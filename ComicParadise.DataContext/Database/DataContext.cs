@@ -23,6 +23,7 @@ namespace ComicParadise.DataContext.Database
         public DbSet<Reaction> Reactions { get; set; }
         public DbSet<ReadingHistory> ReadingHistories { get; set; }
         public DbSet<CategoryDetail> CategoryDetails { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

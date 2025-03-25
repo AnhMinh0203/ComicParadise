@@ -1,9 +1,12 @@
-﻿using Azure.Storage.Blobs;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using ComicParadise.DataContext.Database;
 using ComicParadise.DataContext.Dto;
 using ComicParadise.DataContext.Models;
 using ComicParadise.Repository.Common;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -19,14 +22,23 @@ namespace ComicParadise.Repository
     {
         private readonly AppDbContext _context;
         public readonly IConfiguration _config;
-        private readonly BlobServiceClient _blobServiceClient;
+        //private readonly BlobServiceClient _blobServiceClient;
         private readonly string? _containerMangaStory;
-        public ChapterRepository(AppDbContext context, IConfiguration config, BlobServiceClient blobServiceClient)
+        private readonly IAmazonS3 _s3Client;
+        private readonly string? _bucketName;
+
+        public ChapterRepository(
+            AppDbContext context,
+            IConfiguration config,
+            //BlobServiceClient blobServiceClient,
+            IAmazonS3 s3Client)
         {
             _context = context;
             _config = config;
-            _blobServiceClient = blobServiceClient;
+            //_blobServiceClient = blobServiceClient;
             _containerMangaStory = _config["ContainerMangaStory"];
+            _s3Client = s3Client;
+            _bucketName = _config["BucketName"];
         }
 
         #region Get next chapter number
@@ -40,8 +52,8 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Post chapter
-        public async Task<string> PostChapterAsync(PostChapterDto chapterDto)
+        #region Post chapter (Azure)
+        /*public async Task<string> PostChapterAsync(PostChapterDto chapterDto)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_containerMangaStory);
             await containerClient.CreateIfNotExistsAsync();
@@ -118,6 +130,119 @@ namespace ComicParadise.Repository
             }
 
             return "Loại ảnh không hợp lệ";
+        }*/
+        #endregion
+
+        #region Post chapter (AWS)
+        public async Task<string> PostChapterAsync(PostChapterDto chapterDto)
+        {
+            try
+            {
+                string chapterType = chapterDto.ChapterType;
+                string blobPrefix = $"{_containerMangaStory}/{chapterDto.StoryID}/{chapterDto.ChapterNumber}"; // Ví dụ: "manga/123/1/"
+
+                if (chapterType == "PDF")
+                {
+                    string pdfFileName = "chapter.pdf";
+                    string blobName = pdfFileName;
+                    string pdfUrl = await UploadFileToS3(chapterDto.PdfFile, blobPrefix, blobName);
+
+                    var chapter = new Chapter
+                    {
+                        StoryID = chapterDto.StoryID,
+                        ChapterNumber = chapterDto.ChapterNumber,
+                        Title = chapterDto.Title,
+                        ChapterType = "PDF",
+                        SourceUrl = pdfUrl
+                    };
+                    _context.Chapters.Add(chapter);
+                    await _context.SaveChangesAsync();
+
+                    return pdfUrl;
+                }
+                else if (chapterType == "Images")
+                {
+                    // Xử lý nhiều ảnh
+                    var chapter = new Chapter
+                    {
+                        StoryID = chapterDto.StoryID,
+                        ChapterNumber = chapterDto.ChapterNumber,
+                        Title = chapterDto.Title,
+                        ChapterType = "Images",
+                        SourceUrl = null
+                    };
+                    _context.Chapters.Add(chapter);
+                    await _context.SaveChangesAsync(); // Lưu chapter để lấy ID
+
+                    int order = 1;
+                    foreach (var imageFile in chapterDto.ImageFiles)
+                    {
+                        // Tạo tên file ảnh duy nhất
+                        string imageFileName = $"page{order}-{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+                        string imageUrl = await UploadFileToS3(imageFile, blobPrefix, imageFileName);
+
+                        // Lưu vào bảng ChapterImage
+                        var chapterImage = new ChapterImage
+                        {
+                            ChapterId = chapter.ChapterID,
+                            ImagePath = imageUrl,
+                            Order = order
+                        };
+                        _context.ChapterImages.Add(chapterImage);
+                        order++;
+                    }
+                    await _context.SaveChangesAsync();
+
+                    return "Chapter với nhiều ảnh đã được đăng tải thành công";
+                }
+
+                return "Loại ảnh không hợp lệ";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                return $"Lỗi upload file lên S3: {s3Ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
+        }
+        #endregion
+
+        #region Upload file to AWS
+        private async Task<string> UploadFileToS3(IFormFile file, string prefix, string fileName)
+        {
+            try
+            {
+                var key = $"{prefix}/{fileName}"; // Ví dụ: "manga/123/1/chapter.pdf"
+
+                using var stream = file.OpenReadStream();
+                var request = new PutObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key,
+                    InputStream = stream,
+                    ContentType = file.ContentType,
+                    Headers = { CacheControl = "no-store, no-cache, must-revalidate" }
+                    // Xóa CannedACL vì bucket không cho phép ACLs
+                };
+
+                var response = await _s3Client.PutObjectAsync(request);
+                if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return $"https://{_bucketName}.s3.amazonaws.com/{key}";
+                }
+
+                throw new Exception("Upload file lên S3 thất bại");
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Lỗi upload file lên S3: {ex.Message}");
+            }
         }
         #endregion
 
@@ -129,7 +254,7 @@ namespace ComicParadise.Repository
             var chapter = await _context.Chapters
                                 .Where(c => c.StoryID == storyID && c.ChapterNumber == chapterNumber)
                                 .FirstOrDefaultAsync();
-                if (chapter == null)
+            if (chapter == null)
             {
                 return null;
             }
@@ -149,7 +274,7 @@ namespace ComicParadise.Repository
                 StoryID = storyID,
                 LastReadAt = DateTime.Now
             };
-            _context.ReadingHistories.Add(readingHistory);   
+            _context.ReadingHistories.Add(readingHistory);
             await _context.SaveChangesAsync();
 
 
@@ -203,8 +328,8 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Delete chapter page
-        public async Task<string> DeleteChapterPageAsync(int storyID, int chapterNumber, int chapterPage)
+        #region Delete chapter page (Azure)
+        /*public async Task<string> DeleteChapterPageAsync(int storyID, int chapterNumber, int chapterPage)
         {
             var chapter = await _context.Chapters
                 .FirstOrDefaultAsync(c => c.StoryID == storyID && c.ChapterNumber == chapterNumber);
@@ -244,10 +369,95 @@ namespace ComicParadise.Repository
             }
             await _context.SaveChangesAsync();
             return $"Đã xóa thành công trang {chapterPage} trong chapter {chapterNumber} của story {storyID}";
+        }*/
+        #endregion
+
+        #region Delete chapter page (AWS)
+        public async Task<string> DeleteChapterPageAsync(int storyID, int chapterNumber, int chapterPage)
+        {
+            try
+            {
+                var chapter = await _context.Chapters
+                    .FirstOrDefaultAsync(c => c.StoryID == storyID && c.ChapterNumber == chapterNumber);
+
+                if (chapter == null)
+                {
+                    throw new Exception($"Chapter với StoryID {storyID} và ChapterNumber {chapterNumber} không tồn tại.");
+                }
+
+                var chapterImage = await _context.ChapterImages
+                    .FirstOrDefaultAsync(ci => ci.ChapterId == chapter.ChapterID && ci.Order == chapterPage);
+
+                if (chapterImage == null)
+                {
+                    throw new Exception($"Trang {chapterPage} không tồn tại trong chapter {chapterNumber} của story {storyID}.");
+                }
+
+                // Xóa file trên S3
+                if (!string.IsNullOrEmpty(chapterImage.ImagePath))
+                {
+                    await DeleteFileFromS3(chapterImage.ImagePath);
+                }
+
+                // Xóa bản ghi ChapterImage trong database
+                _context.ChapterImages.Remove(chapterImage);
+                await _context.SaveChangesAsync();
+
+                // Cập nhật thứ tự của các trang còn lại
+                var pagesToUpdate = await (from c in _context.ChapterImages
+                                           where c.ChapterId == chapter.ChapterID && c.Order > chapterPage
+                                           select c).ToListAsync();
+
+                foreach (var page in pagesToUpdate)
+                {
+                    page.Order -= 1;
+                }
+                await _context.SaveChangesAsync();
+
+                return $"Đã xóa thành công trang {chapterPage} trong chapter {chapterNumber} của story {storyID}";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                return $"Lỗi xóa file trên S3: {s3Ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
         }
         #endregion
 
-        #region Replace chapter page 
+        #region Delete file from AWS
+        private async Task DeleteFileFromS3(string fileUrl)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fileUrl))
+                    return;
+
+                var uri = new Uri(fileUrl);
+                var key = uri.AbsolutePath.Substring(1);
+
+                var request = new DeleteObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key
+                };
+
+                await _s3Client.DeleteObjectAsync(request);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Lỗi xóa file trên S3: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region Replace chapter page (Azure)
         /*        public async Task<string> ReplaceChapterPageAsync(ChapterPageRequest request)
                 {
                     var chapter = await (from c in _context.Chapters
@@ -277,7 +487,7 @@ namespace ComicParadise.Repository
                     return "Thay trang thành công";
                 }*/
 
-        public async Task<string> ReplaceChapterPageAsync(ChapterPageRequest request)
+        /*public async Task<string> ReplaceChapterPageAsync(ChapterPageRequest request)
         {
             // Tìm chapter và chapterImage
             var chapter = await _context.Chapters
@@ -322,11 +532,62 @@ namespace ComicParadise.Repository
             }
 
             return "Thay trang thành công";
+        }*/
+        #endregion
+
+        #region Replace chapter page (AWS)
+        public async Task<string> ReplaceChapterPageAsync(ChapterPageRequest request)
+        {
+            try
+            {
+                var chapter = await _context.Chapters
+                    .FirstOrDefaultAsync(c => c.StoryID == request.storyID && c.ChapterNumber == request.chapterNumber);
+                if (chapter == null)
+                {
+                    throw new Exception("Không tìm thấy chapter.");
+                }
+
+                var chapterImage = await _context.ChapterImages
+                    .FirstOrDefaultAsync(ci => ci.ChapterId == chapter.ChapterID && ci.Order == request.chapterPage);
+                if (chapterImage == null)
+                {
+                    throw new Exception("Không tìm thấy trang cần thay thế.");
+                }
+
+                var uri = new Uri(chapterImage.ImagePath);
+                var key = uri.AbsolutePath.Substring(1); // Bỏ dấu "/" đầu tiên, ví dụ: "manga/123/1/page1-xxx.jpg"
+
+                // Tách prefix và fileName từ key
+                var lastSlashIndex = key.LastIndexOf('/');
+                if (lastSlashIndex == -1)
+                {
+                    throw new InvalidOperationException("Đường dẫn ImagePath không hợp lệ.");
+                }
+                var prefix = key.Substring(0, lastSlashIndex); 
+                var fileName = key.Substring(lastSlashIndex + 1); 
+
+                // Upload file mới lên S3 (ghi đè file cũ)
+                await UploadFileToS3(request.newPage, prefix, fileName);
+
+                return "Thay trang thành công";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                return $"Lỗi upload file lên S3: {s3Ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
         }
         #endregion
 
-        #region Add chapter page
-        public async Task<string> AddChapterPageAsync(ChapterPageRequest request)
+        #region Add chapter page (Azure)
+        /*public async Task<string> AddChapterPageAsync(ChapterPageRequest request)
         {
             // Tìm chapter
             var chapter = await _context.Chapters
@@ -373,6 +634,62 @@ namespace ComicParadise.Repository
             await _context.SaveChangesAsync();
 
             return "Thêm trang mới thành công";
+        }*/
+        #endregion
+
+        #region Add chapter page (AWS)
+        public async Task<string> AddChapterPageAsync(ChapterPageRequest request)
+        {
+            try
+            {
+                var chapter = await _context.Chapters
+                    .FirstOrDefaultAsync(c => c.StoryID == request.storyID && c.ChapterNumber == request.chapterNumber);
+                if (chapter == null)
+                {
+                    throw new Exception($"Không tìm thấy chapter với StoryID {request.storyID} và ChapterNumber {request.chapterNumber}.");
+                }
+
+                // Tải lên file mới trên S3
+                string blobPrefix = $"{_containerMangaStory}/{chapter.StoryID}/{chapter.ChapterNumber}/"; // Ví dụ: "manga/123/1/"
+                string newImageFileName = $"page{request.chapterPage ?? (await _context.ChapterImages.CountAsync(ci => ci.ChapterId == chapter.ChapterID) + 1)}-{Guid.NewGuid()}{Path.GetExtension(request.newPage.FileName)}";
+                string newImageUrl = await UploadFileToS3(request.newPage, blobPrefix, newImageFileName);
+
+                // Dịch chuyển các trang hiện có nếu chapterPage được chỉ định
+                if (request.chapterPage.HasValue)
+                {
+                    var pagesToShift = await _context.ChapterImages
+                        .Where(ci => ci.ChapterId == chapter.ChapterID && ci.Order >= request.chapterPage.Value)
+                        .ToListAsync();
+                    foreach (var page in pagesToShift)
+                    {
+                        page.Order += 1;
+                    }
+                }
+
+                // Thêm bản ghi ChapterImage mới
+                var newChapterImage = new ChapterImage
+                {
+                    ChapterId = chapter.ChapterID,
+                    Order = request.chapterPage ?? (await _context.ChapterImages.CountAsync(ci => ci.ChapterId == chapter.ChapterID) + 1),
+                    ImagePath = newImageUrl
+                };
+                _context.ChapterImages.Add(newChapterImage);
+                await _context.SaveChangesAsync();
+
+                return "Thêm trang mới thành công";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                return $"Lỗi upload file lên S3: {s3Ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
         }
         #endregion
     }

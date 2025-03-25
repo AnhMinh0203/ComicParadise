@@ -1,5 +1,7 @@
-﻿using ComicParadise.DataContext.Mapping;
+﻿using Amazon.S3;
+using ComicParadise.DataContext.Mapping;
 using ComicParadise.Repository.Common;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using System;
@@ -22,10 +24,16 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IChapterRepository, ChapterRepository>();
             services.AddScoped<IStatisticalReportRepository, StatisticalReportRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
 
             // Register AutoMapper
             services.AddAutoMapper(typeof(CategoryProfile));
             services.AddAutoMapper(typeof(ReportProfile));
+
+            // SignalR config
+            services.AddSignalR();
+
+
         }
     }
 }

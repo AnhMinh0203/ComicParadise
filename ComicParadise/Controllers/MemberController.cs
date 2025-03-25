@@ -67,5 +67,12 @@ namespace ComicParadise.Api.Controllers
             var result = await _memberRepository.DeleteMemberAsync(userID);
             return Ok(new BaseResponse<string>(true,result));
         }
+
+        [HttpGet("Get-member-by-id")]
+        public async Task<ActionResult> GetMemebrById(int userID)
+        {
+            var result = await _memberRepository.GetMemberById(userID);
+            return Ok(new BaseResponse<User>(true, result));
+        }
     }
 }

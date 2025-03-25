@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace ComicParadise.Repository
 {
@@ -20,18 +22,27 @@ namespace ComicParadise.Repository
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
-        private readonly string? _containerCoverImg;
-        private readonly BlobServiceClient _blobServiceClient;
-        public StoryRepository(AppDbContext context, IConfiguration config, BlobServiceClient blobServiceClient)
+        // private readonly BlobServiceClient _blobServiceClient;
+
+        private readonly IAmazonS3 _s3Client;
+        private readonly string? _bucketName;
+        private readonly string _containerCoverImg;
+        public StoryRepository(
+            AppDbContext context,
+            IConfiguration config,
+            BlobServiceClient blobServiceClient,
+            IAmazonS3 s3Client)
         {
             _context = context;
             _config = config;
-            _blobServiceClient = blobServiceClient;
+            // _blobServiceClient = blobServiceClient;
+            _s3Client = s3Client;
+            _bucketName = _config["BucketName"];
             _containerCoverImg = _config["ContainerCoverImg"];
         }
 
-        #region Add story
-        public async Task<string> AddStoryAsync(AddStoryDto createStoryDto)
+        #region Add story (azure)
+        /*public async Task<string> AddStoryAsync(AddStoryDto createStoryDto)
         {
             try
             {
@@ -45,6 +56,63 @@ namespace ComicParadise.Repository
                 // Đẩy ảnh bìa lên clound
                 var containerCoverImg = _blobServiceClient.GetBlobContainerClient(_containerCoverImg);
                 string primaryImgUrl = await UploadFileToAzure(createStoryDto.CoverImage, containerCoverImg);
+
+                var newStory = new Story
+                {
+                    Title = createStoryDto.Title,
+                    Author = createStoryDto.Author,
+                    Type = createStoryDto.Type,
+                    Status = status,
+                    PublisherID = createStoryDto.PublisherID,
+                    CoverImage = primaryImgUrl,
+                    Description = createStoryDto.Description,
+                };
+
+                _context.Stories.Add(newStory);
+                await _context.SaveChangesAsync();
+
+                var storyCategories = createStoryDto.CategoryIDs.Select(categoryId => new StoryCategoriesMapping
+                {
+                    StoryID = newStory.StoryID,
+                    CategoryID = categoryId
+                }).ToList();
+
+                _context.StoryCategoriesMapping.AddRange(storyCategories);
+                await _context.SaveChangesAsync();
+
+                return "Thêm truyện thành công !";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (Azure.RequestFailedException azEx)
+            {
+                return $"Lỗi upload ảnh lên cloud: {azEx.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
+
+        }*/
+        #endregion
+
+        #region Add story (aws)
+        public async Task<string> AddStoryAsync(AddStoryDto createStoryDto)
+        {
+            try
+            {
+                var publisher = await _context.Users.FindAsync(createStoryDto.PublisherID);
+                if (publisher == null)
+                {
+                    return "Lỗi: Nhà xuất bản không tồn tại";
+                }
+                var status = (publisher.Role == "Admin") ? "Approved" : "Pending";
+
+                // Đẩy ảnh bìa lên clound
+                var fileName = $"cover-{Guid.NewGuid()}{Path.GetExtension(createStoryDto.CoverImage.FileName)}";
+                string primaryImgUrl = await UploadFileToS3(createStoryDto.CoverImage, _containerCoverImg, fileName);
 
                 var newStory = new Story
                 {
@@ -99,6 +167,64 @@ namespace ComicParadise.Repository
 
             }
             return blobClient.Uri.ToString();
+        }
+        #endregion
+
+        #region Upload file to AWS 
+        private async Task<string> UploadFileToS3(IFormFile file, string prefix, string fileName)
+        {
+            try
+            {
+                // Tạo key (đường dẫn) trên S3: prefix/story-id/filename
+                var key = $"{prefix}/{fileName}"; // Ví dụ: "cover-image/cover-123.jpg"
+
+                using var stream = file.OpenReadStream();
+                var request = new PutObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key,
+                    InputStream = stream,
+                    ContentType = file.ContentType
+                };
+
+                var response = await _s3Client.PutObjectAsync(request);
+                if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    // Trả về URL của file trên S3
+                    return $"https://{_bucketName}.s3.amazonaws.com/{key}";
+                }
+
+                throw new Exception("Upload file lên S3 thất bại");
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Lỗi upload file lên S3: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region Delete file from AWS
+        private async Task DeleteFileFromS3(string fileUrl)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fileUrl))
+                    return;
+                var uri = new Uri(fileUrl);
+                var key = uri.AbsolutePath.Substring(1); 
+
+                var request = new DeleteObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key
+                };
+
+                await _s3Client.DeleteObjectAsync(request);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Lỗi xóa file trên S3: {ex.Message}");
+            }
         }
         #endregion
 
@@ -230,8 +356,8 @@ namespace ComicParadise.Repository
 
         #endregion
 
-        #region Update story infor
-        public async Task<string> UpdateStoryAsync(UpdateStoryDto storyDto)
+        #region Update story infor (Azure)
+        /*public async Task<string> UpdateStoryAsync(UpdateStoryDto storyDto)
         {
             try
             {
@@ -309,7 +435,85 @@ namespace ComicParadise.Repository
             {
                 return $"Lỗi hệ thống: {ex.Message}";
             }
+        }*/
+        #endregion
 
+        #region Update story infor (AWS)
+        public async Task<string> UpdateStoryAsync(UpdateStoryDto storyDto)
+        {
+            try
+            {
+                var story = await _context.Stories
+                                .FirstOrDefaultAsync(s => s.StoryID == storyDto.StoryID);
+
+                if (story == null)
+                {
+                    throw new Exception("Truyện không tồn tại");
+                }
+
+                if (!string.IsNullOrEmpty(storyDto.Title) && story.Title != storyDto.Title)
+                {
+                    story.Title = storyDto.Title;
+                }
+                if (!string.IsNullOrEmpty(storyDto.Author) && story.Author != storyDto.Author)
+                {
+                    story.Author = storyDto.Author;
+                }
+                if (!string.IsNullOrEmpty(storyDto.Type) && story.Type != storyDto.Type)
+                {
+                    story.Type = storyDto.Type;
+                }
+                if (!string.IsNullOrEmpty(storyDto.Description) && story.Description != storyDto.Description)
+                {
+                    story.Description = storyDto.Description;
+                }
+
+                if (storyDto.CoverImage != null && storyDto.CoverImage.Length > 0)
+                {
+                    // Xóa ảnh bìa cũ trên S3 (nếu có)
+                    if (!string.IsNullOrEmpty(story.CoverImage))
+                    {
+                        await DeleteFileFromS3(story.CoverImage);
+                    }
+
+                    // Tải ảnh bìa mới lên S3
+                    var fileName = $"cover-{Guid.NewGuid()}{Path.GetExtension(storyDto.CoverImage.FileName)}";
+                    string newCoverImageUrl = await UploadFileToS3(storyDto.CoverImage, _containerCoverImg, fileName);
+                    story.CoverImage = newCoverImageUrl;
+                }
+
+                if (storyDto.CategoryIDs != null && storyDto.CategoryIDs.Any())
+                {
+                    // Xóa các mapping cũ
+                    var existingCategories = await _context.StoryCategoriesMapping
+                        .Where(sc => sc.StoryID == story.StoryID)
+                        .ToListAsync();
+                    _context.StoryCategoriesMapping.RemoveRange(existingCategories);
+
+                    // Thêm các mapping mới
+                    var newStoryCategories = storyDto.CategoryIDs.Select(categoryId => new StoryCategoriesMapping
+                    {
+                        StoryID = story.StoryID,
+                        CategoryID = categoryId
+                    }).ToList();
+                    _context.StoryCategoriesMapping.AddRange(newStoryCategories);
+                }
+
+                await _context.SaveChangesAsync();
+                return "Cập nhật truyện thành công!";
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return $"Lỗi database: {dbEx.Message}";
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                return $"Lỗi xử lý file trên S3: {s3Ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi hệ thống: {ex.Message}";
+            }
         }
         #endregion
 
