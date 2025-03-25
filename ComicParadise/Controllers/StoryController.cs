@@ -88,6 +88,5 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.GetAdvanceStories(userID);
             return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
-
     }
 }
