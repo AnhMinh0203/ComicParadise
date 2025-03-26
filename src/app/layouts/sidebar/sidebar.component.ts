@@ -8,13 +8,14 @@ import { ThemeService } from '../../core/share/theme.service';
 import { categoryService } from '../service/category.service';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
+import { storyService } from '../../comic-paradise/service/story.service';
+import { SharedService } from '../service/share.service';
 @Component({
   selector: 'app-sidebar',
   imports: [
     SharedModule,
     MegaMenuModule,
-    AccordionModule
+    AccordionModule,
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
@@ -24,13 +25,19 @@ export class SidebarComponent {
   visibleCategories: boolean = false;
   activeCategoryIndex: number | null = null;
 
-  items: MenuItem[] = [];
+  categoryItems: MenuItem[] = [];
+  notifyItems: MenuItem[] | undefined;
   isDarkMode: boolean = false;
+  visibleNotify: any;
+  searchStories: any;
+  userID: any;
 
   constructor(
     private sidebarService: SidebarService,
     private themeService: ThemeService,
     private _categoryService: categoryService,
+    private _storyService: storyService,
+    private _sharedService: SharedService,
     private http: HttpClient,
     private router: Router,
   ) {
@@ -40,8 +47,40 @@ export class SidebarComponent {
   }
 
   ngOnInit() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.userID = user.userID;
     this.getCategories();
+    this.notifyItems = [
+      {
+        label: 'Options',
+        items: [
+          {
+            label: 'Refresh',
+            icon: 'pi pi-refresh'
+          },
+          {
+            label: 'Export',
+            icon: 'pi pi-upload'
+          }
+        ]
+      }
+    ];
   }
+
+  resetHome() {
+    this.searchStories = [];
+    this._storyService.setSearchStories([]);
+    this.router.navigate(['']);
+  }
+
+  navigateToLogin() {
+    this.router.navigate(['/login']);
+  }
+  navigateToRegister() {
+    this.router.navigate(['/register']);
+
+  }
+
   closeSidebar() {
     this.sidebarService.toggleSidebar();
   }
@@ -58,7 +97,7 @@ export class SidebarComponent {
   getCategories() {
     this._categoryService.getCategories().subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.items = res.data
+        this.categoryItems = res.data
         console.log(res.data)
       }
     })
@@ -66,5 +105,25 @@ export class SidebarComponent {
 
   navigateToContact() {
     this.router.navigate(['/about-us']);
+  }
+
+  logout(){
+    this._sharedService.logout();
+  }
+
+  openMemberForm() {
+    this._sharedService.triggerUpdateMemberForm();
+  }
+
+  openFavoriteStoriesForm() {
+    this._sharedService.triggeFavoriteStoriesForm();
+  }
+
+  openHistoryStoriesForm(){
+    this._sharedService.triggeHistoryStoriesForm();
+  }
+
+  openNotificationForm(){
+    this._sharedService.triggeNotificationForm();
   }
 }

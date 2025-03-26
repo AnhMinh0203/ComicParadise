@@ -11,9 +11,9 @@
 
         <div class="story-actions mt-3">
           <div class="story-actions-up w-100 d-flex my-2">
-            <p-button label="1.1k" severity="danger" icon="pi pi-heart" [style]="{width: '100%'}"
-              class="flex-grow-1 me-1 border border-danger rounded" />
-            <p-button label="15k" severity="secondary" icon="pi pi-eye" [style]="{width: '100%'}"
+            <p-button label="{{this.likes}}" severity="danger"  icon="{{ isLiked ? 'pi pi-heart-fill' : 'pi pi-heart' }}" [style]="{width: '100%'}"
+              class="flex-grow-1 me-1 border border-danger rounded" (click)="onLikeStory()"/>
+            <p-button label="{{this.views}}" severity="secondary" icon="pi pi-eye" [style]="{width: '100%'}"
               class="flex-grow-1 ms-1 border border-secondary rounded" />
           </div>
           <div class="story-actions-down w-100 d-flex">

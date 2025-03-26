@@ -1,3 +1,4 @@
+<p-toast/>
 <div class="login-container ">
   <div class="row justify-content-center">
     <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-4">
@@ -6,18 +7,15 @@
           <h2>Đăng Nhập</h2>
         </div>
         <form [formGroup]="loginForm">
-
           <input id="username" formControlName="identifier" class="form-control mb-3"
             placeholder="Nhập email hoặc số điện thoại" />
-            <input id="passwordHash" type="password" formControlName="passwordHash" class="form-control mb-3"
+          <input id="passwordHash" type="password" formControlName="passwordHash" class="form-control mb-3"
             placeholder="Nhập mật khẩu" />
-
           <div class="d-flex justify-content-end forget-password mb-3">
             <a (click)="onForgotPassword()" class="pointer" href="#"><b>Quên mật khẩu?</b></a>
           </div>
-
           <div class="w-100 mb-3 mt-5">
-            <p-button label="Đăng nhập" severity="success" [style]="{width: '100%'}"  (onClick)="onLogin()"></p-button>
+            <p-button label="Đăng nhập" severity="success" [style]="{width: '100%'}" (onClick)="onLogin()"></p-button>
           </div>
         </form>
 
@@ -27,7 +25,7 @@
         </div>
 
         <div class="links d-flex justify-content-center mt-3">
-          <span>Chưa có tài khoản? <a (click)="onRegister()" class="pointer" href="#"><b>Đăng ký ngay</b></a></span>
+          <span>Chưa có tài khoản? <a (click)="navigateToRegister()" class="pointer"><b>Đăng ký ngay</b></a></span>
         </div>
       </div>
     </div>

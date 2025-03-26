@@ -115,3 +115,64 @@ ul {
   background-color: #f9f9f9;
 }
 
+// Notification css
+.notification {
+  position: relative;
+  display: inline-block;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+
+.notification:hover .pi-bell {
+  transform: scale(1.1);
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.noti-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.noti-item:hover {
+  background: #eaf2ff;
+}
+
+// .noty-icon p-avatar {
+//   border: 2px solid #007bff;
+// }
+
+.noti-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.noti-time {
+  font-size: 12px;
+  color: #777;
+}
+

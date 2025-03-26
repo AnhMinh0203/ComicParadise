@@ -38,12 +38,13 @@ export class InforStoryComponent {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private _chapterService: chapterService,
-    private _storyService: storyService
+    private _storyService: storyService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
   ) { }
 
   comments: any;
   commentInput: any;
-
   storyID: any;
   commentSelections: MenuItem[] | undefined;
   coverImageDisplay: any;
@@ -54,6 +55,12 @@ export class InforStoryComponent {
   chapters: any[] = [];
   showAllChapters: any;
   maxChaptersToShow: any;
+  likes: any;
+  views: any;
+  isLiked: boolean = false;
+  currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
+  favoriteStories: any[] = [];
+
 
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe(async params => {
@@ -61,11 +68,19 @@ export class InforStoryComponent {
       if (id) {
         this.storyID = +id;
         this.getChaptersByStoryID(this.storyID);
+
         // await this.getCommentsByStoryID(this.storyID);
         this.getStoryDetail(this.storyID);
+        this.checkIsLikeStory();
       }
 
     });
+  }
+
+  checkIsLikeStory(){
+    this._storyService.checkIsLikeStory(this.currentUserId,this.storyID).subscribe((res:any)=>{
+      this.isLiked = res.data;
+    })
   }
 
   getChaptersByStoryID(storyID: any) {
@@ -117,17 +132,18 @@ export class InforStoryComponent {
   }
 
   async getStoryDetail(storyID: number) {
-    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
+
     const res: any = await firstValueFrom(this._storyService.getStoryById(storyID));
 
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
-      console.log(res);
       this.author = res.data.author;
       this.title = res.data.title;
       this.selectStoryType = res.data.type;
       this.categoriesSelect = res.data.categories;
       this.coverImageDisplay = res.data.coverImage;
       this.description = res.data.description;
+      this.views = res.data.views;
+      this.likes = res.data.likes;
 
       // this.comments = this.comments.map((comment: any) => {
       //   // Tìm reaction của user hiện tại trong danh sách reactions
@@ -151,10 +167,9 @@ export class InforStoryComponent {
   }
 
   mapChildComments(childComments: any[]): any[] {
-    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
     return childComments.map((child: any) => {
       // Tìm reaction của user hiện tại trong danh sách reactions của comment con
-      const userReaction = child.reactions.find((reaction: any) => reaction.userID === currentUserId);
+      const userReaction = child.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
 
       return {
         commentID: child.commentID.toString(),
@@ -193,6 +208,27 @@ export class InforStoryComponent {
     throw new Error('Method not implemented.');
   }
   onLike(_t67: any) {
-    throw new Error('Method not implemented.');
+
   }
+
+  onLikeStory(){
+    this.isLiked = ! this.isLiked;
+    this._storyService.likeStory(this.currentUserId, this.storyID).subscribe((res:any)=>{
+      if(res && res.isSuccess){
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Thông báo',
+          detail: 'Thích truyện thành công'
+        })
+        if(this.isLiked){
+          this.likes += 1;
+
+        }
+        else{
+          this.likes -= 1;
+        }
+      }
+    })
+  }
+
 }

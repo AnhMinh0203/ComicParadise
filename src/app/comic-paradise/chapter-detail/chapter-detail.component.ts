@@ -17,6 +17,7 @@ export class ChapterDetailComponent {
   chapterContent: any;
   storyID: any;
   chapterNumber: any;
+  currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,7 +34,7 @@ export class ChapterDetailComponent {
   }
 
   loadChapterContent(): void {
-    this._chapterService.getChapterContent(this.storyID, this.chapterNumber)
+    this._chapterService.getChapterContent(this.storyID, this.chapterNumber, this.currentUserId)
       .subscribe(res => {
         this.chapterContent = res.data;
         this.cdr.detectChanges();

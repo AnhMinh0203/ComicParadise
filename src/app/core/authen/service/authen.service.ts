@@ -17,4 +17,13 @@ export class AuthenService {
       })
     );
   }
+
+  register(model:any){
+    return this.http.post(`${this.apiUrl}/Register`, model)
+    .pipe(
+      catchError((error: any) => {
+        throw error;
+      })
+    );
+  }
 }

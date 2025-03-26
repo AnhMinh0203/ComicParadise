@@ -6,16 +6,19 @@ import { RouterModule, Router } from '@angular/router';
 import { Toast } from 'primeng/toast';
 import { AuthenService } from '../service/authen.service';
 import { MessageService } from 'primeng/api';
-
+import { CheckboxModule } from 'primeng/checkbox';
+import { SharedModule } from '../../share/shared.module';
 @Component({
   selector: 'app-login',
-  standalone: true,  // Standalone component
+  standalone: true,
   imports: [
+    SharedModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     ButtonModule,
     RouterModule,
+    CheckboxModule
   ],
   providers: [MessageService],
   templateUrl: './login.component.html',
@@ -23,7 +26,7 @@ import { MessageService } from 'primeng/api';
 })
 export class LoginComponent {
   loginForm: any;
-  test:any
+  test: any
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -56,11 +59,14 @@ export class LoginComponent {
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
 
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully !' });
-        this.router.navigate(['/dashboard']);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Đăng nhập thành công!' });
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+
+        }, 1000);
       }
       else {
-        this.messageService.add({  severity: 'error', summary: 'Error', detail: res.message });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message });
       }
     });
   }
@@ -75,5 +81,9 @@ export class LoginComponent {
 
   loginWith(provider: string) {
     console.log(`Đăng nhập với ${provider}`);
+  }
+
+  navigateToRegister(){
+    this.router.navigate(['/register']);
   }
 }

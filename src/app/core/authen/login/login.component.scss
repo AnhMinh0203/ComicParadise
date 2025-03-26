@@ -38,6 +38,7 @@ input {
 }
 
 .login-form {
+  background: #333 !important;
   border: 1px solid #ccc;
   border-radius: 5%;
   padding: 25px;
@@ -45,10 +46,10 @@ input {
 }
 
 .login-container {
-  background: url('../../../../assets/images/background_authen.png') no-repeat center center;
+  background: #1a1a1a;
   min-height: 100vh;
   background-size: cover;
-  border-radius: 10px;
   padding: 30px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
+

@@ -229,7 +229,7 @@ p-tab {
 .read-now-btn {
   position: absolute;
   bottom: 10px;
-  right: 10px;
+  right: 0px;
   background: linear-gradient(45deg, #ff416c, #ff4b2b);
   color: white;
   font-weight: bold;
@@ -290,4 +290,31 @@ p-tab {
 
 .mt-150{
   margin-top: 150px;
+}
+
+
+// Search are
+// home.component.scss
+.searchStoryArea {
+  opacity: 0;
+  max-height: 0; // Ẩn hoàn toàn khi không có nội dung
+  overflow: hidden;
+  transition: opacity 0.5s ease, max-height 0.5s ease; // Hiệu ứng mượt mà
+}
+
+.searchStoryArea.visible {
+  opacity: 1;
+  max-height: 1000px; // Đặt giá trị lớn đủ để chứa nội dung (hoặc dùng 'auto' với JS nếu cần)
+}
+
+.container.my-3 {
+  opacity: 1;
+  max-height: 2000px; // Đặt giá trị lớn đủ để chứa nội dung
+  overflow: hidden;
+  transition: opacity 0.5s ease, max-height 0.5s ease;
+}
+
+.container.my-3.hidden {
+  opacity: 0;
+  max-height: 0;
 }

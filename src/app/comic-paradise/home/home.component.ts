@@ -39,12 +39,19 @@ export class HomeComponent {
   // ---
   isInforStoryPage: boolean = false;
   currentUpdateStories: any;
+  topStories: any[] = [];
+  searchStories: any[] = [];
+  advanceStories: any[] = [];
+  selectedTab: string = "0";
+  topType: string = "month";
+  displayLimit: number = 4;
+  currentUserId: any;
 
-
+  isSearch: boolean = false;
 
   constructor(
     private router: Router,
-    private _storyServce: storyService
+    private _storyService: storyService
   ) { }
 
 
@@ -52,35 +59,16 @@ export class HomeComponent {
   isDarkMode = false;
 
   ngOnInit() {
+    // Subscribe để lắng nghe dữ liệu searchStories từ service
+    this._storyService.searchStories$.subscribe((stories: any[]) => {
+      this.searchStories = stories;
+      this.isSearch = stories.length > 0; // Cập nhật trạng thái tìm kiếm
+
+    });
+    this.currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
     this.getCurrentUpdateStories()
-
-
-    // this.items = [
-    //   {
-    //     label: 'Loại truyện',
-
-    //     items: [
-    //       [
-    //         {
-    //           label: 'Living Room',
-    //           items: [
-    //             { label: 'Accessories' },
-    //             { label: 'Armchair' },
-    //             { label: 'Coffee Table' },
-    //             { label: 'Couch' },
-    //             { label: 'TV Stand' },
-    //           ],
-    //         },
-    //       ],
-    //       [
-    //         {
-    //           label: 'Kitchen',
-    //           items: [{ label: 'Bar stool' }, { label: 'Chair' }, { label: 'Table' }],
-    //         },
-    //       ],
-    //     ],
-    //   },
-    // ];
+    this.getTopStories();
+    this.getAdvanceStories();
   }
 
   navigateToInforStory(storyID: number) {
@@ -88,12 +76,51 @@ export class HomeComponent {
   }
 
 
-  getCurrentUpdateStories(){
-    this._storyServce.getCurrentUpdateStories(7).subscribe((res:any)=>{
-      if(res && res.isSuccess){
+  getCurrentUpdateStories() {
+    this._storyService.getCurrentUpdateStories(7).subscribe((res: any) => {
+      if (res && res.isSuccess) {
         this.currentUpdateStories = res.data
         console.log(res.data)
       }
     })
   }
+
+  onTabChange(event: any) {
+    const mapping = ["month", "week", "day"];
+    this.topType = mapping[event] || "month";
+    this.getTopStories();
+  }
+
+
+  getTopStories() {
+    this._storyService.getTopStories(this.topType).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.topStories = res.data;
+
+      }
+    })
+  }
+
+  getAdvanceStories() {
+    // Fix tạm userID
+    this._storyService.getAdvanceStories(1).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.advanceStories = res.data;
+      }
+    })
+  }
+
+
+  showMore() {
+    this.displayLimit += 4; // Tăng giới hạn lên 4
+    if (this.displayLimit > this.topStories.length) {
+      this.displayLimit = this.topStories.length; // Không vượt quá tổng số truyện
+    }
+  }
+
+  showLess() {
+    this.displayLimit = 4; // Quay lại 4 truyện
+  }
+
+
 }

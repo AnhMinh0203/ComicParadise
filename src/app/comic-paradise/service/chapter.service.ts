@@ -16,8 +16,8 @@ export class chapterService {
     return this.http.get(apiUrl);
   }
 
-  getChapterContent(storyId: number, chapterNumber: number): Observable<any> {
-    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}`;
+  getChapterContent(storyId: number, chapterNumber: number, userID: any): Observable<any> {
+    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}&userID=${userID}`;
     return this.http.get(apiUrl);
   }
 

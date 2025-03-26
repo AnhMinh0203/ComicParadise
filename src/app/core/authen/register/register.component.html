@@ -1,1 +1,45 @@
-<p>register works!</p>
+<p-toast/>
+<div class="register-container ">
+  <div class="row justify-content-center">
+    <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-4">
+      <div class="register-form mt-5">
+        <!-- <img src="assets/images/logo.png" alt="Logo" class="register-logo"> -->
+        <div class="d-flex justify-content-center mb-4">
+
+          <h2>Đăng ký</h2>
+        </div>
+        <form [formGroup]="registerForm">
+          <input id="userName" formControlName="userName" class="form-control mb-3" placeholder="Nhập họ tên" />
+          <input id="phone" formControlName="phone" class="form-control mb-3" placeholder="Nhập số điện thoại" />
+
+          <input id="email" type="text" formControlName="email" class="form-control mb-3" placeholder="Nhập email " />
+
+
+          <input id="passwordHash" type="password" formControlName="passwordHash" class="form-control mb-3"
+            placeholder="Nhập mật khẩu" />
+          <input id="passwordHashConfirm" type="password" formControlName="passwordHashConfirm"
+            class="form-control mb-3" placeholder="Xác nhận mật khẩu" />
+
+          <div class="d-flex justify-content-start forget-password mb-3">
+
+            <p-toggleswitch formControlName="role" />
+            <span class="mx-2">Trở thành nhà xuất bản ?</span>
+          </div>
+
+          <div class="w-100 mb-3 mt-5">
+            <p-button label="Đăng ký" severity="success" [style]="{width: '100%'}" (onClick)="onRegister()"></p-button>
+          </div>
+        </form>
+
+        <div class="social-register d-flex justify-content-center align-items-center mt-3 mb-3">
+          <i (click)="registerWith('Facebook')" class="pi pi-facebook"></i>
+          <i (click)="registerWith('Google')" class="pi pi-google"></i>
+        </div>
+
+        <div class="links d-flex justify-content-center mt-3">
+          <span>Đã có tài khoản? <a (click)="navigateToLogin()" class="pointer" ><b>Đăng nhập ngay</b></a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

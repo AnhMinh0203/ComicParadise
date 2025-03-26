@@ -7,7 +7,7 @@
   </div>
   <div class="d-flex justify-content-between align-items-center mb-3 container-toggle p-1">
     <!-- Notification Icon -->
-    <div class="notification">
+    <div class="notification" (click)="openNotificationForm()">
       <i class="pi pi-bell"></i>
     </div>
 
@@ -19,13 +19,23 @@
 
   <ul class="sidebar-menu">
     <li>
-      <a href="#">
-        <i class="me-3 pi pi-home"></i>Trang chủ
+      <a (click)="resetHome()">
+        <i class="me-3 pi pi-home"></i> Trang chủ
       </a>
     </li>
-    <li>
-      <a href="#">
+    <li *ngIf="userID">
+      <a (click)="openMemberForm()">
         <i class="me-3 pi pi-user"></i>Tài khoản
+      </a>
+    </li>
+    <li *ngIf="userID">
+      <a (click)="openFavoriteStoriesForm()">
+        <i class="me-3 pi pi-heart"></i>Yêu thích
+      </a>
+    </li>
+    <li *ngIf="userID">
+      <a (click)="openHistoryStoriesForm()">
+        <i class="me-3 pi pi-history"></i>Lịch sử
       </a>
     </li>
     <li>
@@ -36,14 +46,28 @@
     </li>
     <li>
       <a (click)="navigateToContact()">
-        <i class="me-3 pi pi-phone"></i>Giới thiệu
+        <i class="me-3 pi pi-id-card  "></i>Giới thiệu
       </a>
     </li>
-    <li>
-      <a href="#">
-        <i class="me-3 pi pi-cog"></i>Cài đặt
+    <li *ngIf="userID">
+      <a (click)="logout()">
+        <i class="me-3 pi pi-sign-out"></i>Đăng xuất
       </a>
     </li>
+
+    <li *ngIf="!userID">
+      <a (click)="navigateToRegister()">
+        <i class="me-3 pi pi-user-edit"></i>Đăng ký
+      </a>
+    </li>
+
+    <li *ngIf="!userID">
+      <a (click)="navigateToLogin()">
+        <i class="me-3 pi pi-sign-in"></i>Đăng nhập
+      </a>
+    </li>
+
+
   </ul>
 </div>
 
@@ -55,7 +79,7 @@
   [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
   [resizable]="false">
   <div class="category-list">
-    <p-accordion *ngFor="let category of items let i = index">
+    <p-accordion *ngFor="let category of categoryItems let i = index">
       <p-accordion-panel value={{i}}>
         <p-accordion-header>{{category.label}}</p-accordion-header>
         <p-accordion-content *ngFor="let categoryName of category.items">
@@ -66,3 +90,73 @@
     </p-accordion>
   </div>
 </p-dialog>
+
+
+<!-- notify -->
+<!-- <p-dialog header="Thông báo" [(visible)]="visibleNotify" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <div class="d-flex justify-content-between noti-item p-2 my-2">
+
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar label="P" shape="circle" size="large" />
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text">
+          abc
+        </div>
+        <div class="noti-time">
+          9 giờ trước
+        </div>
+      </div>
+    </div>
+    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
+      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body"/>
+      <i class="pi pi-ellipsis-h" ></i>
+
+    </div>
+  </div>
+  <div class="d-flex justify-content-between noti-item p-2 my-2">
+
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar label="P" shape="circle" size="large" />
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text">
+          abc
+        </div>
+        <div class="noti-time">
+          9 giờ trước
+        </div>
+      </div>
+    </div>
+    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
+      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body"/>
+      <i class="pi pi-ellipsis-h" ></i>
+
+    </div>
+  </div>
+  <div class="d-flex justify-content-between noti-item p-2 my-2">
+
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar label="P" shape="circle" size="large" />
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text">
+          abc
+        </div>
+        <div class="noti-time">
+          9 giờ trước
+        </div>
+      </div>
+    </div>
+    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
+      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body"/>
+      <i class="pi pi-ellipsis-h" ></i>
+
+    </div>
+  </div>
+</p-dialog> -->
