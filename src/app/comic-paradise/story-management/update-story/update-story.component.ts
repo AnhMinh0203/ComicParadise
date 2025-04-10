@@ -530,8 +530,11 @@ export class UpdateStoryComponent {
       ChapterNumber: this.chapterNumber,
       Title: this.title,
       ChapterType: this.selectMangaType,
-      ImageFiles: this.selectedContentImages
+      ImageFiles: this.selectedContentImages,
+      CreatedBy: JSON.parse(localStorage.getItem('user') || '{}').userID
     };
+    console.log("---- Chapter ----");
+    console.log(chapter);
 
     this._chapterService.postChapter(chapter).subscribe((res: any) => {
       if (res && res.isSuccess == true) {

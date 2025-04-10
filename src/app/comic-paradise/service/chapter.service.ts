@@ -16,8 +16,8 @@ export class chapterService {
     return this.http.get(apiUrl);
   }
 
-  getChapterContent(storyId: number, chapterNumber: number): Observable<any> {
-    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}`;
+  getChapterContent(storyId: number, chapterNumber: number, currentUserId:any): Observable<any> {
+    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}&userID=${currentUserId}`;
     return this.http.get(apiUrl);
   }
 
@@ -33,6 +33,7 @@ export class chapterService {
     formData.append('ChapterNumber', chapter.ChapterNumber.toString());
     formData.append('Title', chapter.Title);
     formData.append('ChapterType', chapter.ChapterType);
+    formData.append('CreatedBy', chapter.CreatedBy);
 
     if (chapter.ChapterType === 'PDF' && chapter.PdfFile) {
       formData.append('PdfFile', chapter.PdfFile); // PdfFile là File object

@@ -30,6 +30,7 @@ export class ChapterManagementComponent {
   newPageReplace: any;
   newPageAdd: any;
   deletePageNumber: any;
+  currentUserId: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,15 +41,17 @@ export class ChapterManagementComponent {
   ) { }
 
   ngOnInit(): void {
+    this.currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
     this.storyID = +this.route.snapshot.paramMap.get('storyID')!;
     this.chapterNumber = +this.route.snapshot.paramMap.get('chapterNumber')!;
     this.loadChapterContent();
   }
 
   loadChapterContent(): void {
-    this._chapterService.getChapterContent(this.storyID, this.chapterNumber)
+    this._chapterService.getChapterContent(this.storyID, this.chapterNumber, this.currentUserId)
       .subscribe(res => {
         this.chapterContent = res.data;
+        console.log(this.chapterContent);
         this.cdr.detectChanges();
       });
   }
@@ -137,7 +140,7 @@ export class ChapterManagementComponent {
   }
 
   loadChapterContentWhenReplace(): Observable<any> {
-    return this._chapterService.getChapterContent(this.storyID, this.chapterNumber)
+    return this._chapterService.getChapterContent(this.storyID, this.chapterNumber, this.currentUserId)
       .pipe(
         tap(res => {
           this.chapterContent = res.data;
@@ -150,7 +153,7 @@ export class ChapterManagementComponent {
     this.newPageAdd = event.files[0];
   }
 
-  addChapterPage(event: any){
+  addChapterPage(event: any) {
     const model = {
       storyID: this.storyID,
       chapterNumber: this.chapterNumber,

@@ -41,7 +41,6 @@
 <p-card header="Danh sách chương ({{ chapters.length }})" [styleClass]="'mb-2'">
   <div class="chapter-list">
     <div class="row">
-      <!-- Chỉ hiển thị số chương theo trạng thái showAllChapters -->
       <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 mb-3"
         *ngFor="let chapter of (showAllChapters ? chapters : chapters.slice(0, maxChaptersToShow))">
         <div class="chapter-item d-flex align-items-center p-3 rounded shadow-sm transition"

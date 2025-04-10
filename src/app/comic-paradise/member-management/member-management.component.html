@@ -210,11 +210,11 @@
 <!-- Reading histories -->
 <div class="card flex justify-center">
   <p-dialog [(visible)]="visibleReadingHistoryForm" [modal]="true" [closable]="true"
-    [header]="'Lịch sử đọc truyện'" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"   [style]="{ width: '80vw', height: '80vh' }"   [baseZIndex]="10000">
+    [header]="'Lịch sử đọc truyện'" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"   [style]="{ width: '80vw', height: 'auto' }"   [baseZIndex]="10000">
 
     <ng-container *ngIf="historyStories.length > 0; else noData">
-      <p-listbox [options]="historyStories" optionLabel="title" [style]="{width: '100%',height: '100%'}">
-        <ng-template let-story pTemplate="item" [style]="{width: '100%',height: '100%'}">
+      <p-listbox [options]="historyStories" optionLabel="title" [style]="{width: '100%',height: 'auto'}">
+        <ng-template let-story pTemplate="item" [style]="{width: '100%',height: 'auto'}">
           <div class="d-flex justify-content-between w-100 items-center gap-3 p-2 border-b border-gray-200">
 
             <div>
@@ -225,7 +225,7 @@
             </div>
             <img [src]="story.coverImage" alt="Thumbnail"
               class="rounded-md object-cover shadow-sm border border-gray-300"
-              style="width: 56px; height: 80px;">
+              style="width: 56px; height: auto;">
 
           </div>
         </ng-template>

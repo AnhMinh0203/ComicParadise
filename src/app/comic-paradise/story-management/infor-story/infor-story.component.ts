@@ -52,7 +52,7 @@ export class InforStoryComponent {
   selectedComment: any;
   replyingCommentId: any;
   showAllChapters: boolean = false;
-  maxChaptersToShow: number = 8;
+  maxChaptersToShow: number = 12;
 
   constructor(
     private http: HttpClient,

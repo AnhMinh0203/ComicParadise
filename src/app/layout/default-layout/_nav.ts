@@ -51,15 +51,15 @@ export const navItems: INavData[] = [
     ]
   },
 
-  {
-    title: true,
-    name: 'Tài liệu',
-    class: 'mt-auto'
-  },
-  {
-    name: 'Docs',
-    url: 'https://coreui.io/angular/docs/',
-    iconComponent: { name: 'cil-description' },
-    attributes: { target: '_blank' }
-  }
+  // {
+  //   title: true,
+  //   name: 'Tài liệu',
+  //   class: 'mt-auto'
+  // },
+  // {
+  //   name: 'Docs',
+  //   url: 'https://coreui.io/angular/docs/',
+  //   iconComponent: { name: 'cil-description' },
+  //   attributes: { target: '_blank' }
+  // }
 ];
