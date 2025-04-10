@@ -155,7 +155,8 @@
 
 .notification,
 .toggle-theme,
-.bar-mobile {
+.bar-mobile,
+.search-mobile {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,23 +165,37 @@
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
+.search-mobile-full{
+  height: 83px;
+}
+
+.flex-0-9{
+  flex: 0.9;
+}
+
+.flex-0-1{
+  flex: 0.1;
+}
 
 .toggle-theme,
-.bar-mobile,
-.notification i {
+.notification i{
   padding: 10px;
+}
+
+.bar-mobile,
+.search-mobile {
+  padding: 6px 10px;
 }
 
 /* Hiệu ứng hover */
 .notification:hover,
 .toggle-theme:hover,
-.bar-mobile:hover {
+.bar-mobile:hover,
+.search-mobile:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  /* Nhẹ sáng lên */
   border-color: rgba(255, 255, 255, 0.5);
-  /* Viền sáng hơn */
   box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-  /* Đổ bóng nhẹ */
+
 }
 
 // Css cho thông báo
@@ -214,6 +229,12 @@
   font-size: 14px;
   font-weight: 500;
   color: #333;
+  white-space: pre-line;
+}
+.noti-link a{
+  font-size: 14px;
+  font-weight: 500;
+  color: #f39c12;
 }
 
 .noti-time {
@@ -264,6 +285,8 @@
     display: none;
   }
 
+
+  .search-mobile,
   .bar-mobile {
     display: block !important;
   }
@@ -277,6 +300,7 @@
   }
 }
 
+.search-mobile,
 .bar-mobile {
   display: none;
   cursor: pointer;

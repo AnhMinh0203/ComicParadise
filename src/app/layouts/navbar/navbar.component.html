@@ -1,23 +1,21 @@
 <p-toast />
 
 <nav class="navbar d-flex justify-content-between aligh-categoryItems-center">
-
-  <!-- Logo -->
+  <!-- Left Side -->
   <div class="d-flex">
-    <div class="header-logo ">
+    <!-- Logo -->
+    <div class="header-logo" *ngIf="!isSearchMobile">
       <a (click)="resetHome()">
         <img src="../../../assets/images/logo.png" alt="Logo">
       </a>
-
     </div>
-    <!-- Right Side -->
+    <!-- Home -->
     <div class="navbar-left">
       <a (click)="resetHome()">Trang chủ</a>
-      <!-- <a href="">Thể loại</a> -->
       <p-megamenu [model]="categoryItems" />
       <a (click)="navigateToContact()">Giới thiệu</a>
 
-      <!-- Search Input -->
+      <!-- Search -->
       <div class="search-box">
         <input type="text" placeholder="Tìm kiếm..." [(ngModel)]="searchKey" (ngModelChange)="onSearchKeyChange()">
         <i class="pi pi-search" (click)="searchStory()"></i>
@@ -25,16 +23,43 @@
     </div>
   </div>
 
-  <div class="bar-mobile mx-3" (click)="toggleSidebar()">
-    <i class="pi pi-bars"></i>
+  <!-- Mobile -->
+  <div *ngIf="!isSearchMobile" class="d-flex align-items-center">
+    <div class="search-mobile" (click)="toggleSearchMobile()">
+      <i class="pi pi-search"></i>
+    </div>
+
+    <div class="bar-mobile ms-3" (click)="toggleSidebar()">
+      <i class="pi pi-bars"></i>
+    </div>
   </div>
 
+  <div *ngIf="isSearchMobile" class="search-mobile-full d-flex justify-content-between align-items-center w-100 ">
+    <div class="back flex-0-1" (click)="toggleSearchMobile()">
+      <i class="pi pi-angle-left"></i>
+    </div>
+    <div class="search-box flex-0-9">
+      <input type="text" class="w-100" placeholder="Tìm kiếm..." [(ngModel)]="searchKey"
+        (ngModelChange)="onSearchKeyChange()">
+      <i class="pi pi-search" (click)="searchStory()"></i>
+    </div>
+  </div>
+
+  <!-- Right Side -->
   <div class="navbar-right">
+
     <!-- Notification -->
-    <div class="notification" (click)="showDialogNotify()">
-      <p-overlaybadge badgeSize="small" [value]="getUnreadNotificationsCount()">
+    <!-- <div class="notification" (click)="showDialogNotify()">
+      <p-overlaybadge badgeSize="small" [value]="unreadNotification">
         <i class="pi pi-bell" style="font-size: 1rem"></i>
       </p-overlaybadge>
+    </div> -->
+
+    <div class="notification" (click)="showDialogNotify()">
+      <p-overlaybadge *ngIf="unreadNotification > 0" badgeSize="small" [value]="unreadNotification">
+        <i class="pi pi-bell" style="font-size: 1rem"></i>
+      </p-overlaybadge>
+      <i class="pi pi-bell" *ngIf="unreadNotification === 0" style="font-size: 1rem"></i>
     </div>
 
     <!-- Toggle Theme -->
@@ -55,35 +80,65 @@
       </div>
     </div>
   </div>
+
+
 </nav>
 
 <!-- Notify Dialog -->
 <p-dialog header="Thông báo" [(visible)]="visibleNotify" [modal]="true"
   [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
   [resizable]="false">
-  <div *ngFor="let noti of notifications" class="d-flex justify-content-between noti-item p-2 my-2">
+  <hr>
+  <h6>Thông báo mới</h6>
+  <div *ngFor="let noti of newNotifications.reverse()" class="d-flex justify-content-between noti-item p-2 my-2">
     <div class="d-flex">
       <div class="noti-icon">
         <p-avatar [label]="noti.senderId.toString().charAt(0)" shape="circle" size="large" />
       </div>
       <div class="noti-content mx-3">
         <div class="noti-text">{{ noti.content }}</div>
+        <div class="noti-link">
+          <a *ngIf="noti.link" [href]="noti.link" class="">Xem ngay</a>
+        </div>
         <div class="noti-time">{{ noti.createdAt | date:'short' }}</div>
       </div>
     </div>
     <div class="noti-action mx-2 " (click)="menu.toggle($event)">
       <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body" />
-      <i class="pi pi-ellipsis-h"></i>
+      <i class="pi pi-ellipsis-h" (click)="setCurrentNotify(noti)"></i>
     </div>
   </div>
-  <div *ngIf="notifications.length === 0" class="p-2 text-center">
+  <div *ngIf="newNotifications.length == 0" class="p-2 text-center">
+    Chưa có thông báo nào.
+  </div>
+  <hr>
+  <h6>Thông báo cũ</h6>
+  <div *ngFor="let noti of oldNotifications.reverse()" class="d-flex justify-content-between noti-item p-2 my-2">
+    <div class="d-flex">
+      <div class="noti-icon">
+        <p-avatar [label]="noti.senderId.toString().charAt(0)" shape="circle" size="large" />
+      </div>
+      <div class="noti-content mx-3">
+        <div class="noti-text" >{{ noti.content }}</div>
+        <div class="noti-link">
+          <a *ngIf="noti.link" [href]="noti.link" class="">Xem ngay</a>
+        </div>
+        <div class="noti-time">{{ noti.createdAt | date:'short' }}</div>
+      </div>
+    </div>
+    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
+      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body" />
+      <i class="pi pi-ellipsis-h" (click)="setCurrentNotify(noti)"></i>
+    </div>
+  </div>
+  <div *ngIf="oldNotifications.length == 0" class="p-2 text-center">
     Chưa có thông báo nào.
   </div>
 </p-dialog>
 
 <!-- Profile Dialog -->
 <div class="card flex justify-center">
-  <p-dialog header="Chi tiết thành viên" [(visible)]="visibleUpdateForm" [modal]="true"
+  <p-dialog header="Thông tin cá nhân" [(visible)]="visibleUpdateForm" [modal]="true"
     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw' }" [draggable]="false"
     [resizable]="false">
     <div class="member-infor">
@@ -212,7 +267,8 @@
       <p-listbox [options]="historyStories.slice().reverse()" optionLabel="title"
         [style]="{width: '100%',height: '85%'}">
         <ng-template let-story pTemplate="item" [style]="{width: '100%',height: '100%'}">
-          <div class="d-flex w-100 items-center gap-3 p-2 border-b border-gray-200" (click)="navigateToInforStory(story.storyID)">
+          <div class="d-flex w-100 items-center gap-3 p-2 border-b border-gray-200"
+            (click)="navigateToInforStory(story.storyID)">
 
 
             <img [src]="story.coverImage" alt="Thumbnail"
@@ -252,7 +308,8 @@
       <p-listbox [options]="favoriteStories.slice().reverse()" optionLabel="title"
         [style]="{width: '100%',height: '100%'}">
         <ng-template let-story pTemplate="item" [style]="{width: '100%',height: '100%'}">
-          <div class="favorite-item d-flex justify-content-between align-items-center w-100" (click)="navigateToInforStory(story.storyID)">
+          <div class="favorite-item d-flex justify-content-between align-items-center w-100"
+            (click)="navigateToInforStory(story.storyID)">
             <div class="d-flex w-100 items-center gap-3 p-2 border-b border-gray-200">
 
 

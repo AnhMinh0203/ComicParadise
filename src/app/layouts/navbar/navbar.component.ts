@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { APP_INITIALIZER, ChangeDetectorRef, Component } from '@angular/core';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SharedModule } from '../../core/share/shared.module';
 import { ThemeService } from '../../core/share/theme.service';
@@ -39,7 +39,8 @@ import { SharedService } from '../service/share.service';
     RadioButtonModule,
     ListboxModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService, MessageService, SignalRService,
+  ],
   templateUrl: './navbar.component.html',
   animations: [
     trigger('togglePassword', [
@@ -77,20 +78,24 @@ export class NavbarComponent {
   selectedHistoryFilter: string = 'all';
   visibleInterestingForm: any;
   favoriteStories: any[] = [];
-  notifications: any[] = [];
-
+  newNotifications: any[] = [];
+  oldNotifications: any[] = [];
+  unreadNotification: any;
+  systemNotifications: any[] = [];
+  isSearchMobile: boolean = false;
+  currentNotify: any;
+  receivedMessage: any;
   notifyItems: MenuItem[] = [
     {
-      label: 'Options',
+      label: 'Hành động',
       items: [
         {
-          label: 'Refresh',
-          icon: 'pi pi-refresh'
+          label: 'Ẩn thông báo', icon: 'pi pi-eye-slash', command: () => this.turnOffNotification(this.currentNotify)
         },
-        {
-          label: 'Export',
-          icon: 'pi pi-upload'
-        }
+        // {
+        //   label: 'tắt thông bao',
+        //   icon: 'pi pi-upload'
+        // }
       ]
     }
   ];
@@ -100,6 +105,13 @@ export class NavbarComponent {
     { label: 'Lịch sử', icon: 'pi pi-history', command: async () => await this.showFormHistoryStories() },
     { label: 'Đăng xuất', icon: 'pi pi-sign-out', command: () => this.logout() }
   ]
+
+  hubHelloMessage?: string;
+  progressPercentage?: number;
+  progressMessage?: string;
+  processing?: boolean;
+  private signalRSubscription!: Subscription;
+  private systemSignalRSubscription!: Subscription;
 
   constructor(
     private themeService: ThemeService,
@@ -127,12 +139,13 @@ export class NavbarComponent {
   }
 
   ngOnInit() {
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.userID = user.userID;
     this.userInitial = this.getUserInitial(user.username || '');
     this.getCategories();
-    this.loadNotifications();
     this.initializeSignalR();
+
 
     this._sharedService.notificationFormSubject$.subscribe(() => {
       this.showDialogNotify();
@@ -150,24 +163,48 @@ export class NavbarComponent {
       this.showFormHistoryStories();
     });
 
-    this._sharedService.logoutSubject$.subscribe(()=>{
+    this._sharedService.logoutSubject$.subscribe(() => {
       this.logout();
     })
+
+    this._sharedService.unreadCount$.subscribe(count => {
+      this.unreadNotification = count;
+    });
+
+    this._sharedService.loadNotifications$.subscribe(()=>{
+      this.loadNotifications();
+    })
+    this.loadNotifications();
+  }
+
+  ngOnDestroy() {
+    if (this.signalRSubscription) {
+      this.signalRSubscription.unsubscribe();
+    }
+    if (this.systemSignalRSubscription) {
+      this.systemSignalRSubscription.unsubscribe();
+    }
+    this.signalRService.stopConnection();
+  }
+
+  updateUnreadCount() {
+    const unreadCount = this.newNotifications.filter(noti => !noti.isRead).length;
+    this.unreadNotification = unreadCount > 0 ? unreadCount.toString() : '';
   }
 
   initializeSignalR() {
     if (this.userID) {
       this.signalRService.startConnection(this.userID.toString()).then(() => {
         console.log('SignalR Connected');
-        this.signalRService.notification$.subscribe((notification: any) => {
-          console.log('Navbar received notification:', notification);
-          // Kiểm tra trùng lặp trước khi thêm
-          if (!this.notifications.some(n => n.id === notification.id)) {
-            this.notifications.unshift(notification); // Thêm vào đầu danh sách
-            this.cdr.detectChanges(); // Cập nhật giao diện
-          }
+        // Subscription cho thông báo cá nhân
+        this.signalRSubscription = this.signalRService.notification$.subscribe((notification) => {
+          this.newNotifications.unshift(notification);
+          this.updateUnreadCount();
+          this.cdr.detectChanges();
         });
       }).catch(err => console.error('SignalR Connection Error:', err));
+
+
     }
   }
 
@@ -176,8 +213,12 @@ export class NavbarComponent {
       this._notificationService.getNotifications(this.userID).subscribe({
         next: (res: any) => {
           if (res && res.isSuccess) {
-            this.notifications = res.data;
+            this.newNotifications = res.data.newNotifications;
+            this.oldNotifications = res.data.oldNotifications;
+            this.unreadNotification = res.data.totalNewNotify;
+
             this.cdr.detectChanges(); // Đảm bảo giao diện cập nhật
+            this.updateIsReadStatus();
           }
         },
         error: (err) => console.error('Error loading notifications:', err)
@@ -185,13 +226,9 @@ export class NavbarComponent {
     }
   }
 
-  getUnreadNotificationsCount(): string {
-    const unreadCount = this.notifications.filter(noti => !noti.isRead).length;
-    return unreadCount > 0 ? unreadCount.toString() : '';
-  }
 
   getUserInitial(username: string): string {
-    return username ? username.charAt(0).toUpperCase() : 'U'; // Mặc định là 'U' nếu không có tên
+    return username ? username.charAt(0).toUpperCase() : 'U';
   }
 
   toggleTheme() {
@@ -222,6 +259,10 @@ export class NavbarComponent {
   }
 
   showDialogNotify() {
+
+    this.unreadNotification = 0; // Đặt về 0 ngay lập tức
+    this.cdr.detectChanges(); // Cập nhật giao diện ngay lập tức
+    this.loadNotifications();
     this.visibleNotify = true;
   }
 
@@ -247,9 +288,11 @@ export class NavbarComponent {
     this._storyService.setSearchStories([]);
     this.router.navigate(['']);
   }
+
   navigateToLogin() {
     this.router.navigate(['/login']);
   }
+
   navigateToRegister() {
     this.router.navigate(['/register']);
 
@@ -327,7 +370,6 @@ export class NavbarComponent {
   async showFormHistoryStories() {
     await this.getReadingHistoriesByRange("all");
     this.visibleReadingHistoryForm = true;
-
   }
 
   async getReadingHistoriesByRange(filter: string) {
@@ -402,4 +444,41 @@ export class NavbarComponent {
   onLikeStory(storyID: any) {
     this._storyService.likeStory(this.userID, storyID).subscribe();
   }
+
+  toggleSearchMobile() {
+    this.isSearchMobile = !this.isSearchMobile;
+  }
+
+  setCurrentNotify(noti: any) {
+    this.currentNotify = noti;
+  }
+
+  turnOffNotification(currentNotify: any) {
+    this._notificationService.turnOffNotifications(currentNotify.notificationID).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this.newNotifications = this.newNotifications.filter(noti => noti.notificationID !== currentNotify.notificationID);
+        this.oldNotifications = this.oldNotifications.filter(noti => noti.notificationID !== currentNotify.notificationID);
+      }
+    })
+  }
+
+  updateIsReadStatus(){
+    const notificationIds = this.newNotifications.map(noti => noti.notificationID);
+    this._notificationService.updateIsReadStatus(notificationIds).subscribe((res:any)=>{
+      this.unreadNotification = 0;
+      this.cdr.detectChanges();
+    })
+  }
+
+  // navigateToLink(link: string): void {
+  //   console.log(link);
+  //   const url = new URL(link, window.location.origin); // Parse URL
+  //   const basePath = url.pathname; // Lấy path: /stories/4025
+  //   const queryParams = Object.fromEntries(url.searchParams); // Lấy query params: { commentID: "1063" }
+  //   alert(basePath);
+  //   this.router.navigate([basePath], { queryParams });
+  // }
+
+
 }

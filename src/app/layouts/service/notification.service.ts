@@ -21,5 +21,23 @@ export class notificationService {
       );
   }
 
+  turnOffNotifications(notificationID: any) {
+    var apiUrl = `${this.serviceUri}/Turn-off-notifications?notificationID=${notificationID}`;
+    return this.http.post(apiUrl,notificationID)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 
+  updateIsReadStatus(isReadNotifications: any) {
+    var apiUrl = `${this.serviceUri}/Update-is-read-status`;
+    return this.http.post(apiUrl,isReadNotifications)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 }

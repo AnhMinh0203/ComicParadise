@@ -1,3 +1,54 @@
 .mt-150{
   margin-top: 150px;
 }
+.about-card {
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 6px 18px rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  // box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+.about-card .icon {
+  font-size: 2.5rem;
+  color: #f39c12;
+}
+
+.about-card h4 {
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #ffffff;
+}
+
+
+.highlight-box {
+  background-color: #000000;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+.highlight-box:hover {
+  transform: translateY(-5px);
+}
+.highlight-box .icon {
+  font-size: 2rem;
+  color: #f39c12;
+}
+
+.mission-section {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.highlight-box {
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 6px 18px rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+

@@ -40,9 +40,9 @@
     </div>
 
     <div class="container my-3" *ngIf="!isSearch">
-      <h5>Cập nhật gần đây</h5>
+      <h5 class="mt-5">Truyện đề cử</h5>
       <div class="row">
-        <div *ngFor="let story of currentUpdateStories" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 " *ngFor="let story of advanceStories">
           <div class="story-item" (click)="navigateToInforStory(story.storyID)">
             <div class="story-item-img">
               <img [src]="story.coverImage" alt="Slide Image">
@@ -66,6 +66,8 @@
           </div>
         </div>
       </div>
+
+
       <div class="row">
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
           <p-tabs [(value)]="selectedTab" (valueChange)="onTabChange($event)">
@@ -216,9 +218,9 @@
         </div>
       </div>
 
-      <h5 class="mt-5">Truyện đề cử</h5>
+      <h5>Cập nhật gần đây</h5>
       <div class="row">
-        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 " *ngFor="let story of advanceStories">
+        <div *ngFor="let story of currentUpdateStories" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
           <div class="story-item" (click)="navigateToInforStory(story.storyID)">
             <div class="story-item-img">
               <img [src]="story.coverImage" alt="Slide Image">
@@ -242,6 +244,8 @@
           </div>
         </div>
       </div>
+
+
     </div>
   </div>
 </div>

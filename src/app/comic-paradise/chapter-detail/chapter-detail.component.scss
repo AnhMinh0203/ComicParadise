@@ -1,0 +1,52 @@
+.nav-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 20px;
+}
+
+.nav-icon:hover {
+  background-color: #dcdcdc;
+  transform: scale(1.1);
+}
+
+.nav-icon.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.chapter-dropdown ::ng-deep .p-dropdown {
+  border-radius: 10px;
+  min-width: 200px;
+}
+
+.nav-icon {
+  transition: all 0.3s ease;
+}
+
+.d-none {
+  display: none !important;
+}
+
+#topNavigator.chapter-navigator {
+  height: 95px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  z-index: 1000;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+#topNavigator.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}

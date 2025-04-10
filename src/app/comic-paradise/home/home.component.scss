@@ -33,7 +33,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: visible;
+  // overflow: visible;
   border-radius: 15px;
   overflow: hidden;
 }
@@ -304,13 +304,13 @@ p-tab {
 
 .searchStoryArea.visible {
   opacity: 1;
-  max-height: 1000px; // Đặt giá trị lớn đủ để chứa nội dung (hoặc dùng 'auto' với JS nếu cần)
+  max-height: 1000px;
 }
 
 .container.my-3 {
   opacity: 1;
-  max-height: 2000px; // Đặt giá trị lớn đủ để chứa nội dung
-  overflow: hidden;
+  // max-height: 2000px; // Đặt giá trị lớn đủ để chứa nội dung
+  // overflow: hidden;
   transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 

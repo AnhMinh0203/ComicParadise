@@ -1,9 +1,52 @@
+<p-toast/>
 <div class="container my-5">
   <div class="d-flex justify-content-center ">
+    <!-- Chapter action -->
+    <p-speeddial [model]="chapterActions" direction="down"
+      [style]="{ position: 'fixed', top: '6.2rem', right: '1rem', zIndex: 1000 }">
+    </p-speeddial>
+
     <div class="col-12 col-sm-12 col-md-8 col-lg-6 col-xl-6 mt-5">
-      <div *ngIf="chapterContent.chapterType === 'Images'">
+      <!-- Fixed Top Navigator -->
+      <div id="topNavigator" class="chapter-navigator fixed-top d-flex justify-content-center align-items-center gap-3"
+        [class.hidden]="!showTopNavigator">
+
+        <div class="nav-icon d-flex justify-content-center align-items-center" [class.disabled]="!hasPreviousChapter"
+          (click)="hasPreviousChapter && goToPreviousChapter()" pTooltip="Chương trước">
+          <i class="pi pi-chevron-left"></i>
+        </div>
+
+        <p-dropdown [options]="chapterList" [(ngModel)]="selectedChapter" optionLabel="title" placeholder="Chọn chương"
+          [filter]="true" class="chapter-dropdown" (onChange)="onChapterSelect($event.value)">
+        </p-dropdown>
+
+        <div class="nav-icon d-flex justify-content-center align-items-center" [class.disabled]="!hasNextChapter"
+          (click)="hasNextChapter && goToNextChapter()" pTooltip="Chương tiếp theo">
+          <i class="pi pi-chevron-right"></i>
+        </div>
+      </div>
+
+      <!-- Nội dung truyện -->
+      <div *ngIf="chapterContent.chapterType === 'Images'" class="mt-3">
         <div *ngFor="let imageUrl of chapterContent.imageUrls">
           <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+        </div>
+      </div>
+
+      <!-- Điều hướng chương -->
+      <div class="d-flex justify-content-center align-items-center mt-4 gap-3">
+        <div class="nav-icon d-flex justify-content-center align-items-center" [class.disabled]="!hasPreviousChapter"
+          (click)="hasPreviousChapter && goToPreviousChapter()" pTooltip="Chương trước">
+          <i class="pi pi-chevron-left"></i>
+        </div>
+
+        <p-dropdown [options]="chapterList" [(ngModel)]="selectedChapter" optionLabel="title" placeholder="Chọn chương"
+          [filter]="true" class="chapter-dropdown" (onChange)="onChapterSelect($event.value)">
+        </p-dropdown>
+
+        <div class="nav-icon d-flex justify-content-center align-items-center" [class.disabled]="!hasNextChapter"
+          (click)="hasNextChapter && goToNextChapter()" pTooltip="Chương tiếp theo">
+          <i class="pi pi-chevron-right"></i>
         </div>
       </div>
     </div>

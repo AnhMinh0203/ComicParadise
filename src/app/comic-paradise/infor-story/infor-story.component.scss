@@ -143,7 +143,7 @@
 /* Giao diện chương */
 .chapter-item {
   background: #fff;
-  border: 1px solid #ddd;
+  border: 1px dashed  #999797;
   border-radius: 10px;
   cursor: pointer;
   transition: transform 0.15s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
@@ -170,6 +170,7 @@
 /* Hiệu ứng thời gian */
 .chapter-time {
   font-size: 14px;
+  // color: rgba(37, 42.92, 54.02, 0.681) ;
 }
 
 .p-tag-hover {
@@ -186,6 +187,12 @@
   transform: scale(0.95);
 }
 
+// Higlight khi scroll bình luận
+.highlight-comment {
+  background-color: #fff3cd;
+  border: 2px solid #ffca2c;
+  transition: background-color 1s ease;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

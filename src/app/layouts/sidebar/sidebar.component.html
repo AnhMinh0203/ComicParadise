@@ -7,9 +7,17 @@
   </div>
   <div class="d-flex justify-content-between align-items-center mb-3 container-toggle p-1">
     <!-- Notification Icon -->
-    <div class="notification" (click)="openNotificationForm()">
+    <!-- <div class="notification" (click)="openNotificationForm()">
       <i class="pi pi-bell"></i>
+    </div> -->
+
+    <div class="notification" (click)="openNotificationForm()">
+      <p-overlaybadge *ngIf="unreadNotification > 0" badgeSize="small" [value]="unreadNotification">
+        <i class="pi pi-bell" style="font-size: 1rem"></i>
+      </p-overlaybadge>
+      <i class="pi pi-bell" *ngIf="unreadNotification === 0" style="font-size: 1rem"></i>
     </div>
+
 
     <!-- Toggle Theme Icon -->
     <div class="toggle-theme " (click)="toggleTheme()">
@@ -92,71 +100,4 @@
 </p-dialog>
 
 
-<!-- notify -->
-<!-- <p-dialog header="Thông báo" [(visible)]="visibleNotify" [modal]="true"
-  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
-  [resizable]="false">
-  <div class="d-flex justify-content-between noti-item p-2 my-2">
 
-    <div class="d-flex">
-      <div class="noti-icon">
-        <p-avatar label="P" shape="circle" size="large" />
-      </div>
-      <div class="noti-content mx-3">
-        <div class="noti-text">
-          abc
-        </div>
-        <div class="noti-time">
-          9 giờ trước
-        </div>
-      </div>
-    </div>
-    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
-      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body"/>
-      <i class="pi pi-ellipsis-h" ></i>
-
-    </div>
-  </div>
-  <div class="d-flex justify-content-between noti-item p-2 my-2">
-
-    <div class="d-flex">
-      <div class="noti-icon">
-        <p-avatar label="P" shape="circle" size="large" />
-      </div>
-      <div class="noti-content mx-3">
-        <div class="noti-text">
-          abc
-        </div>
-        <div class="noti-time">
-          9 giờ trước
-        </div>
-      </div>
-    </div>
-    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
-      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body"/>
-      <i class="pi pi-ellipsis-h" ></i>
-
-    </div>
-  </div>
-  <div class="d-flex justify-content-between noti-item p-2 my-2">
-
-    <div class="d-flex">
-      <div class="noti-icon">
-        <p-avatar label="P" shape="circle" size="large" />
-      </div>
-      <div class="noti-content mx-3">
-        <div class="noti-text">
-          abc
-        </div>
-        <div class="noti-time">
-          9 giờ trước
-        </div>
-      </div>
-    </div>
-    <div class="noti-action mx-2 " (click)="menu.toggle($event)">
-      <p-menu #menu [model]="notifyItems" [popup]="true" appendTo="body"/>
-      <i class="pi pi-ellipsis-h" ></i>
-
-    </div>
-  </div>
-</p-dialog> -->

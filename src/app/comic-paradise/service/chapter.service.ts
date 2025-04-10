@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,7 @@ export class chapterService {
     this.serviceUri = `${environment.apiUrl}/Chapter`;
   }
 
-  getNextChapterNumber(storyID:number){
+  getNextChapterNumber(storyID: number) {
     var apiUrl = `${this.serviceUri}/Get-next-chapter-number?storyID=${storyID}`;
     return this.http.get(apiUrl);
   }
@@ -21,8 +21,40 @@ export class chapterService {
     return this.http.get(apiUrl);
   }
 
-  getChaptersByStoryID(storyID:number){
+  getChaptersByStoryID(storyID: number) {
     var apiUrl = `${this.serviceUri}/Get-chapters-by-storyID?storyID=${storyID}`;
     return this.http.get(apiUrl);
   }
+
+  markChapter(model: any) {
+    var apiUrl = `${this.serviceUri}/Mark-chapter`;
+    return this.http.post(apiUrl, model)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  isChapterBookmarked(model: any) {
+    var apiUrl = `${this.serviceUri}/Is-bookmarked`;
+    return this.http.post(apiUrl, model)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  getMarkChapter(userID: any, storyID: any) {
+    var apiUrl = `${this.serviceUri}/Get-mark-chapter?userID=${userID}&storyID=${storyID}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+
+  }
+
 }

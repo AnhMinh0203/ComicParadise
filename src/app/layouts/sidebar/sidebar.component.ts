@@ -10,12 +10,15 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { storyService } from '../../comic-paradise/service/story.service';
 import { SharedService } from '../service/share.service';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
+
 @Component({
   selector: 'app-sidebar',
   imports: [
     SharedModule,
     MegaMenuModule,
     AccordionModule,
+    OverlayBadgeModule
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
@@ -31,6 +34,7 @@ export class SidebarComponent {
   visibleNotify: any;
   searchStories: any;
   userID: any;
+  unreadNotification: any;
 
   constructor(
     private sidebarService: SidebarService,
@@ -50,6 +54,12 @@ export class SidebarComponent {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.userID = user.userID;
     this.getCategories();
+
+
+    this.loadNotification();
+    this._sharedService.unreadCount$.subscribe(count => {
+      this.unreadNotification = count;
+    });
     this.notifyItems = [
       {
         label: 'Options',
@@ -125,5 +135,8 @@ export class SidebarComponent {
 
   openNotificationForm(){
     this._sharedService.triggeNotificationForm();
+  }
+  loadNotification(){
+    this._sharedService.loadNotificationsEvent();
   }
 }

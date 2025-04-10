@@ -3,7 +3,7 @@
 
 :root {
   // --primary-color: #007bff;
-  --background-color: #ffffff;
+  --background-color-light-mode: #ffffff;
   --text-color: #333333;
   --text-color-dark-mode: #eae6e6;
   --transition-duration: 200ms;
@@ -11,6 +11,7 @@
   --text-color: #fff;
   --transition-duration: 0.3s;
   --dark-mode-item: #333;
+  --text-color-light-mode: #1a1a1a;
 }
 
 .dark-theme {
@@ -33,7 +34,12 @@ body {
 }
 
 /* Áp dụng cho PrimeNG */
-// .dark-theme .p-listbox-list,
+// .dark-theme .p-speeddial .p-speeddial-action,
+
+.dark-theme .p-select-overlay,
+.dark-theme .p-dropdown,
+.dark-theme .p-tag-comment,
+.dark-theme .p-tree-root-children,
 .dark-theme .p-dialog,
 .dark-theme .p-panel,
 .dark-theme .p-panel .p-panel-title,
@@ -43,6 +49,12 @@ body {
   color: var(--text-color-dark-mode) !important;
   background: var(--dark-mode-item) !important;
 }
+
+.dark-theme .p-select-label ,
+.dark-theme .comment-item-report,
+.dark-theme .comment-item-actions,
+.dark-theme .comment-time,
+.dark-theme .comment-item-text,
 .dark-theme .noti-text{
   color: var(--text-color-dark-mode) !important;
 }
@@ -86,4 +98,39 @@ body {
 }
 
 
+.dark-theme .highlight-comment {
+  background-color: #828080 !important;
+}
 
+
+.dark-theme .nav-icon{
+  color:  var(--text-color-dark-mode) !important;
+  background: var(--dark-mode-item) !important;
+}
+.dark-theme .chapter-navigator{
+  background: #1a1a1a !important;
+
+}
+
+.dark-theme .p-dropdown .p-select-option{
+  color:  var(--text-color) !important;
+}
+
+.dark-theme .p-dropdown .p-select-option-selected{
+  color:  var(--text-color-light-mode) !important;
+  background-color: var(--background-color-light-mode) !important;
+}
+
+// .dark-theme .p-speeddial button .p-speeddial-direction-down{
+//   color: var(--text-color-dark-mode) !important;
+//   background: var(--dark-mode-item) !important;
+//   border: var(--dark-mode-item) !important;
+// }
+
+.dark-theme .chapter-item {
+  background: #545454 !important;
+}
+
+.dark-theme .chapter-item  .chapter-time{
+  color: var(--text-color-dark-mode) !important;
+}
