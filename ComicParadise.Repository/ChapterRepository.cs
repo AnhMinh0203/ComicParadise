@@ -26,12 +26,13 @@ namespace ComicParadise.Repository
         private readonly string? _containerMangaStory;
         private readonly IAmazonS3 _s3Client;
         private readonly string? _bucketName;
-
+        private readonly INotificationRepository _notificationRepository;
         public ChapterRepository(
             AppDbContext context,
             IConfiguration config,
             //BlobServiceClient blobServiceClient,
-            IAmazonS3 s3Client)
+            IAmazonS3 s3Client,
+            INotificationRepository notificationRepository)
         {
             _context = context;
             _config = config;
@@ -39,6 +40,7 @@ namespace ComicParadise.Repository
             _containerMangaStory = _config["ContainerMangaStory"];
             _s3Client = s3Client;
             _bucketName = _config["BucketName"];
+            _notificationRepository = notificationRepository;
         }
 
         #region Get next chapter number
@@ -172,7 +174,7 @@ namespace ComicParadise.Repository
                         SourceUrl = null
                     };
                     _context.Chapters.Add(chapter);
-                    await _context.SaveChangesAsync(); // Lưu chapter để lấy ID
+                    await _context.SaveChangesAsync();
 
                     int order = 1;
                     foreach (var imageFile in chapterDto.ImageFiles)
@@ -192,6 +194,23 @@ namespace ComicParadise.Repository
                         order++;
                     }
                     await _context.SaveChangesAsync();
+
+                    // Tạo thông báo
+                    string storyTitle = await _context.Stories.Where(s => s.StoryID == chapterDto.StoryID)
+                        .Select(s => s.Title).FirstAsync();
+                    var notificationDto = new CreateNotificationDto
+                    {
+                        SenderId = chapterDto.CreatedBy,
+                        TargetID = chapter.StoryID,
+                        Content = $"Chương {chapter.ChapterNumber} của truyện '{storyTitle}' đã được đăng!",
+                        Type = "NewChapter",
+                        Link = $"/chapter-content/{chapter.StoryID}/{chapter.ChapterNumber}"
+                    };
+                    var notificationResult = await _notificationRepository.CreateNotificationAsync(notificationDto);
+                    if (!notificationResult.Contains("thành công"))
+                    {
+                        throw new Exception($"Lỗi khi tạo thông báo: {notificationResult}");
+                    }
 
                     return "Chapter với nhiều ảnh đã được đăng tải thành công";
                 }
@@ -297,7 +316,7 @@ namespace ComicParadise.Repository
 
         #endregion
 
-        #region Get chapter by storyID
+        #region Get chapter infor by storyID
         public async Task<List<Chapter>> GetChaptersByStoryIDAsync(int storyID)
         {
             var charters = await (from c in _context.Chapters
@@ -563,8 +582,8 @@ namespace ComicParadise.Repository
                 {
                     throw new InvalidOperationException("Đường dẫn ImagePath không hợp lệ.");
                 }
-                var prefix = key.Substring(0, lastSlashIndex); 
-                var fileName = key.Substring(lastSlashIndex + 1); 
+                var prefix = key.Substring(0, lastSlashIndex);
+                var fileName = key.Substring(lastSlashIndex + 1);
 
                 // Upload file mới lên S3 (ghi đè file cũ)
                 await UploadFileToS3(request.newPage, prefix, fileName);
@@ -689,6 +708,93 @@ namespace ComicParadise.Repository
             catch (Exception ex)
             {
                 return $"Lỗi hệ thống: {ex.Message}";
+            }
+        }
+        #endregion
+
+        #region Mark chapter
+        public async Task<string> ToggleChapterBookmarkAsync(MarkChapterDto markChapterDto)
+        {
+            try
+            {
+                var existingBookmark = await _context.BookMarks.FirstOrDefaultAsync(b =>
+                    b.StoryID == markChapterDto.StoryID &&
+                    b.ChapterNumber == markChapterDto.ChapterNumber &&
+                    b.UserID == markChapterDto.UserID
+                );
+
+                if(existingBookmark != null)
+                {
+                    _context.BookMarks.Remove(existingBookmark);
+                    await _context.SaveChangesAsync();
+                    return "Hủy lưu thành công";
+                }
+                else
+                {
+                    var bookMark = await _context.BookMarks.FirstOrDefaultAsync(b =>
+                    b.StoryID == markChapterDto.StoryID &&
+                    b.UserID == markChapterDto.UserID
+                );
+
+                    if (bookMark != null)
+                    {
+                        _context.BookMarks.Remove(bookMark);
+                    }
+                    var newBookmark = new BookMark
+                    {
+                        StoryID = markChapterDto.StoryID,
+                        ChapterNumber = markChapterDto.ChapterNumber,
+                        UserID = markChapterDto.UserID
+                    };
+
+                    _context.BookMarks.Add(newBookmark);
+                    await _context.SaveChangesAsync();
+                    return "Lưu thành công !";
+                }           
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi xử lý bookmark: " + ex.Message);
+            }
+        }
+
+        #endregion
+
+        #region Check if bookmark
+        public async Task<bool> IsChapterBookmarkedAsync(MarkChapterDto markChapterDto)
+        {
+            return await _context.BookMarks.AnyAsync(b =>
+                b.UserID == markChapterDto.UserID &&
+                b.StoryID == markChapterDto.StoryID &&
+                b.ChapterNumber == markChapterDto.ChapterNumber);
+        }
+
+        #endregion
+
+        #region Get mark chapter 
+        public async Task<dynamic?> GetMarkChapterAsync(int userID, int storyID)
+        {
+            try
+            {
+                var isExistMarkChapter = await _context.BookMarks
+                                    .Where(b => b.StoryID == storyID && b.UserID == userID)
+                                    .FirstOrDefaultAsync();
+
+                if (isExistMarkChapter != null)
+                {
+                    return new { 
+                        Link = $"/chapter-content/{storyID}/{isExistMarkChapter.ChapterNumber}",
+                        ChapterNumber = isExistMarkChapter.ChapterNumber,
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
         #endregion

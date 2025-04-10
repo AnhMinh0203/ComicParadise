@@ -9,25 +9,29 @@ namespace ComicParadise.Repository
 {
     public class NotificationHub: Hub
     {
-        /* public override Task OnConnectedAsync()
-         {
-             Console.WriteLine("-----------------------");
-
-            Console.WriteLine($"Client connected: {Context.ConnectionId}, UserID: {Context.UserIdentifier}");
-             return base.OnConnectedAsync();
-         }
-         public async Task SendNotificationToUser(int receiverId, string message)
-         {
-             await Clients.User(receiverId.ToString()).SendAsync("ReceiveNotification", message);
-         }
-
-         public async Task SendNotificationToAll(string message)
-         {
-             await Clients.All.SendAsync("ReceiveNotification", message);
-         }*/
-        public async Task SendNotification(string userId, string message)
+        public async Task RegisterUser(string userId)
         {
-            await Clients.User(userId).SendAsync("ReceiveNotification", message);
+            // Đăng ký client vào nhóm dựa trên userId 
+            await Groups.AddToGroupAsync(Context.ConnectionId, userId);
         }
+
+        public async Task SendSystemNotification(string message)
+        {
+            await Clients.All.SendAsync("ReceiveSystemNotification", message);
+        }
+
+/*        // Đăng ký user vào nhóm theo dõi truyện
+        public async Task FollowStory(string userId, int storyId)
+        {
+            var groupName = $"story_{storyId}";
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        }
+
+        // Hủy theo dõi truyện
+        public async Task UnfollowStory(string userId, int storyId)
+        {
+            var groupName = $"story_{storyId}";
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+        }*/
     }
 }

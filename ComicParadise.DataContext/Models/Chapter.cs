@@ -18,5 +18,6 @@ namespace ComicParadise.DataContext.Models
         public string? Content { get; set; }
         public string? SourceUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public int CreatedBy { get; set; }
     }
 }

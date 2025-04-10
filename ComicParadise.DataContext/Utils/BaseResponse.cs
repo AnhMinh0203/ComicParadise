@@ -18,6 +18,11 @@ namespace ComicParadise.DataContext.Utils
             Data = data;
         }
 
+        public BaseResponse(bool isSuccess)
+        {
+            IsSuccess = isSuccess;
+        }
+
         /*        public BaseResponse(bool isSuccess, string message, T data)
         {
             IsSuccess = isSuccess;

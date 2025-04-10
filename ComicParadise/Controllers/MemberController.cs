@@ -61,6 +61,14 @@ namespace ComicParadise.Api.Controllers
             var result = await _memberRepository.GetReadingHistoryAsync(userID);
             return Ok(new BaseResponse<IQueryable<ReadingHistoryDto>>(true,result));
         }
+
+        [HttpGet("Get-reading-histories-by-range")]
+        public async Task<ActionResult> GetReadingHistoryByRange(int userID, string range)
+        {
+            var result = await _memberRepository.GetReadingHistoryByRangeAsync(userID, range);
+            return Ok(new BaseResponse<IQueryable<ReadingHistoryDto>>(true, result));
+        }
+
         [HttpDelete("Delete-member")]
         public async Task<ActionResult> DeleteMember(int userID)
         {

@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using ComicParadise.DataContext.Mapping;
 using ComicParadise.Repository.Common;
+using ComicParadise.Repository.Interface;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +26,7 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<IChapterRepository, ChapterRepository>();
             services.AddScoped<IStatisticalReportRepository, StatisticalReportRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
 
             // Register AutoMapper
             services.AddAutoMapper(typeof(CategoryProfile));

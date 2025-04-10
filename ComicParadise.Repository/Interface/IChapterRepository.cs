@@ -18,5 +18,8 @@ namespace ComicParadise.Repository.Common
         Task<string> DeleteChapterPageAsync(int storyID, int chapterNumber, int chapterPage);
         Task<string> ReplaceChapterPageAsync(ChapterPageRequest request);
         Task<string> AddChapterPageAsync(ChapterPageRequest request);
+        Task<string> ToggleChapterBookmarkAsync(MarkChapterDto markChapterDto);
+        Task<bool> IsChapterBookmarkedAsync(MarkChapterDto markChapterDto);
+        Task<dynamic?> GetMarkChapterAsync(int userID, int storyID);
     }
 }

@@ -3,6 +3,7 @@ using Amazon.S3;
 using Azure.Storage.Blobs;
 using ComicParadise.DataContext.Database;
 using ComicParadise.Repository;
+using ComicParadise.Repository.Common;
 using ComicParadise.Repository.Configs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-/*builder.Services.AddSignalR();*/
+builder.Services.AddSignalR();
 builder.Services.AddDataContextServices();
 
 

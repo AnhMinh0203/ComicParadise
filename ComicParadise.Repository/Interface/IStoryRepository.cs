@@ -15,10 +15,14 @@ namespace ComicParadise.Repository.Common
         Task<StoryDetail> GetStoryByIdAsync(int storyID);
         Task<string> UpdateStoryAsync(UpdateStoryDto storyDto);
         Task<string> DeleteStoryAsync(int storyID);
-        Task<List<StoryInfor>> SearchStoryAsync(string title);
+        Task<List<dynamic>> SearchStoryAsync(string title);
         Task<IEnumerable<dynamic>> GetCurrentUpdateStoriesAsync(int days);
         Task<List<dynamic>> GetTopStoriesAsync(string topType);
         Task<List<dynamic>> GetAdvanceStories(int userID);
+        Task<string> LikeStoryAsync(int userID, int storyID);
+        Task<bool> CheckIsLikedAsync(int userID, int storyID);
+        Task<List<dynamic>> GetFavoriteStoriesAsync(int userID);
+        Task<string> LikeStoriesAsync(LikeStoryRequest likeStoryRequest);
 
     }
 }

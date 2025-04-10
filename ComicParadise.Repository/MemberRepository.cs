@@ -431,10 +431,11 @@ namespace ComicParadise.Repository
                         ? "Quyền bình luận của bạn đã được mở lại."
                         : "Quyền bình luận của bạn đã bị tắt.";
 
+
                     // Tạo thông báo
                     var notification = new Notification
                     {
-                        SenderId = 1, // Thay bằng ID của admin thực tế (lấy từ HttpContext nếu có auth)
+                        SenderId = 1,
                         ReceiverId = existingUser.UserID,
                         Content = message,
                         CreatedAt = DateTime.Now,
@@ -443,12 +444,12 @@ namespace ComicParadise.Repository
                         Link = null
                     };
                     _context.Notifications.Add(notification);
-
+                    // Gửi thông báo qua nhóm
+                    await _hubContext.Clients.Group(existingUser.UserID.ToString()).SendAsync("ReceiveNotification", notification);
+                    Console.WriteLine($"Sent notification to group: {existingUser.UserID}");
                     await _context.SaveChangesAsync();
 
-                    // Gửi thông báo qua SignalR với dữ liệu đầy đủ
-                    await _hubContext.Clients.User(existingUser.UserID.ToString())
-                        .SendAsync("ReceiveNotification", notification);
+  
                 }
                 else
                 {
@@ -487,7 +488,7 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Get story history of member
+        #region Get history of member
         public Task<IQueryable<ReadingHistoryDto>> GetReadingHistoryAsync(int userID)
         {
             var result = from s in _context.Stories
@@ -501,9 +502,40 @@ namespace ComicParadise.Repository
                              Views = s.Views,
                              LastReadAt = rh.LastReadAt,
                          };
+            return Task.FromResult(result.Distinct());
+        }
+        #endregion
+
+        #region Get history of member by range
+        public Task<IQueryable<ReadingHistoryDto>> GetReadingHistoryByRangeAsync(int userID, string range)
+        {
+            DateTime startDate = DateTime.MinValue;
+
+            if (range == "30days")
+                startDate = DateTime.UtcNow.AddDays(-30);
+            else if (range == "7days")
+                startDate = DateTime.UtcNow.AddDays(-7);
+
+            var result = (from s in _context.Stories
+                          join rh in _context.ReadingHistories on s.StoryID equals rh.StoryID
+                          where rh.UserID == userID && (range == "all" || rh.LastReadAt >= startDate)
+                          select new ReadingHistoryDto
+                          {
+                              StoryID = s.StoryID,
+                              Title = s.Title,
+                              CoverImage = s.CoverImage,
+                              Views = s.Views,
+                              LastReadAt = rh.LastReadAt,
+                          })
+                         .GroupBy(rh => rh.StoryID)  // Nhóm theo StoryID
+                         .Select(g => g.OrderByDescending(x => x.LastReadAt).FirstOrDefault()) // Chọn lần đọc gần nhất
+                         .AsQueryable();
+
             return Task.FromResult(result);
         }
         #endregion
+
+
 
         #region Delete member 
         public async Task<string> DeleteMemberAsync(int userID)

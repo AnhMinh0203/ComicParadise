@@ -24,6 +24,10 @@ namespace ComicParadise.DataContext.Database
         public DbSet<ReadingHistory> ReadingHistories { get; set; }
         public DbSet<CategoryDetail> CategoryDetails { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<BookMark> BookMarks { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,7 +39,13 @@ namespace ComicParadise.DataContext.Database
                .HasKey(h => new { h.HistoryID });
 
             modelBuilder.Entity<CategoryDetail>()
-               .HasKey(cd => new { cd.DetailID });
+               .HasKey(dt => new { dt.DetailID });
+
+            modelBuilder.Entity<Report>()
+               .HasKey(r => new { r.ReportID });
+
+            modelBuilder.Entity<BookMark>()
+              .HasKey(b => new { b.BookMarkID });
 
             base.OnModelCreating(modelBuilder);
         }

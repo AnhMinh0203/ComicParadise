@@ -211,7 +211,7 @@ namespace ComicParadise.Repository
                 if (string.IsNullOrEmpty(fileUrl))
                     return;
                 var uri = new Uri(fileUrl);
-                var key = uri.AbsolutePath.Substring(1); 
+                var key = uri.AbsolutePath.Substring(1);
 
                 var request = new DeleteObjectRequest
                 {
@@ -292,6 +292,8 @@ namespace ComicParadise.Repository
                                                        join c in _context.Categories on sc.CategoryID equals c.CategoryID
                                                        where sc.StoryID == storyID
                                                        select c).ToList(),
+                                         Views = s.Views,
+                                         Likes = s.Likes
                                      })
                                      .FirstOrDefaultAsync();
 
@@ -536,24 +538,31 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Search story
-        public async Task<List<StoryInfor>> SearchStoryAsync(string title)
+        public async Task<List<dynamic>> SearchStoryAsync(string title)
         {
             try
             {
-                List<StoryInfor> listStories = await (from s in _context.Stories
-                                                      join u in _context.Users on s.PublisherID equals u.UserID
-                                                      join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
-                                                      where s.Title.Contains(title)
-                                                      select new StoryInfor
-                                                      {
-                                                          StoryID = s.StoryID,
-                                                          Title = s.Title,
-                                                          CoverImage = s.CoverImage,
-                                                          Status = s.Status,
-                                                          PublisherName = u.Username,
-                                                          TotalChapter = chapters.Count()
-                                                      })
-                                         .ToListAsync();
+                var listStories = await (from s in _context.Stories
+                                         join u in _context.Users on s.PublisherID equals u.UserID
+                                         join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
+                                         where s.Title.Contains(title)
+
+                                         let latestChapter = _context.Chapters
+                                            .Where(c => c.StoryID == s.StoryID)
+                                            .OrderByDescending(c => c.CreatedAt)
+                                            .FirstOrDefault()
+                                         select new
+                                         {
+                                             StoryID = s.StoryID,
+                                             Title = s.Title,
+                                             CoverImage = s.CoverImage,
+                                             Status = s.Status,
+                                             PublisherName = u.Username,
+                                             Views = s.Views,
+                                             Likes = s.Likes,
+                                             LastestChapter = latestChapter.ChapterNumber,
+                                         })
+                                         .ToListAsync<dynamic>();
                 return listStories;
             }
             catch (Exception ex)
@@ -590,7 +599,7 @@ namespace ComicParadise.Repository
                                          .Take(12)
                                          .ToListAsync();
 
-                if (!listStories.Any())
+                if (!listStories.Any() || listStories.Count() < 12)
                 {
                     listStories = await (from s in _context.Stories
                                          let latestChapter = _context.Chapters
@@ -668,7 +677,7 @@ namespace ComicParadise.Repository
                                         .Take(12)
                                         .ToListAsync<dynamic>();
 
-                if (!topStories.Any())
+                if (!topStories.Any() || topStories.Count() < 12)
                 {
                     topStories = await (from s in _context.Stories
                                         select new
@@ -732,7 +741,7 @@ namespace ComicParadise.Repository
                                             .Take(12)
                                             .ToListAsync<dynamic>();
 
-            if (!recommendedStories.Any())
+            if (!recommendedStories.Any() || recommendedStories.Count() < 12)
             {
                 recommendedStories = await (from s in _context.Stories
                                             let latestChapter = _context.Chapters
@@ -762,5 +771,132 @@ namespace ComicParadise.Repository
             return recommendedStories;
         }
         #endregion
+
+        #region Like story
+        public async Task<string> LikeStoryAsync(int userID, int storyID)
+        {
+            try
+            {
+                var story = await _context.Stories.FirstOrDefaultAsync(s => s.StoryID == storyID);
+                var isFavorite = await _context.Favorites.FirstOrDefaultAsync(f => f.UserID == userID && f.StoryID == storyID);
+
+                if (isFavorite == null)
+                {
+                    story.Likes += 1;
+
+                    Favorite favorite = new Favorite
+                    {
+                        StoryID = storyID,
+                        UserID = userID,
+                        CreatedAt = DateTime.Now,
+                    };
+
+                    _context.Favorites.Add(favorite);
+                }
+                else
+                {
+                    story.Likes -= 1;
+                    _context.Favorites.Remove(isFavorite);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return "Thích truyện thành công";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        #endregion
+
+        #region Like stories (for list of favorite stories)
+        public async Task<string> LikeStoriesAsync(LikeStoryRequest likeStoryRequest)
+        {
+            try
+            {
+                var stories = await _context.Stories.Where(s => likeStoryRequest.StoryIDs.Contains(s.StoryID)).ToListAsync();
+                var existingFavorites = await _context.Favorites
+                    .Where(f => f.UserID == likeStoryRequest.UserID && likeStoryRequest.StoryIDs.Contains(f.StoryID))
+                    .ToListAsync();
+
+                List<Favorite> newFavorites = new List<Favorite>();
+                List<Favorite> favoritesToRemove = new List<Favorite>();
+
+                foreach (var story in stories)
+                {
+                    var isFavorite = existingFavorites.FirstOrDefault(f => f.StoryID == story.StoryID);
+                    if (isFavorite == null)
+                    {
+                        // Thích truyện
+                        story.Likes += 1;
+                        newFavorites.Add(new Favorite
+                        {
+                            StoryID = story.StoryID,
+                            UserID = likeStoryRequest.UserID,
+                            CreatedAt = DateTime.Now,
+                        });
+                    }
+                    else
+                    {
+                        // Hủy thích truyện
+                        story.Likes -= 1;
+                        favoritesToRemove.Add(isFavorite);
+                    }
+                }
+
+                if (newFavorites.Count > 0)
+                    await _context.Favorites.AddRangeAsync(newFavorites);
+
+                if (favoritesToRemove.Count > 0)
+                    _context.Favorites.RemoveRange(favoritesToRemove);
+
+                await _context.SaveChangesAsync();
+
+                return "Cập nhật thích truyện thành công";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Check is liked
+        public async Task<bool> CheckIsLikedAsync(int userID, int storyID)
+        {
+            var story = await _context.Stories.FirstOrDefaultAsync(s => s.StoryID == storyID);
+            var isFavorite = await _context.Favorites.FirstOrDefaultAsync(f => f.UserID == userID && f.StoryID == storyID);
+
+            if (isFavorite != null)
+            {
+                return true;
+            }
+            return false;
+        }
+        #endregion
+
+        #region Get favorite stories
+        public async Task<List<dynamic>> GetFavoriteStoriesAsync(int userID)
+        {
+            var stories = await (from f in _context.Favorites
+                                 join s in _context.Stories
+                                 on f.StoryID equals s.StoryID
+                                 where f.UserID == userID
+                                 select new
+                                 {
+                                     StoryID = s.StoryID,
+                                     Title = s.Title,
+                                     CoverImage = s.CoverImage,
+                                     CreatedAt = s.CreatedAt,
+                                     Likes = s.Likes,
+                                     IsLiked = true
+                                 }).ToListAsync<dynamic>();
+            return stories;
+        }
+        #endregion
+
+
     }
 }

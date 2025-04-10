@@ -6,6 +6,7 @@ using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository;
 using ComicParadise.Repository.Common;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace ComicParadise.Api.Controllers
 {
@@ -64,7 +65,7 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult> SearchStory(string title)
         {
             var result = await _storyRepository.SearchStoryAsync(title);
-            return Ok(new BaseResponse<List<StoryInfor>>(true, result));
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
 
         [HttpGet("Get-current-update-story")]
@@ -86,6 +87,40 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult> GetAdvanceStory(int userID)
         {
             var result = await _storyRepository.GetAdvanceStories(userID);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
+        [HttpPost("Like-story")]
+        public async Task<ActionResult> LikeStory(int userID, int storyID)
+        {
+            var result = await _storyRepository.LikeStoryAsync(userID, storyID);
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+
+        [HttpPost("Like-stories")]
+        public async Task<ActionResult> LikeStories(LikeStoryRequest likeStoryRequest)
+        {
+            var result = await _storyRepository.LikeStoriesAsync(likeStoryRequest);
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+        [HttpGet("Check-is-liked")]
+        public async Task<ActionResult> CheclkIsLiked(int userID, int storyID)
+        {
+            var result = await _storyRepository.CheckIsLikedAsync(userID, storyID);
+            if (!result)
+            {
+                return Ok(new BaseResponse<bool>(result));
+
+            }
+            return Ok(new BaseResponse<bool>(true,result));
+        }
+
+        [HttpGet("Get-favorite-stories")]
+        public async Task<ActionResult> GetFavoriteStories(int userID)
+        {
+            var result = await _storyRepository.GetFavoriteStoriesAsync(userID);
             return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
     }

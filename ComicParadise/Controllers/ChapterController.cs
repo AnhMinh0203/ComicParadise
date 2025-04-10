@@ -67,11 +67,25 @@ namespace ComicParadise.Api.Controllers
         }
 
 
-        /*        [HttpGet("Get-chapter-page-by-page-number")]
-                public async Task<ActionResult> GetChapterPageByPageNumber(int storyID, int chapterID, int pageNumber)
-                {
-                    var result = await _chapterRepository.GetChapterPageByPageNumberAsync(storyID, chapterID,pageNumber);
-                    return Ok(new BaseResponse<string>(true, result));
-                }*/
+        [HttpPost("Mark-chapter")]
+        public async Task<ActionResult> MarkChapter(MarkChapterDto markChapterDto)
+        {
+            var result = await _chapterRepository.ToggleChapterBookmarkAsync(markChapterDto);
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+        [HttpPost("Is-bookmarked")]
+        public async Task<ActionResult> IsBookmarked(MarkChapterDto markChapterDto)
+        {
+            var result = await _chapterRepository.IsChapterBookmarkedAsync(markChapterDto);
+            return Ok(new BaseResponse<bool>(true, result));
+        }
+
+        [HttpGet("Get-mark-chapter")]
+        public async Task<ActionResult> GetMarkChapter(  int userID ,int storyID)
+        {
+            var result = await _chapterRepository.GetMarkChapterAsync(userID, storyID);
+            return Ok(new BaseResponse<dynamic?>(true, result));
+        }
     }
 }

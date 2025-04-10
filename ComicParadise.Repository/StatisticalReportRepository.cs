@@ -44,7 +44,6 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-
         #region Search report story
         public async Task<List<ReportStoryDto>> SearchStoryForReportAsync(string? title)
         {
