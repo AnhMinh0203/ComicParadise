@@ -194,6 +194,37 @@
   transition: background-color 1s ease;
 }
 
+//Report
+.story-report .report-icon {
+  background-color: #fff;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  border-radius: 50%;
+  padding: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.story-report .report-icon:hover {
+  background-color: #dc3545;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+// Rating
+.story-actions-rating{
+  padding: 5px 10px;
+
+}
+.rating-container{
+  padding: 12px 10px;
+  border-radius: 5px;
+  background-color: #2e2e2e;
+}
+
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .story-infor-detail {

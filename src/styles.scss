@@ -134,3 +134,25 @@ body {
 .dark-theme .chapter-item  .chapter-time{
   color: var(--text-color-dark-mode) !important;
 }
+
+// Report story
+.dark-theme .story-report .report-icon {
+  background-color: #2c2c2c !important;
+  border-color: #f0ad4e !important;   /* Cam nhạt kiểu cảnh báo nhẹ */
+  color: #f0ad4e !important;
+  // box-shadow: 0 0 4px rgba(240, 173, 78, 0.3) !important;
+}
+
+.dark-theme .story-report .report-icon:hover {
+  background-color: #f0ad4e  !important;
+  color: #2c2c2c !important;
+  // box-shadow: 0 0 8px rgba(240, 173, 78, 0.5) !important;
+}
+
+.p-rating svg{
+  color: #ffca2c !important;
+}
+
+.dark-theme .rating-container{
+  background-color: #1e1e1e !important;
+}

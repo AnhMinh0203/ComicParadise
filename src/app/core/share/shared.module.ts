@@ -23,6 +23,8 @@ import { HttpClient } from '@angular/common/http';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { CardModule } from 'primeng/card';
+import { SkeletonModule } from 'primeng/skeleton';
+import { Skeleton } from 'primeng/skeleton';
 // ---
 
 
@@ -36,7 +38,7 @@ import { FormModule } from '@coreui/angular';
 import { AvatarModule } from 'primeng/avatar';
 import { TagModule } from 'primeng/tag';
 import { TreeModule } from 'primeng/tree';
-
+import { ScrollTopModule } from 'primeng/scrolltop';
 @NgModule({
   imports: [
     CommonModule,
@@ -65,7 +67,8 @@ import { TreeModule } from 'primeng/tree';
     TreeModule,
     InputGroupAddonModule,
     InputGroupModule,
-
+    SkeletonModule,
+    Skeleton
   ],
   exports: [
     CommonModule,
@@ -93,7 +96,8 @@ import { TreeModule } from 'primeng/tree';
     TagModule,
     TreeModule,
     InputGroupAddonModule,
-    InputGroupModule
+    InputGroupModule,
+    ScrollTopModule
   ],
 })
 export class SharedModule { }

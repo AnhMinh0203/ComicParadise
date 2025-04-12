@@ -17,6 +17,7 @@ import { CommentService } from '../service/comment.service';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { SignalRService } from '../../layouts/service/signalR.service';
 import { ReportService } from '../service/report.service';
+import { RatingModule } from 'primeng/rating';
 @Component({
   selector: 'app-infor-story',
   imports: [
@@ -29,7 +30,8 @@ import { ReportService } from '../service/report.service';
     TreeModule,
     AvatarModule,
     CommonModule,
-    RadioButtonModule
+    RadioButtonModule,
+    RatingModule
   ],
   providers: [MessageService, ConfirmationService, SignalRService],
   templateUrl: './infor-story.component.html',
@@ -54,7 +56,7 @@ export class InforStoryComponent {
   comments: any[] = [];
   commentInput: any;
   commenReplytInput: any;
-  currentComment:any;
+  currentComment: any;
   storyID: any;
   coverImageDisplay: any;
   title: any;
@@ -72,6 +74,8 @@ export class InforStoryComponent {
   favoriteStories: any[] = [];
   replyingCommentId: any;
   linkToMarkChapter: any;
+  storyRating: number = 4;
+  userRating: any;
   reportReasons: string[] = [
     'Nội dung khiêu dâm',
     'Nội dung bạo lực hoặc phản cảm',
@@ -85,7 +89,7 @@ export class InforStoryComponent {
   ];
 
   selectedReason: string = '';
-
+  totalComments: number = 0;
   commentReport: MenuItem[] = [
     {
       label: 'Báo cáo vi phạm',
@@ -107,6 +111,10 @@ export class InforStoryComponent {
 
         this.getStoryDetail(this.storyID);
         this.checkIsLikeStory();
+        this.getMarkChapter();
+        this.getStoryRating(this.storyID);
+        this.getUserRating(this.storyID, this.currentUserId);
+
 
         this.activatedRoute.queryParams.subscribe(queryParams => {
           const commentID = queryParams['commentID'];
@@ -119,7 +127,7 @@ export class InforStoryComponent {
         });
 
         console.log("--- Chapter number ---")
-        this.getMarkChapter();
+
       }
 
     });
@@ -134,7 +142,6 @@ export class InforStoryComponent {
   getChaptersByStoryID(storyID: any) {
     return this._chapterService.getChaptersByStoryID(storyID).subscribe((res: any) => {
       this.chapters = res.data;
-      console.log(res.data)
     });
   }
 
@@ -238,6 +245,11 @@ export class InforStoryComponent {
 
   // --- Comment ---//
   postComment() {
+    if(!this.commentInput) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung bình luận" });
+      return;
+    }
+
     const comment = {
       StoryID: this.storyID,
       UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
@@ -271,11 +283,15 @@ export class InforStoryComponent {
   async getCommentsByStoryID(storyID: number) {
     return this._commentService.getCommentsByStoryID(storyID).subscribe((res: any) => {
       this.comments = res.data;
+      this.totalComments = this.countTotalComments(this.comments);
     });
   }
 
   replyComment(comment: any) {
-    console.log(comment);
+    if (!this.commenReplytInput) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung phản hồi" });
+      return;
+    }
     const responseComment = {
       StoryID: this.storyID,
       UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
@@ -306,7 +322,7 @@ export class InforStoryComponent {
         // Thêm newResComment vào children của comment cha
         comment.children.push(newResComment);
         this.toggleReply(comment);
-        this.commentInput = "";
+        this.commenReplytInput = "";
         this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
@@ -445,7 +461,7 @@ export class InforStoryComponent {
     }, 500);
   }
 
-  onReportComment(){
+  onReportComment() {
     const report = {
       CreatedBy: JSON.parse(localStorage.getItem('user') || '{}').userID,
       TargetType: "ReportComment",
@@ -461,30 +477,78 @@ export class InforStoryComponent {
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
       }
-    } );
+    });
   }
 
-  onReportStory(){
-
+  reportStory() {
+    alert("report success")
   }
 
-  getMarkChapter(){
-    this._chapterService.getMarkChapter( this.currentUserId,this.storyID).subscribe((res: any) => {
+  getMarkChapter() {
+    this._chapterService.getMarkChapter(this.currentUserId, this.storyID).subscribe((res: any) => {
       console.log(res)
-      if (res && res.isSuccess ) {
-        if( res.data == null){
-          this.linkToMarkChapter = null;
-          this.markChapterNumber = 0;
-        }
+      if (res && res.isSuccess) {
         this.linkToMarkChapter = res.data.link;
         this.markChapterNumber = res.data.chapterNumber;
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
+  }
+
+  goToMarkedChapter() {
+    this.router.navigate([this.linkToMarkChapter]);
+  }
+
+  ratingStory() {
+    const model = {
+      StoryID: this.storyID,
+      UserID: this.currentUserId,
+      RatingValue: this.userRating
+    }
+    console.log(model)
+    this._storyService.ratingStory(model).subscribe((res: any) => {
+      if (res && res.isSuccess && res.data ) {
+        this.messageService.add({ severity: "success", summary: "Thông báo", detail: "Đánh giá thành công" });
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
+  }
+
+  getUserRating(storyID: number, userID: number) {
+    this._storyService.getUserRating(storyID, userID).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.userRating = res.data;
+        console.log("--- user rating value ---")
+        console.log(this.userRating)
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
       }
     } );
   }
 
-  goToMarkedChapter(){
-    this.router.navigate([this.linkToMarkChapter]);
+  getStoryRating(storyID: number) {
+    this._storyService.getStoryRating(storyID).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.storyRating = res.data;
+        console.log("--- story rating value ---")
+        console.log(this.storyRating)
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    } );
+  }
+
+  countTotalComments(comments: any[]): number {
+    let total = comments.length; // Đếm comment cha
+    console.log("Total comments: ", total)
+    console.log(" comments: ", comments)
+    for (const comment of comments) {
+      if (comment.childComments && comment.childComments.length > 0) {
+        total += this.countTotalComments(comment.childComments); // Đếm đệ quy comment con
+      }
+    }
+    return total;
   }
 }

@@ -4,8 +4,17 @@
       <div class="slide-container">
         <p-carousel [value]="images" [numVisible]="1" [numScroll]="1" [circular]="true" [autoplayInterval]="3000"
           [showNavigators]="false">
-          <ng-template let-image pTemplate="item">
-            <img [src]="image" alt="Slide Image" class="format-img">
+          <ng-template let-image let-i="index" pTemplate="item">
+            <div class="relative">
+              <!-- Skeleton loading khi ảnh chưa load -->
+              <p-skeleton *ngIf="!imageLoaded[i]" height="200px"
+                styleClass="format-img absolute top-0 left-0 w-full h-full" />
+
+              <!-- Ảnh banner -->
+              <img [src]="image" alt="Slide Image" class="format-img" (load)="imageLoaded[i] = true"
+                [class.hidden]="!imageLoaded[i]" />
+            </div>
+            <!-- <img [src]="image" alt="Slide Image" class="format-img"> -->
           </ng-template>
         </p-carousel>
       </div>
@@ -42,6 +51,26 @@
     <div class="container my-3" *ngIf="!isSearch">
       <h5 class="mt-5">Truyện đề cử</h5>
       <div class="row">
+
+        <!-- Loading Skeleton -->
+        <ng-container *ngIf="isLoadingStories">
+          <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2" *ngFor="let item of [1,2,3,4,5,6]">
+            <div class="story-item">
+              <div class="story-item-img mb-2">
+                <p-skeleton height="300px" borderRadius="8px"></p-skeleton>
+              </div>
+              <div class="story-item-infor">
+                <p-skeleton width="80%" class="mb-2"></p-skeleton>
+                <p-skeleton width="60%" class="mb-2"></p-skeleton>
+                <div class="d-flex justify-content-between">
+                  <p-skeleton width="40%" height="1.2rem"></p-skeleton>
+                  <p-skeleton width="40%" height="1.2rem"></p-skeleton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
         <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 " *ngFor="let story of advanceStories">
           <div class="story-item" (click)="navigateToInforStory(story.storyID)">
             <div class="story-item-img">
@@ -249,3 +278,4 @@
     </div>
   </div>
 </div>
+<p-scrolltop />

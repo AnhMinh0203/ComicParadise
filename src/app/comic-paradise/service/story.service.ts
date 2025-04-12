@@ -111,4 +111,34 @@ export class storyService {
         })
       );
   }
+
+  ratingStory(model:any){
+    const apiUrl = `${this.serviceUri}/Rating-story`;
+    return this.http.post(apiUrl, model)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  getUserRating( storyID: any ,userID: any) {
+    const apiUrl = `${this.serviceUri}/Get-user-rating?storyID=${storyID}&userID=${userID}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  getStoryRating(storyID: any) {
+    const apiUrl = `${this.serviceUri}/Get-story-rating?storyID=${storyID}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 }

@@ -1,3 +1,4 @@
+<p-toast/>
 <div class=" container mt-100">
 
   <p-card [styleClass]="'mb-2'">
@@ -20,15 +21,20 @@
 
 
           </div>
-          <div class="story-actions-down w-100 d-flex">
-            <p-button label="Báo cáo truyện" severity="warn" icon="pi pi-flag" [style]="{width: '100%'}"
-              class="flex-grow-1  p-button-sm" (click)="onReportStory()" />
+          <div class="story-actions-rating w-100 d-flex">
+            <div class="rating-container w-100 d-flex justify-content-center align-items-center">
+              <p-rating [(ngModel)]="userRating" (onRate)="ratingStory()"></p-rating>
+            </div>
           </div>
 
 
         </div>
       </div>
       <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
+        <div class="story-report d-flex justify-content-end">
+          <i class="pi pi-flag report-icon" (click)="reportStory()" title="Báo cáo truyện"></i>
+        </div>
+
         <div class="story-infor-detail">
           <h2 class="story-title">{{this.title}}</h2>
           <p class="story-author"><strong class="me-3">Tác giả:</strong> {{this.author}}</p>
@@ -43,6 +49,12 @@
           </div>
 
           <p class="story-status"><strong class="me-3">Trạng thái:</strong> Đang tiến hành</p>
+          <p class="story-rate d-flex my-2">
+            <strong class="me-3">Đánh giá:</strong>
+            <p-rating [(ngModel)]="storyRating" [readonly]="true"></p-rating>
+          </p>
+
+
           <p class="story-description">{{this.description}}</p>
         </div>
       </div>
@@ -54,14 +66,8 @@
   <p-card header="Danh sách chương ({{ chapters.length }})" [styleClass]="'mb-2'">
     <!-- Thêm 1 button điều hướng đến chương đánh dấu ở đây, đẹp vào -->
     <div class="d-flex justify-content-end mb-3">
-        <p-button
-          label="Đến chương đã lưu ({{ markChapterNumber }})"
-          severity="success"
-          icon="pi pi-bookmark-fill"
-
-          [disabled]="linkToMarkChapter==null"
-          class="p-button-sm p-0"
-          (click)="goToMarkedChapter()" />
+      <p-button label="Đến chương đã lưu ({{ markChapterNumber }})" severity="success" icon="pi pi-bookmark-fill"
+        [disabled]="linkToMarkChapter==null" class="p-button-sm p-0" (click)="goToMarkedChapter()" />
     </div>
 
     <div class="chapter-list">
@@ -87,7 +93,7 @@
 
       <!-- Nút "Xem thêm" hoặc "Thu gọn" -->
       <div class="row">
-        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-12">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-12"  *ngIf="chapters.length > 12">
           <button pButton type="button" severity="success" label="{{ showAllChapters ? 'Thu gọn' : 'Xem thêm' }}"
             [style]="{ 'width': '100%' }" (click)="toggleChapterView()">
           </button>
@@ -99,7 +105,7 @@
 
 
 
-  <p-card header="Bình luận ({{ comments.length || 0 }})" [styleClass]="'mb-2'">
+  <p-card header="Bình luận ({{ totalComments || 0 }})" [styleClass]="'mb-2'">
     <div class="new-comment-input my-1">
       <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
         [style]="{ 'width': '100%' }"></textarea>

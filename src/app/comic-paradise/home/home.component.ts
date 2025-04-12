@@ -11,7 +11,7 @@ import { MegaMenuModule } from 'primeng/megamenu';
 import { NavbarComponent } from "../../layouts/navbar/navbar.component";
 import { Router } from '@angular/router';
 import { storyService } from '../service/story.service';
-
+import { SkeletonModule } from 'primeng/skeleton';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -23,8 +23,7 @@ import { storyService } from '../service/story.service';
     CarouselModule,
     TabsModule,
     MegaMenuModule,
-
-
+    SkeletonModule
   ]
 })
 export class HomeComponent {
@@ -36,6 +35,9 @@ export class HomeComponent {
     '../../../assets/images/slide3.jpg',
     '../../../assets/images/slide4.jpg',
   ];
+  // Skeleton
+  imageLoaded: boolean[] = [];
+  isLoadingStories = true;
   // ---
   isInforStoryPage: boolean = false;
   currentUpdateStories: any;
@@ -59,6 +61,8 @@ export class HomeComponent {
   isDarkMode = false;
 
   ngOnInit() {
+    this.imageLoaded = this.images.map(() => false);
+
     // Subscribe để lắng nghe dữ liệu searchStories từ service
     this._storyService.searchStories$.subscribe((stories: any[]) => {
       this.searchStories = stories;
@@ -103,11 +107,17 @@ export class HomeComponent {
 
   getAdvanceStories() {
     // Fix tạm userID
-    this._storyService.getAdvanceStories(1).subscribe((res: any) => {
-      if (res && res.isSuccess) {
-        this.advanceStories = res.data;
-      }
-    })
+
+    setTimeout(() => {
+      this._storyService.getAdvanceStories(1).subscribe((res: any) => {
+        if (res && res.isSuccess) {
+          this.advanceStories = res.data;
+        }
+      })
+      this.isLoadingStories = false;
+    }, 3000); // giả lập 1.5s delay
+
+
   }
 
 
