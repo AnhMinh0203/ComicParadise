@@ -5,6 +5,7 @@ using ComicParadise.DataContext.Models;
 using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository;
 using ComicParadise.Repository.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 
@@ -68,6 +69,14 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
 
+
+        [HttpPost("Filter-stories")]
+        public async Task<ActionResult> FilterStory(StoryFilterRequest storyFilterRequest)
+        {
+            var result = await _storyRepository.FilterStoryAsync(storyFilterRequest);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
         [HttpGet("Get-current-update-story")]
         public async Task<ActionResult> GetCurrentUpdateStory(int days)
         {
@@ -111,7 +120,7 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.CheckIsLikedAsync(userID, storyID);
             if (!result)
             {
-                return Ok(new BaseResponse<bool>(result));
+                return Ok(new BaseResponse<bool>(false,result));
 
             }
             return Ok(new BaseResponse<bool>(true,result));
@@ -122,6 +131,27 @@ namespace ComicParadise.Api.Controllers
         {
             var result = await _storyRepository.GetFavoriteStoriesAsync(userID);
             return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
+        [HttpPost("Rating-story")]
+        public async Task<ActionResult> RatingStory (RatingStoryDto ratingStoryDto)
+        {
+            var result = await _storyRepository.RatingStoryAsync(ratingStoryDto);
+            return Ok(new BaseResponse<bool>(true,result));
+        }
+
+        [HttpGet("Get-user-rating")]
+        public async Task<ActionResult> GetUserRating(int storyID, int userID)
+        {
+            var result = await _storyRepository.GetUserRating(storyID, userID);
+            return Ok(new BaseResponse<int?>(true, result));
+        }
+
+        [HttpGet("Get-story-rating")]
+        public async Task<ActionResult> GetStoryRating(int storyID)
+        {
+            var result = await _storyRepository.GetStoryRatingAsync(storyID);
+            return Ok(new BaseResponse<int?>(true, result));
         }
     }
 }

@@ -85,7 +85,7 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult> GetMarkChapter(  int userID ,int storyID)
         {
             var result = await _chapterRepository.GetMarkChapterAsync(userID, storyID);
-            return Ok(new BaseResponse<dynamic?>(true, result));
+            return Ok(new BaseResponse<ChapterLinkDto>(true, result));
         }
     }
 }

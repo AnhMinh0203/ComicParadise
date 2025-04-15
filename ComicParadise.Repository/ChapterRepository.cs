@@ -772,7 +772,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get mark chapter 
-        public async Task<dynamic?> GetMarkChapterAsync(int userID, int storyID)
+        public async Task<ChapterLinkDto> GetMarkChapterAsync(int userID, int storyID)
         {
             try
             {
@@ -782,14 +782,18 @@ namespace ComicParadise.Repository
 
                 if (isExistMarkChapter != null)
                 {
-                    return new { 
+                    return new ChapterLinkDto
+                    { 
                         Link = $"/chapter-content/{storyID}/{isExistMarkChapter.ChapterNumber}",
                         ChapterNumber = isExistMarkChapter.ChapterNumber,
                     };
                 }
                 else
                 {
-                    return null;
+                    return new ChapterLinkDto { 
+                        Link = null,
+                        ChapterNumber = 0
+                    };
                 }
             }
             catch (Exception ex)

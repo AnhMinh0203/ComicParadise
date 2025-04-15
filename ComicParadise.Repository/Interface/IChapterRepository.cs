@@ -20,6 +20,6 @@ namespace ComicParadise.Repository.Common
         Task<string> AddChapterPageAsync(ChapterPageRequest request);
         Task<string> ToggleChapterBookmarkAsync(MarkChapterDto markChapterDto);
         Task<bool> IsChapterBookmarkedAsync(MarkChapterDto markChapterDto);
-        Task<dynamic?> GetMarkChapterAsync(int userID, int storyID);
+        Task<ChapterLinkDto> GetMarkChapterAsync(int userID, int storyID);
     }
 }

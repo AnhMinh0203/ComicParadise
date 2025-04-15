@@ -62,7 +62,7 @@ namespace ComicParadise.Repository
                     Title = createStoryDto.Title,
                     Author = createStoryDto.Author,
                     Type = createStoryDto.Type,
-                    Status = status,
+                    CompletionStatus = status,
                     PublisherID = createStoryDto.PublisherID,
                     CoverImage = primaryImgUrl,
                     Description = createStoryDto.Description,
@@ -897,6 +897,167 @@ namespace ComicParadise.Repository
         }
         #endregion
 
+        #region Rating story
+        public async Task<bool> RatingStoryAsync (RatingStoryDto ratingStoryDto)
+        {
+            try
+            {
+                var isExistRating = await _context.Ratings
+                                                .Where(r => r.UserID == ratingStoryDto.UserID && r.StoryID == ratingStoryDto.StoryID)
+                                                .FirstOrDefaultAsync();
+                if (isExistRating != null)
+                {
+                    isExistRating.RatingValue = ratingStoryDto.RatingValue;
+                    await _context.SaveChangesAsync();
+                    return true;
 
+                }
+                else
+                {
+                    var newRate = new Rating
+                    {
+                        UserID = ratingStoryDto.UserID,
+                        StoryID = ratingStoryDto.StoryID,
+                        RatingValue = ratingStoryDto.RatingValue,
+                    };
+                    _context.Ratings.Add(newRate);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }   
+        }
+        #endregion
+
+        #region Get user rating 
+        public async Task<int?> GetUserRating (int storyID, int userID)
+        {
+            var isExistRating = await _context.Ratings
+                                            .Where(r => r.UserID ==  userID && r.StoryID == storyID)
+                                            .FirstOrDefaultAsync();
+            if(isExistRating == null)
+            {
+                return null;
+            }
+            return isExistRating.RatingValue;
+        }
+        #endregion
+
+        #region Get story rating 
+        public async Task<int?> GetStoryRatingAsync (int storyID)
+        {
+            var ratings = await _context.Ratings
+                                .Where(r => r.StoryID == storyID)
+                                .ToListAsync();
+
+            if (ratings == null || ratings.Count == 0)
+            {
+                return null; 
+            }
+            var average = ratings.Average(r => r.RatingValue);
+            return (int)Math.Round(average);
+
+        }
+
+        #endregion
+
+        #region Filter story
+        public async Task<List<dynamic>> FilterStoryAsync(StoryFilterRequest filter)
+        {
+            try
+            {
+                var query = from s in _context.Stories
+                            join u in _context.Users on s.PublisherID equals u.UserID
+                            let latestChapter = _context.Chapters
+                                .Where(c => c.StoryID == s.StoryID)
+                                .OrderByDescending(c => c.CreatedAt)
+                                .FirstOrDefault()
+                            let chapterCount = _context.Chapters
+                                .Count(c => c.StoryID == s.StoryID)
+                            let averageRating = _context.Ratings
+                                .Where(r => r.StoryID == s.StoryID)
+                                .Select(r => (double?)r.RatingValue)
+                                .Average() ?? 0
+                            select new
+                            {
+                                StoryID = s.StoryID,
+                                Title = s.Title,
+                                CoverImage = s.CoverImage,
+                                CompletionStatus = s.IsComplete ? "completed" : "updating",
+                                PublisherName = u.Username,
+                                Views = s.Views,
+                                Likes = s.Likes,
+                                Type = s.Type,
+                                LastestChapter = latestChapter != null ? latestChapter.ChapterNumber : 0,
+                                ChapterCount = chapterCount,
+                                AverageRating = averageRating
+                            };
+
+
+                if (filter.IsManga.HasValue || filter.IsNovel.HasValue)
+                {
+                    var typeFilters = new List<string>();
+                    if (filter.IsManga == true)
+                    {
+                        typeFilters.Add("Manga");
+                    }
+                    if (filter.IsNovel == true)
+                    {
+                        typeFilters.Add("Novel");
+                    }
+
+                    if (typeFilters.Any())
+                    {
+                        query = query.Where(s => typeFilters.Contains(s.Type));
+                    }
+                   
+                }
+
+                if (!string.IsNullOrEmpty(filter.CompletionStatus) && filter.CompletionStatus != "all")
+                {
+                    if (filter.CompletionStatus == "completed")
+                    {
+                        query = query.Where(s => s.CompletionStatus == "completed"); // IsComplete == true
+                    }
+                    else if (filter.CompletionStatus == "updating")
+                    {
+                        query = query.Where(s => s.CompletionStatus == "updating"); // IsComplete == false
+                    }
+                }
+
+                if (filter.MinChapters.HasValue)
+                {
+                    query = query.Where(s => s.ChapterCount >= filter.MinChapters.Value);
+                }
+
+                if (filter.MaxChapters.HasValue)
+                {
+                    query = query.Where(s => s.ChapterCount <= filter.MaxChapters.Value);
+                }
+
+                // Sắp xếp theo lượt xem hoặc đánh giá
+                if (filter.HighestViews == true)
+                {
+                    query = query.OrderByDescending(s => s.Views);
+                }
+                if (filter.HighestRates == true)
+                {
+                    query = query.OrderByDescending(s => s.AverageRating);
+                }
+
+
+                // Thực thi truy vấn và trả về kết quả
+                var listStories = await query.ToListAsync<dynamic>();
+                return listStories;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi lọc truyện: " + ex.Message);
+            }
+        }
+        #endregion
     }
 }

@@ -27,6 +27,7 @@ namespace ComicParadise.DataContext.Database
         public DbSet<Favorite> Favorites { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<BookMark> BookMarks { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
 
 
 
@@ -47,9 +48,10 @@ namespace ComicParadise.DataContext.Database
             modelBuilder.Entity<BookMark>()
               .HasKey(b => new { b.BookMarkID });
 
+            modelBuilder.Entity<Rating>()
+              .HasKey(r => new { r.RatingID });
+
             base.OnModelCreating(modelBuilder);
         }
-
-
     }
 }

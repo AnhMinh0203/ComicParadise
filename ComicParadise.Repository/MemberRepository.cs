@@ -104,7 +104,7 @@ namespace ComicParadise.Repository
                     Phone = addMemberDto.Phone,
                     PasswordHash = hash,
                     Role = addMemberDto.Role,
-                    Status = addMemberDto.Status,
+                    CompletionStatus = addMemberDto.CompletionStatus,
                     Avatar = addMemberDto.Avatar != null ? avtPath : null,
                     IsComment = addMemberDto.IsComment,
                     IsLock = addMemberDto.IsLock

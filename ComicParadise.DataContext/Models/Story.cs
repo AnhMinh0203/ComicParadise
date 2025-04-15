@@ -19,6 +19,7 @@ namespace ComicParadise.DataContext.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string Description { get; set; }
         public string CoverImage { get; set; }
+        public bool IsComplete { get; set; }
     }
 
 }

@@ -19,19 +19,5 @@ namespace ComicParadise.Repository
         {
             await Clients.All.SendAsync("ReceiveSystemNotification", message);
         }
-
-/*        // Đăng ký user vào nhóm theo dõi truyện
-        public async Task FollowStory(string userId, int storyId)
-        {
-            var groupName = $"story_{storyId}";
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-        }
-
-        // Hủy theo dõi truyện
-        public async Task UnfollowStory(string userId, int storyId)
-        {
-            var groupName = $"story_{storyId}";
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-        }*/
     }
 }

@@ -23,6 +23,10 @@ namespace ComicParadise.Repository.Common
         Task<bool> CheckIsLikedAsync(int userID, int storyID);
         Task<List<dynamic>> GetFavoriteStoriesAsync(int userID);
         Task<string> LikeStoriesAsync(LikeStoryRequest likeStoryRequest);
+        Task<bool> RatingStoryAsync(RatingStoryDto ratingStoryDto);
+        Task<int?> GetUserRating(int storyID, int userID);
+        Task<int?> GetStoryRatingAsync(int storyID);
+        Task<List<dynamic>> FilterStoryAsync(StoryFilterRequest filter);
 
     }
 }
