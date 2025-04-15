@@ -23,7 +23,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ListboxModule } from 'primeng/listbox';
 import { SharedService } from '../service/share.service';
-
+import { DropdownModule } from 'primeng/dropdown';
 @Component({
   selector: 'app-navbar',
   imports: [
@@ -37,7 +37,8 @@ import { SharedService } from '../service/share.service';
     BadgeModule,
     PasswordModule,
     RadioButtonModule,
-    ListboxModule
+    ListboxModule,
+    DropdownModule
   ],
   providers: [ConfirmationService, MessageService, SignalRService,
   ],
@@ -60,7 +61,8 @@ export class NavbarComponent {
   categoryItems: MegaMenuItem[] | undefined;
   visibleNotify: any;
   searchKey: any;
-  searchStories: any;
+  searchStoryResults: any;
+  filterStoryResults: any;
   userID: any;
   userInitial: string = '';
 
@@ -106,10 +108,28 @@ export class NavbarComponent {
     { label: 'Đăng xuất', icon: 'pi pi-sign-out', command: () => this.logout() }
   ]
 
+  statusOptionsFilter = [
+    { label: 'Tất cả', value: 'all' },
+    { label: 'Đang cập nhật', value: 'updating' },
+    { label: 'Hoàn thành', value: 'completed' }
+  ];
+  selectedStatusFilter = 'all';
+
+
   hubHelloMessage?: string;
   progressPercentage?: number;
   progressMessage?: string;
   processing?: boolean;
+
+  // Filter
+  isMangaFilter: any;
+  visibleFilter: any;
+  isNovelFilter: any;
+  isHighestViews: any;
+  isHighestRates: any;
+  minChapters: any;
+  maxChapters: any;
+
   private signalRSubscription!: Subscription;
   private systemSignalRSubscription!: Subscription;
 
@@ -266,25 +286,47 @@ export class NavbarComponent {
     this.visibleNotify = true;
   }
 
+  showDialogFilter(){
+    this.visibleFilter = true;
+  }
+
   searchStory() {
     this._storyService.searchStories(this.searchKey).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.searchStories = res.data;
+        this.searchStoryResults = res.data;
         this._storyService.setSearchStories(res.data);
       }
     })
     this.router.navigate(['']);
   }
 
+  filterStories() {
+    const filterConditions = {
+      IsManga: this.isMangaFilter,
+      IsNovel: this.isNovelFilter,
+      CompletionStatus: this.selectedStatusFilter,
+      HighestViews: this.isHighestViews,
+      HighestRates: this.isHighestRates,
+      MinChapters: this.minChapters,
+      MaxChapters: this.maxChapters,
+    };
+    this._storyService.filterStories(filterConditions).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.filterStoryResults = res.data;
+        this._storyService.setFilterStories(res.data);
+      }
+    });
+  }
+
   onSearchKeyChange() {
     if (!this.searchKey.trim()) {
-      this.searchStories = []; // Reset local data
+      this.searchStoryResults = []; // Reset local data
       this._storyService.setSearchStories([]);
     }
   }
 
   resetHome() {
-    this.searchStories = [];
+    this.searchStoryResults = [];
     this._storyService.setSearchStories([]);
     this.router.navigate(['']);
   }

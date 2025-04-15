@@ -7,8 +7,10 @@ import { BehaviorSubject, catchError, Observable } from 'rxjs';
 })
 export class storyService {
   private searchStoriesSubject = new BehaviorSubject<any[]>([]);
-  searchStories$ = this.searchStoriesSubject.asObservable();
+  private filterStoriesSubject = new BehaviorSubject<any[]>([]);
 
+  searchStories$ = this.searchStoriesSubject.asObservable();
+  filterStories$ = this.filterStoriesSubject.asObservable();
 
   serviceUri: any;
   constructor(private http: HttpClient) {
@@ -68,8 +70,23 @@ export class storyService {
   searchStories(title: string): Observable<any> {
     return this.http.get(`${this.serviceUri}/Search-stories?title=${title}`);
   }
+
+  filterStories(conditions: any): Observable<any> {
+    const apiUrl = `${this.serviceUri}/Filter-stories`;
+    return this.http.post(apiUrl, conditions)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
   setSearchStories(stories: any[]) {
     this.searchStoriesSubject.next(stories);
+  }
+
+  setFilterStories(stories: any[]) {
+    this.filterStoriesSubject.next(stories);
   }
 
   likeStory(userID: any, storyID: any) {

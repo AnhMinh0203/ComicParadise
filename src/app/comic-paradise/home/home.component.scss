@@ -295,14 +295,14 @@ p-tab {
 
 // Search are
 // home.component.scss
-.searchStoryArea {
+.searchAndFilterStoryArea {
   opacity: 0;
   max-height: 0; // Ẩn hoàn toàn khi không có nội dung
   overflow: hidden;
   transition: opacity 0.5s ease, max-height 0.5s ease; // Hiệu ứng mượt mà
 }
 
-.searchStoryArea.visible {
+.searchAndFilterStoryArea.visible {
   opacity: 1;
   max-height: 1000px;
 }

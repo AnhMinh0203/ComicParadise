@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MegaMenuItem, MenuItem } from 'primeng/api';
+import { ConfirmationService, MegaMenuItem, MenuItem, MessageService } from 'primeng/api';
 import { Menubar } from 'primeng/menubar';
 import { InputTextModule } from 'primeng/inputtext';
 import { CarouselModule } from 'primeng/carousel';
@@ -24,7 +24,8 @@ import { SkeletonModule } from 'primeng/skeleton';
     TabsModule,
     MegaMenuModule,
     SkeletonModule
-  ]
+  ],
+    providers: [ConfirmationService, MessageService],
 })
 export class HomeComponent {
 
@@ -43,6 +44,7 @@ export class HomeComponent {
   currentUpdateStories: any;
   topStories: any[] = [];
   searchStories: any[] = [];
+  filterStories: any[] = [];
   advanceStories: any[] = [];
   selectedTab: string = "0";
   topType: string = "month";
@@ -50,10 +52,13 @@ export class HomeComponent {
   currentUserId: any;
 
   isSearch: boolean = false;
+  isFilter: boolean = false;
 
   constructor(
     private router: Router,
-    private _storyService: storyService
+    private _storyService: storyService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
   ) { }
 
 
@@ -66,9 +71,29 @@ export class HomeComponent {
     // Subscribe để lắng nghe dữ liệu searchStories từ service
     this._storyService.searchStories$.subscribe((stories: any[]) => {
       this.searchStories = stories;
-      this.isSearch = stories.length > 0; // Cập nhật trạng thái tìm kiếm
-
+      this.isSearch = stories.length > 0;
+      // if(!this.isSearch) {
+      //   this.messageService.add({
+      //     severity: 'warn',
+      //     summary: 'Thông báo',
+      //     detail: 'Không tìm thấy truyện!' });
+      // }
     });
+
+    this._storyService.filterStories$.subscribe((stories: any[]) => {
+      this.filterStories = stories;
+      this.isFilter = stories.length > 0;
+      console.log('== isFilter == ',this.isFilter)
+      if(!this.isFilter) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Thông báo',
+          detail: 'Không có truyện nào phù hợp với bộ lọc của bạn!' });
+      }
+    });
+
+
+
     this.currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
     this.getCurrentUpdateStories()
     this.getTopStories();
@@ -81,12 +106,15 @@ export class HomeComponent {
 
 
   getCurrentUpdateStories() {
-    this._storyService.getCurrentUpdateStories(7).subscribe((res: any) => {
-      if (res && res.isSuccess) {
-        this.currentUpdateStories = res.data
-        console.log(res.data)
-      }
-    })
+
+    setTimeout(() => {
+      this._storyService.getCurrentUpdateStories(7).subscribe((res: any) => {
+        if (res && res.isSuccess) {
+          this.currentUpdateStories = res.data
+          console.log(res.data)
+        }
+      })
+    } , 3000);
   }
 
   onTabChange(event: any) {
@@ -97,12 +125,14 @@ export class HomeComponent {
 
 
   getTopStories() {
-    this._storyService.getTopStories(this.topType).subscribe((res: any) => {
-      if (res && res.isSuccess) {
-        this.topStories = res.data;
+    setTimeout(() => {
+      this._storyService.getTopStories(this.topType).subscribe((res: any) => {
+        if (res && res.isSuccess) {
+          this.topStories = res.data;
 
-      }
-    })
+        }
+      })
+    } , 3000);
   }
 
   getAdvanceStories() {
@@ -115,8 +145,7 @@ export class HomeComponent {
         }
       })
       this.isLoadingStories = false;
-    }, 3000); // giả lập 1.5s delay
-
+    }, 3000);
 
   }
 
