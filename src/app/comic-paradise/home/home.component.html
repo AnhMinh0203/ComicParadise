@@ -22,7 +22,7 @@
     </div>
 
     <!-- Search and filter stories result -->
-    <div class="searchAndFilterStoryArea" [ngClass]="{'visible': isSearch || isFilter}">
+    <div class="searchAndFilterStoryArea" [ngClass]="{'visible': isSearch || isFilterByConditions || isFilterByCategories}">
       <h4>Kết quả</h4>
       <div class="row">
         <!-- Search -->
@@ -52,8 +52,35 @@
       </div>
 
       <div class="row">
-        <!-- Search -->
-        <div *ngFor="let story of filterStories" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+        <!-- Filter by conditions -->
+        <div *ngFor="let story of filterStoryByConditions" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+          <div class="story-item" (click)="navigateToInforStory(story.storyID)">
+            <div class="story-item-img">
+              <img [src]="story.coverImage" alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                {{story.title}}
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: {{story.lastestChapter}}
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> {{story.likes}}
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> {{story.views}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Filter by categories -->
+        <div *ngFor="let story of filterStoryByCategories" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
           <div class="story-item" (click)="navigateToInforStory(story.storyID)">
             <div class="story-item-img">
               <img [src]="story.coverImage" alt="Slide Image">
@@ -79,7 +106,7 @@
       </div>
     </div>
 
-    <div class="container my-3" *ngIf="!isSearch || !isFilter">
+    <div class="container my-3" *ngIf="!isSearch || !isFilterByConditions">
       <h5 class="mt-5">Truyện đề cử</h5>
       <div class="row">
 
@@ -506,9 +533,9 @@
           </div>
         </div>
       </div>
-
-
     </div>
   </div>
 </div>
-<p-scrolltop />
+<!-- <p-scrolltop /> -->
+<!-- Chatbot -->
+<app-chatbot></app-chatbot>

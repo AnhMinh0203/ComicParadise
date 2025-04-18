@@ -1,4 +1,4 @@
-<p-toast/>
+<p-toast />
 <div class=" container mt-100">
 
   <p-card [styleClass]="'mb-2'">
@@ -32,7 +32,7 @@
       </div>
       <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
         <div class="story-report d-flex justify-content-end">
-          <i class="pi pi-flag report-icon" (click)="reportStory()" title="Báo cáo truyện"></i>
+          <i class="pi pi-flag report-icon" (click)="reportStoryForm()" title="Báo cáo truyện"></i>
         </div>
 
         <div class="story-infor-detail">
@@ -93,7 +93,7 @@
 
       <!-- Nút "Xem thêm" hoặc "Thu gọn" -->
       <div class="row">
-        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-12"  *ngIf="chapters.length > 12">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-12" *ngIf="chapters.length > 12">
           <button pButton type="button" severity="success" label="{{ showAllChapters ? 'Thu gọn' : 'Xem thêm' }}"
             [style]="{ 'width': '100%' }" (click)="toggleChapterView()">
           </button>
@@ -241,19 +241,37 @@
 
 
 <!-- Report comment form -->
-<p-dialog header="Cảnh báo" [closable]="true" [modal]="true" [(visible)]="isReportCommentForm"
+<p-dialog header="Báo cáo bình luận" [closable]="true" [modal]="true" [(visible)]="isReportCommentForm"
   [style]="{ width: '30rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" (onHide)="resetReportForm()">
 
-  <div *ngFor="let reason of reportReasons" class="mb-3 d-flex align-items-center">
-    <p-radioButton name="reportReason" [value]="reason" [(ngModel)]="selectedReason"
+  <div *ngFor="let reason of reportCommentReasons" class="mb-3 d-flex align-items-center">
+    <p-radioButton name="reportReason" [value]="reason" [(ngModel)]="selectedCommentReason"
       inputId="{{ reason }}"></p-radioButton>
     <label for="{{ reason }}" class="ms-3">{{ reason }}</label>
   </div>
 
   <div class="mt-4 text-right d-flex justify-content-center">
-    <button pButton type="button" label="Báo cáo vi phạm" icon="pi pi-flag" class="p-button-danger"
-      [disabled]="!selectedReason" (click)="onReportComment()">
+    <button pButton type="button" label="Báo cáo vi phạm" icon="pi pi-flag" class="p-button-danger w-100"
+      [disabled]="!selectedCommentReason" (click)="onReportComment()">
     </button>
   </div>
+</p-dialog>
 
+
+<!-- Report story form -->
+<p-dialog header="Báo cáo truyện" [closable]="true" [modal]="true" [(visible)]="isReportStoryForm"
+[style]="{ width: '40vw' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" (onHide)="resetReportForm()"
+  [draggable]="false" [resizable]="false">
+
+  <div *ngFor="let reason of reportStoryReasons" class="mb-3 d-flex align-items-center">
+    <p-radioButton name="reportReason" [value]="reason" [(ngModel)]="selectedStoryReason"
+      inputId="{{ reason }}"></p-radioButton>
+    <label for="{{ reason }}" class="ms-3">{{ reason }}</label>
+  </div>
+
+  <div class="mt-4 text-right d-flex justify-content-center">
+    <button pButton type="button" label="Báo cáo vi phạm" icon="pi pi-flag" class="p-button-danger w-100"
+      [disabled]="!selectedStoryReason" (click)="onReportStory()">
+    </button>
+  </div>
 </p-dialog>

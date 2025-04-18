@@ -241,6 +241,17 @@
   width: 10%;
 }
 
+// Category
+.category-dialog {
+  padding: 1rem;
+}
+
+.category-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
 
 :host ::ng-deep p-columnFilter {
   width: 100% !important;

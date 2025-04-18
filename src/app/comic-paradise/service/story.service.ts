@@ -7,10 +7,12 @@ import { BehaviorSubject, catchError, Observable } from 'rxjs';
 })
 export class storyService {
   private searchStoriesSubject = new BehaviorSubject<any[]>([]);
-  private filterStoriesSubject = new BehaviorSubject<any[]>([]);
+  private filterStoryByConditionsSubject = new BehaviorSubject<any[]>([]);
+  private filterStoryByCategoriesSubject = new BehaviorSubject<any[]>([]);
 
   searchStories$ = this.searchStoriesSubject.asObservable();
-  filterStories$ = this.filterStoriesSubject.asObservable();
+  filterStoryByConditions$ = this.filterStoryByConditionsSubject.asObservable();
+  filterStoryByCategories$ = this.filterStoryByCategoriesSubject.asObservable();
 
   serviceUri: any;
   constructor(private http: HttpClient) {
@@ -71,9 +73,19 @@ export class storyService {
     return this.http.get(`${this.serviceUri}/Search-stories?title=${title}`);
   }
 
-  filterStories(conditions: any): Observable<any> {
-    const apiUrl = `${this.serviceUri}/Filter-stories`;
+  filterStoryByConditions(conditions: any): Observable<any> {
+    const apiUrl = `${this.serviceUri}/Filter-story-by-conditions`;
     return this.http.post(apiUrl, conditions)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  filterStoryByCategories(categories: any): Observable<any> {
+    const apiUrl = `${this.serviceUri}/Filter-story-by-categories`;
+    return this.http.post(apiUrl, categories)
       .pipe(
         catchError((error: any) => {
           throw error;
@@ -85,8 +97,12 @@ export class storyService {
     this.searchStoriesSubject.next(stories);
   }
 
-  setFilterStories(stories: any[]) {
-    this.filterStoriesSubject.next(stories);
+  setFilterStoryByConditions(stories: any[]) {
+    this.filterStoryByConditionsSubject.next(stories);
+  }
+
+  setFilterStoryByCategories(stories: any[]) {
+    this.filterStoryByCategoriesSubject.next(stories);
   }
 
   likeStory(userID: any, storyID: any) {

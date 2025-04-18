@@ -1,0 +1,21 @@
+<div class="chatbot-container" [class.open]="isOpen">
+  <div class="chat-header" (click)="toggleChat()">
+    <ng-container *ngIf="isOpen; else iconOnly">
+      <span>🤖 Trợ lý đọc truyện</span>
+      <span class="toggle-btn">{{ isOpen ? '−' : '+' }}</span>
+    </ng-container>
+    <ng-template #iconOnly>
+      <span class="icon-only">🤖</span>
+    </ng-template>
+  </div>
+
+  <div class="chat-body" *ngIf="isOpen">
+    <div class="messages">
+      <div *ngFor="let msg of messages" class="message" [ngClass]="msg.sender" [innerHTML]="msg.text"></div>
+    </div>
+    <div class="chat-input">
+      <input [(ngModel)]="inputText" (keydown.enter)="sendMessage()" placeholder="Nhập tin nhắn..." />
+      <button (click)="sendMessage()">Gửi</button>
+    </div>
+  </div>
+</div>

@@ -58,11 +58,13 @@ import { DropdownModule } from 'primeng/dropdown';
 })
 export class NavbarComponent {
   isDarkMode: boolean = false;
-  categoryItems: MegaMenuItem[] | undefined;
+  // categoryItems: MegaMenuItem[] | undefined;
+  categoryItems:any;
   visibleNotify: any;
   searchKey: any;
   searchStoryResults: any;
-  filterStoryResults: any;
+  filterStoryByConditionsResults: any;
+  filterStoryByCategoriesResults: any;
   userID: any;
   userInitial: string = '';
 
@@ -132,6 +134,10 @@ export class NavbarComponent {
 
   private signalRSubscription!: Subscription;
   private systemSignalRSubscription!: Subscription;
+
+  displayCategoryDialog = false;
+  categoryColumns: any[][] = [];
+
 
   constructor(
     private themeService: ThemeService,
@@ -256,23 +262,34 @@ export class NavbarComponent {
     this.themeService.setDarkMode(this.isDarkMode);
   }
 
+  // getCategories() {
+  //   this._categoryService.getCategories().subscribe((res: any) => {
+  //     if (res && res.isSuccess === true) {
+  //       const itemsPerColumn = 2; // Số danh mục mỗi cột
+  //       const columns = [];
+  //       for (let i = 0; i < res.data.length; i += itemsPerColumn) {
+  //         columns.push(res.data.slice(i, i + itemsPerColumn));
+  //       }
+  //       this.categoryItems = [
+  //         {
+  //           label: 'Thể loại',
+  //           items: columns
+  //         }
+  //       ];
+  //     }
+  //   });
+  // }
+
   getCategories() {
     this._categoryService.getCategories().subscribe((res: any) => {
-      if (res && res.isSuccess === true) {
-        const itemsPerColumn = 2; // Số danh mục mỗi cột
-        const columns = [];
-        for (let i = 0; i < res.data.length; i += itemsPerColumn) {
-          columns.push(res.data.slice(i, i + itemsPerColumn));
-        }
-        this.categoryItems = [
-          {
-            label: 'Thể loại',
-            items: columns
-          }
-        ];
+      if (res?.isSuccess) {
+        this.categoryItems = res.data;
       }
     });
   }
+
+
+
 
   navigateToContact() {
     this.router.navigate(['/about-us']);
@@ -284,6 +301,10 @@ export class NavbarComponent {
     this.cdr.detectChanges(); // Cập nhật giao diện ngay lập tức
     this.loadNotifications();
     this.visibleNotify = true;
+  }
+
+  showDialogCategory() {
+    this.displayCategoryDialog = true;
   }
 
   showDialogFilter(){
@@ -300,7 +321,7 @@ export class NavbarComponent {
     this.router.navigate(['']);
   }
 
-  filterStories() {
+  filterStoryByConditions() {
     const filterConditions = {
       IsManga: this.isMangaFilter,
       IsNovel: this.isNovelFilter,
@@ -310,11 +331,22 @@ export class NavbarComponent {
       MinChapters: this.minChapters,
       MaxChapters: this.maxChapters,
     };
-    this._storyService.filterStories(filterConditions).subscribe((res: any) => {
+    this._storyService.filterStoryByConditions(filterConditions).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.filterStoryResults = res.data;
-        this._storyService.setFilterStories(res.data);
+        this.filterStoryByConditionsResults = res.data;
+        this._storyService.setFilterStoryByConditions(res.data);
       }
+    });
+  }
+
+  filterStoryByCategories(){
+    const selectedCategoryIds = this.categoryItems
+      .filter((category:any) => category.selected)
+      .map((category:any) => category.categoryID);
+
+    this._storyService.filterStoryByCategories(selectedCategoryIds).subscribe((res: any) => {
+      this.filterStoryByCategoriesResults = res.data;
+      this._storyService.setFilterStoryByCategories(res.data);
     });
   }
 

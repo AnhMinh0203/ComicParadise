@@ -70,13 +70,14 @@ export class InforStoryComponent {
   views: any;
   isLiked: boolean = false;
   isReportCommentForm: boolean = false;
+  isReportStoryForm: boolean = false;
   currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
   favoriteStories: any[] = [];
   replyingCommentId: any;
   linkToMarkChapter: any;
   storyRating: number = 4;
   userRating: any;
-  reportReasons: string[] = [
+  reportCommentReasons: string[] = [
     'Nội dung khiêu dâm',
     'Nội dung bạo lực hoặc phản cảm',
     'Nội dung lăng mạ hoặc kích động thù hận',
@@ -88,14 +89,29 @@ export class InforStoryComponent {
     'Nội dung gian lận/vi phạm hoặc gây hiểu lầm'
   ];
 
-  selectedReason: string = '';
+  reportStoryReasons: string[] = [
+    'Truyện có nội dung khiêu dâm',
+    'Truyện chứa nội dung bạo lực hoặc phản cảm',
+    'Truyện có ngôn từ lăng mạ hoặc kích động thù hận',
+    'Truyện có yếu tố quấy rối hoặc bắt nạt',
+    'Truyện chứa hành vi gây hại hoặc nguy hiểm',
+    'Truyện cung cấp thông tin sai lệch',
+    'Truyện có nội dung liên quan đến ngược đãi trẻ em',
+    'Truyện quảng bá chủ nghĩa khủng bố',
+    'Truyện vi phạm bản quyền hoặc gian lận',
+    'Truyện có nội dung gây hiểu lầm cho người đọc'
+  ];
+
+
+  selectedCommentReason: string = '';
+  selectedStoryReason: string = '';
   totalComments: number = 0;
   commentReport: MenuItem[] = [
     {
       label: 'Báo cáo vi phạm',
       icon: 'pi pi-flag',
       command: () => {
-        this.reportViolation(); // gọi hàm xử lý báo cáo
+        this.reportCommentForm(); // gọi hàm xử lý báo cáo
       }
     }
   ];
@@ -428,13 +444,20 @@ export class InforStoryComponent {
     // this.signalRService.followStory(userId, this.storyID);
   }
 
-  reportViolation() {
+  reportCommentForm() {
     this.isReportCommentForm = true;
   }
 
-  resetReportForm() {
-    this.selectedReason = '';
+  reportStoryForm() {
+    this.isReportStoryForm = true;
   }
+
+  resetReportForm() {
+    this.selectedCommentReason = '';
+    this.selectedStoryReason = '';
+  }
+
+
 
   scrollToComment(commentID: string): void {
     setTimeout(() => {
@@ -465,7 +488,7 @@ export class InforStoryComponent {
     const report = {
       CreatedBy: JSON.parse(localStorage.getItem('user') || '{}').userID,
       TargetType: "ReportComment",
-      Reason: this.selectedReason,
+      Reason: this.selectedCommentReason,
       TargetID: this.currentComment.commentID,
     }
 
@@ -473,15 +496,30 @@ export class InforStoryComponent {
       if (res && res.isSuccess) {
         this.messageService.add({ severity: "success", summary: "Thành công", detail: "Báo cáo thành công" });
         this.isReportCommentForm = false;
-        this.selectedReason = '';
+        this.selectedCommentReason = '';
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
       }
     });
   }
 
-  reportStory() {
-    alert("report success")
+  onReportStory() {
+    const report = {
+      CreatedBy: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      TargetType: "ReportStory",
+      Reason: this.selectedStoryReason,
+      TargetID: this.storyID,
+    }
+
+    this._reportService.createReport(report).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Báo cáo thành công" });
+        this.isReportStoryForm = false;
+        this.selectedStoryReason = '';
+      } else {
+        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      }
+    });
   }
 
   getMarkChapter() {

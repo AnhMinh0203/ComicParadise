@@ -12,6 +12,7 @@ import { NavbarComponent } from "../../layouts/navbar/navbar.component";
 import { Router } from '@angular/router';
 import { storyService } from '../service/story.service';
 import { SkeletonModule } from 'primeng/skeleton';
+import { ChatbotComponent } from "../../layouts/chatbot/chatbot.component";
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -23,8 +24,9 @@ import { SkeletonModule } from 'primeng/skeleton';
     CarouselModule,
     TabsModule,
     MegaMenuModule,
-    SkeletonModule
-  ],
+    SkeletonModule,
+    ChatbotComponent
+],
     providers: [ConfirmationService, MessageService],
 })
 export class HomeComponent {
@@ -44,7 +46,8 @@ export class HomeComponent {
   currentUpdateStories: any;
   topStories: any[] = [];
   searchStories: any[] = [];
-  filterStories: any[] = [];
+  filterStoryByConditions: any[] = [];
+  filterStoryByCategories: any[] = [];
   advanceStories: any[] = [];
   selectedTab: string = "0";
   topType: string = "month";
@@ -52,7 +55,8 @@ export class HomeComponent {
   currentUserId: any;
 
   isSearch: boolean = false;
-  isFilter: boolean = false;
+  isFilterByConditions: boolean = false;
+  isFilterByCategories: boolean = false;
 
   constructor(
     private router: Router,
@@ -80,11 +84,23 @@ export class HomeComponent {
       // }
     });
 
-    this._storyService.filterStories$.subscribe((stories: any[]) => {
-      this.filterStories = stories;
-      this.isFilter = stories.length > 0;
-      console.log('== isFilter == ',this.isFilter)
-      if(!this.isFilter) {
+    this._storyService.filterStoryByConditions$.subscribe((stories: any[]) => {
+      this.filterStoryByConditions = stories;
+      this.isFilterByConditions = stories.length > 0;
+
+      if(!this.isFilterByConditions) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Thông báo',
+          detail: 'Không có truyện nào phù hợp với bộ lọc của bạn!' });
+      }
+    });
+
+    this._storyService.filterStoryByCategories$.subscribe((stories: any[]) => {
+      this.filterStoryByCategories = stories;
+      this.isFilterByCategories = stories.length > 0;
+
+      if(!this.isFilterByCategories) {
         this.messageService.add({
           severity: 'warn',
           summary: 'Thông báo',
