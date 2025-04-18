@@ -8,59 +8,16 @@ import { catchError, Observable } from 'rxjs';
 export class reportService {
   serviceUri: any;
   constructor(private http: HttpClient) {
-    this.serviceUri =`${environment.apiUrl}/StatisticalReport`;
+    this.serviceUri =`${environment.apiUrl}/Report`;
   }
 
-  getReportStory() {
-    var apiUrl = `${this.serviceUri}/Get-report-story`;
+  getReport(reportType:string) {
+    var apiUrl = `${this.serviceUri}/Get-report?reportType=${reportType}`;
     return this.http.get(apiUrl)
       .pipe(
         catchError((error: any) => {
           throw error;
         })
       );
-  }
-
-  searchReportStory(title: string) {
-    var apiUrl = `${this.serviceUri}/Search-report-story?title=${title}`;
-    return this.http.get(apiUrl)
-      .pipe(
-        catchError((error: any) => {
-          throw error;
-        })
-      );
-  }
-
-  exportStoryReportExcel() {
-    var apiUrl = `${this.serviceUri}/Export-report-story-excel`;
-    return this.http.get(apiUrl, { responseType: 'blob' });
-  }
-
-  exportMemberReportExcel() {
-    var apiUrl = `${this.serviceUri}/Export-report-member-excel`;
-    return this.http.get(apiUrl, { responseType: 'blob' });
-  }
-
-  getTotalStories(){
-    var apiUrl = `${this.serviceUri}/Get-total-stories`;
-    return this.http.get(apiUrl);
-  }
-  getTotalMembers(){
-    var apiUrl = `${this.serviceUri}/Get-total-members`;
-    return this.http.get(apiUrl);
-  }
-  getTotalCategories(){
-    var apiUrl = `${this.serviceUri}/Get-total-categories`;
-    return this.http.get(apiUrl);
-  }
-
-  getChartReportStory (typeReport:string){
-    var apiUrl = `${this.serviceUri}/Get-chart-story-report?type=${typeReport}`;
-    return this.http.get(apiUrl);
-  }
-
-  getChartReportMember (typeReport:string){
-    var apiUrl = `${this.serviceUri}/Get-chart-member-report?type=${typeReport}`;
-    return this.http.get(apiUrl);
   }
 }

@@ -4,7 +4,7 @@ export const routes: Routes = [
   {
     path: '',
     data: {
-      title: 'Base'
+      title: 'Quản lý hệ thống'
     },
     children: [
       {
@@ -18,7 +18,8 @@ export const routes: Routes = [
         data: {
           title: 'Accordion'
         }
-      }
+      },
+
     ]
   }
 ];

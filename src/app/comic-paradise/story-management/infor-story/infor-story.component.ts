@@ -53,7 +53,7 @@ export class InforStoryComponent {
   replyingCommentId: any;
   showAllChapters: boolean = false;
   maxChaptersToShow: number = 12;
-
+  commenReplytInput: any;
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -72,9 +72,16 @@ export class InforStoryComponent {
       const id = params.get('id');
       if (id) {
         this.storyID = +id;
-        this.getChaptersByStoryID(this.storyID);
+        await this.getChaptersByStoryID(this.storyID);
         await this.getCommentsByStoryID(this.storyID);
         this.getStoryDetail(this.storyID);
+
+        const commentID = this.activatedRoute.snapshot.queryParamMap.get('commentID');
+        if (commentID) {
+          setTimeout(() => {
+            this.scrollToComment(commentID);
+          }, 300);
+        }
       }
       this.commentSelections = [
         { label: 'Ẩn / Bỏ ẩn', icon: 'pi pi-delete-left', command: () => this.onUpdateStatusComment(this.selectedComment) },
@@ -84,7 +91,19 @@ export class InforStoryComponent {
     });
   }
 
-  getChaptersByStoryID(storyID: number) {
+  scrollToComment(commentID: string) {
+    const commentElement = document.getElementById(`comment-${commentID}`);
+    if (commentElement) {
+      commentElement.classList.add('highlight-comment');
+      commentElement.scrollIntoView({ behavior: 'smooth' });
+
+      // setTimeout(() => {
+      //   commentElement.classList.remove('highlight-comment');
+      // }, 3000);
+    }
+  }
+
+  async getChaptersByStoryID(storyID: number) {
     return this._chapterService.getChaptersByStoryID(storyID).subscribe((res: any) => {
       this.chapters = res.data;
     });
@@ -187,7 +206,6 @@ export class InforStoryComponent {
 
   // --- Comment ---//
   postComment() {
-    alert('post comment');
     const comment = {
       StoryID: this.storyID,
       UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
@@ -201,7 +219,7 @@ export class InforStoryComponent {
 
     this._commentService.postComment(comment).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        var userName = JSON.parse(localStorage.getItem('user') || '{}').fullName
+        var userName = JSON.parse(localStorage.getItem('user') || '{}').username
         const newComment = {
           userID: JSON.parse(localStorage.getItem('user') || '{}').userID,
           commentID: res.data.commentID,
@@ -288,11 +306,14 @@ export class InforStoryComponent {
   }
 
   replyComment(comment: any) {
-    console.log(comment);
+    if (!this.commenReplytInput) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung phản hồi" });
+      return;
+    }
     const responseComment = {
       StoryID: this.storyID,
       UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
-      Content: this.commentInput,
+      Content: this.commenReplytInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",
       Reply: comment.commentID,
@@ -319,7 +340,7 @@ export class InforStoryComponent {
         // Thêm newResComment vào children của comment cha
         comment.children.push(newResComment);
         this.toggleReply(comment);
-        this.commentInput = "";
+        this.commenReplytInput = "";
         this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });

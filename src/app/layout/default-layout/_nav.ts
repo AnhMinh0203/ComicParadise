@@ -30,6 +30,11 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-bookmark' }
   },
   {
+    name: 'Quản lý báo cáo',
+    url: '/report-management',
+    iconComponent: { name: 'cil-report-slash' }
+  },
+  {
     name: 'Báo cáo thống kê',
     url: '/statistical-report-management',
     iconComponent: { name: 'cil-chart-pie' }
@@ -47,7 +52,7 @@ export const navItems: INavData[] = [
         name: 'Accordion',
         url: '/base/accordion',
         icon: 'nav-icon-bullet'
-      }
+      },
     ]
   },
 

@@ -214,3 +214,17 @@
   // }
 }
 
+
+.highlight-comment {
+  background-color: #fff9c4;  /* Nền vàng nhẹ */
+  border: 2px solid #ffeb3b;  /* Viền vàng đậm */
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.highlight-comment:focus {
+  background-color: #fff59d;  /* Màu nền vàng đậm hơn khi focus */
+  border-color: #fbc02d; /* Viền cam đậm */
+}
+

@@ -13,7 +13,7 @@ import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
 import { InputGroup } from 'primeng/inputgroup';
 import { DialogModule } from 'primeng/dialog';
 
-
+import { SplitButtonModule } from 'primeng/splitbutton';
 
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import Quill from 'quill';
@@ -37,7 +37,7 @@ import { storyService } from '../service/story.service';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
-
+import { TabViewModule } from 'primeng/tabview';
 interface Story {
   StoryID: number;
   Title: string;
@@ -73,7 +73,9 @@ interface Story {
     ConfirmDialog,
     ToastModule,
     TabsModule,
-    MenuModule
+    MenuModule,
+    TabViewModule,
+    SplitButtonModule
 
   ],
   providers: [ConfirmationService, MessageService],
@@ -104,8 +106,13 @@ export class StoryManagementComponent {
 
 
   stories!: Story[];
+  myStories!: Story[];
+  pendingStories!: Story[];
+
   selectedStory: any;
   items: MenuItem[] | undefined;
+  itemApproval: MenuItem[] | undefined;
+  activeIndex: number = 0;
 
   constructor(
     private router: Router,
@@ -126,7 +133,7 @@ export class StoryManagementComponent {
 
 
   ngOnInit() {
-    this.loadStories();
+    this.onTabChange({ index: 0 });
     this.items = [
       { label: 'Xem nội dung', icon: 'pi pi-file-check', command: () => this.onDetail(this.selectedStory?.storyID) },
       {
@@ -143,6 +150,12 @@ export class StoryManagementComponent {
       { label: 'Cập nhật', icon: 'pi pi-pen-to-square', command: () => this.onEdit(this.selectedStory.storyID) },
       { label: 'Xóa', icon: 'pi pi-trash', command: (event: any) => this.onDelete(this.selectedStory.storyID, event) }
     ];
+
+    this.itemApproval = [
+      { label: 'Phê duyệt', icon: 'pi pi-check', command: () => this.approveStory(this.selectedStory) },
+      { label: 'Từ chối', icon: 'pi pi-times', command: () => this.rejectStory(this.selectedStory) }
+    ];
+
   }
   exportExcel() {
     // Logic xuất Excel (có thể thêm sau)
@@ -220,10 +233,39 @@ export class StoryManagementComponent {
   }
 
 
+  onTabChange(event: any) {
+    const tabIndex = event.index; // Lấy index của tab được chọn
+    if (tabIndex == 0) {
+
+      this.loadMyStories();
+    } else if (tabIndex == 1) {
+      this.loadStories();
+    } else if (tabIndex == 2) {
+      this.loadPendingStories();
+    }
+  }
+
+  loadMyStories() {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}').userID;
+    this._storyService.getMyStories(currentUser).subscribe((res: any) => {
+      if (res) {
+        this.myStories = res.data;
+      }
+    });
+  }
+
   loadStories() {
     this._storyService.getStories().subscribe((res: any) => {
       if (res) {
         this.stories = res.data;
+      }
+    });
+  }
+
+  loadPendingStories() {
+    this._storyService.getPendingStories("Pending").subscribe((res: any) => {
+      if (res) {
+        this.pendingStories = res.data;
       }
     });
   }
@@ -314,4 +356,27 @@ export class StoryManagementComponent {
       }
     });
   }
+
+  getActionItems(story: any): MenuItem[] {
+    return [
+      {
+        label: 'Phê duyệt',
+        icon: 'pi pi-check',
+        command: () => this.approveStory(story)
+      },
+      {
+        label: 'Từ chối',
+        icon: 'pi pi-times',
+        command: () => this.rejectStory(story)
+      }
+    ];
+  }
+
+  approveStory(story: any) {
+    this.updateStatus("Approved", story.storyID);
+  }
+  rejectStory(story: any) {
+    this.updateStatus("Rejected", story.storyID);
+  }
+
 }

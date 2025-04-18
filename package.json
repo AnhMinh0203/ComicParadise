@@ -37,6 +37,7 @@
     "@coreui/icons-angular": "~5.3.9",
     "@coreui/react": "^5.5.0",
     "@coreui/utils": "^2.0.2",
+    "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@primeng/themes": "^19.0.5",
     "chart.js": "^4.4.7",
     "lodash-es": "^4.17.21",

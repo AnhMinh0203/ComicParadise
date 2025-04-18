@@ -21,8 +21,28 @@ export class storyService {
       );
   }
 
+  getMyStories(userID: any) {
+    var apiUrl = `${this.serviceUri}/Get-all-stories?userID=${userID}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
   getStories() {
     var apiUrl = `${this.serviceUri}/Get-all-stories`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
+  getPendingStories(storyStatus: any) {
+    var apiUrl = `${this.serviceUri}/Get-all-stories?storyStatus=${storyStatus}`;
     return this.http.get(apiUrl)
       .pipe(
         catchError((error: any) => {

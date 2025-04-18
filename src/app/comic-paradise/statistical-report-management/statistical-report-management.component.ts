@@ -30,7 +30,7 @@ import { PanelModule } from 'primeng/panel';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { reportService } from '../service/report.service';
+import { statisticalReportService } from '../service/statisticalReport.service';
 import { storyService } from '../service/story.service';
 import { initial } from 'lodash-es';
 import { DropdownModule } from 'primeng/dropdown';
@@ -115,7 +115,7 @@ export class StatisticalReportManagementComponent {
     private http: HttpClient,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private _reportService: reportService,
+    private _statisticalReportService: statisticalReportService,
     private _storyService: storyService,
     private _memberService: memberService
 
@@ -148,7 +148,7 @@ export class StatisticalReportManagementComponent {
 
 
   getReportStory() {
-    this._reportService.getReportStory().subscribe((res: any) => {
+    this._statisticalReportService.getReportStory().subscribe((res: any) => {
       this.stories = res.data;
     });
   }
@@ -167,7 +167,7 @@ export class StatisticalReportManagementComponent {
   }
 
   exportStoryReportExcel() {
-    this._reportService.exportStoryReportExcel().subscribe((res: Blob) => {
+    this._statisticalReportService.exportStoryReportExcel().subscribe((res: Blob) => {
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
 
@@ -187,7 +187,7 @@ export class StatisticalReportManagementComponent {
   }
 
   searchStory() {
-    this._reportService.searchReportStory(this.keySearch).subscribe((res: any) => {
+    this._statisticalReportService.searchReportStory(this.keySearch).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.stories = res.data;
       }
@@ -202,7 +202,7 @@ export class StatisticalReportManagementComponent {
   }
 
   getTotalStories() {
-    this._reportService.getTotalStories().subscribe((res: any) => {
+    this._statisticalReportService.getTotalStories().subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.totalStories = res.data
       }
@@ -210,14 +210,14 @@ export class StatisticalReportManagementComponent {
 
   }
   getTotalMembers() {
-    this._reportService.getTotalMembers().subscribe((res: any) => {
+    this._statisticalReportService.getTotalMembers().subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.totalMembers = res.data
       }
     })
   }
   getTotalCategories() {
-    this._reportService.getTotalCategories().subscribe((res: any) => {
+    this._statisticalReportService.getTotalCategories().subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.totalCategories = res.data
       }
@@ -239,7 +239,7 @@ export class StatisticalReportManagementComponent {
   }
 
   getChartStoryReport(typeReport: string) {
-    this._reportService.getChartReportStory(typeReport).subscribe(
+    this._statisticalReportService.getChartReportStory(typeReport).subscribe(
       (res: any) => {
         if (res && res.isSuccess) {
           this.reportStoryData = {
@@ -301,7 +301,7 @@ export class StatisticalReportManagementComponent {
 
 
   exportMemberReportExcel() {
-    this._reportService.exportMemberReportExcel().subscribe((res: Blob) => {
+    this._statisticalReportService.exportMemberReportExcel().subscribe((res: Blob) => {
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
 
@@ -331,7 +331,7 @@ export class StatisticalReportManagementComponent {
   }
 
   getChartMemberReport(typeReport: string) {
-    this._reportService.getChartReportMember(typeReport).subscribe(
+    this._statisticalReportService.getChartReportMember(typeReport).subscribe(
       (res: any) => {
         if (res && res.isSuccess) {
           this.reportMemberData = {

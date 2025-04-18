@@ -1,0 +1,78 @@
+<c-card>
+  <c-card-header>
+    <h5>Quản lý báo cáo</h5>
+  </c-card-header>
+
+  <c-card-body>
+    <!-- <div class="d-flex justify-content-end">
+      <p-toast></p-toast>
+      <p-confirmdialog></p-confirmdialog>
+      <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help"
+        (click)="exportExcel()" />
+    </div>
+    <hr> -->
+
+
+    <p-tabView (onChange)="onTabChange($event)">
+      <!-- Tab Truyện -->
+      <p-tabPanel header="Truyện">
+        <p-table [value]="reportStories" [paginator]="true" [rows]="10" [responsiveLayout]="'scroll'"
+        [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>STT</th>
+              <th>Người báo cáo</th>
+              <th>Lý do</th>
+              <th>Ngày báo cáo</th>
+              <th>Link</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-report let-i="rowIndex">
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ report.createdBy }}</td>
+              <td>{{ report.reason }}</td>
+              <td>{{ report.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <a [routerLink]="['/story-management/infor-story', report.targetID]">Chi tiết</a>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+
+      <!-- Tab Bình luận -->
+      <p-tabPanel header="Bình luận">
+        <p-table [value]="reportComments" [paginator]="true" [rows]="10" [responsiveLayout]="'scroll'"
+        [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>STT</th>
+              <th>Người báo cáo</th>
+              <th>Lý do</th>
+              <th>Nội dung bình luận</th>
+              <th>Ngày báo cáo</th>
+              <th>Link</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-report let-i="rowIndex">
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ report.createdBy }}</td>
+              <td>{{ report.reason }}</td>
+              <td>{{ report.commentContent }}</td>
+              <td>{{ report.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <a [routerLink]="['/story-management/infor-story', report.storyID]"
+                [queryParams]="{ commentID: report.targetID }">Chi tiết</a>
+
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+    </p-tabView>
+
+
+  </c-card-body>
+</c-card>

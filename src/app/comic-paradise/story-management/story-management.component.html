@@ -13,131 +13,168 @@
     </div>
     <hr>
 
-    <p-tabs value="0">
-      <p-tablist>
-        <p-tab value="0">Truyện của tôi</p-tab>
-        <p-tab value="1">Tất cả truyện</p-tab>
-        <p-tab value="2">Phê duyệt</p-tab>
-      </p-tablist>
-      <p-tabpanels>
-        <p-tabpanel value="0">
-          <div class="d-flex justify-content-between">
-            <div>
-              <p-button icon="pi pi-refresh" (click)="loadStories()" severity="info" />
-            </div>
-            <div>
-              <c-input-group class="mb-3">
-                <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
-                  placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
-                <button cButton color="secondary" id="button-addon2" type="button" variant="outline" (click)="searchStory()">
-                  Tìm kiếm
-                </button>
-              </c-input-group>
-            </div>
-
+    <p-tabView (onChange)="onTabChange($event)">
+      <p-tabPanel header="Truyện của tôi">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p-button icon="pi pi-refresh" (click)="loadMyStories()" severity="info" />
           </div>
-          <p-table #dt [value]="stories" [paginator]="true" [rows]="rows" [first]="first"
-            [tableStyle]="{ 'min-width': '50rem' }" [rowsPerPageOptions]="[5, 10, 20]" (onPage)="onPageChange($event)">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>STT</th>
-                <th>Tiêu đề</th>
-                <th>Ảnh bìa</th>
-                <th>Trạng thái</th>
-                <th>Người đăng</th>
-                <th>Số chương</th>
-                <th>Thao tác</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-story let-i="rowIndex">
-              <tr>
-                <td>{{ i + 1 + first }}</td>
-                <td>{{ story.title }}</td>
-                <td>
-                  <img [src]="story.coverImage" [alt]="story.title" width="100" class="shadow-4" />
-                </td>
-                <td>
-                  <span [ngClass]="getSeverity(story.status)">{{ story.status }}</span>
-                </td>
-
-                <td>{{ story.publisherName }}</td>
-                <td>{{ story.totalChapter }}</td>
-                <td>
-                  <div style="position: relative;">
-                    <p-menu #menu [model]="items" [popup]="true" appendTo="body" />
-                    <i class="pi pi-ellipsis-h round-icon" (click)="menu.toggle($event)"
-                      (click)="setCurrentStory(story)"></i>
-                  </div>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabpanel>
-        <p-tabpanel value="1">
-          <!-- <div class="d-flex justify-content-between">
-            <div>
-              <p-button icon="pi pi-refresh" (click)="loadStories()" severity="info" />
-            </div>
-            <div>
-              <c-input-group class="mb-3">
-                <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
-                  placeholder="Nhập tên truyện" />
-                <button cButton color="secondary" id="button-addon2" type="button" variant="outline">
-                  Tìm kiếm
-                </button>
-              </c-input-group>
-            </div>
-
+          <div>
+            <c-input-group class="mb-3">
+              <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
+                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+              <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
+                (click)="searchStory()">
+                Tìm kiếm
+              </button>
+            </c-input-group>
           </div>
-          <p-table [value]="stories" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
-            [rowsPerPageOptions]="[5, 10, 20]">
-            <ng-template #header>
-              <tr>
-                <th>Tên truyện</th>
-                <th>Hình ảnh</th>
-                <th>Loại</th>
-                <th>Giá</th>
-                <th>Đơn vị</th>
-                <th>Tồn kho</th>
-                <th>Hành động</th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-story>
-              <tr>
-                <td>{{story.name}}</td>
-                <td><img [src]="story.primaryImg" [alt]="story.name" width="100" class="shadow-4" /></td>
-                <td>{{story.idType}}</td>
-                <td>{{story.price }}</td>
+        </div>
+        <p-table #dt [value]="myStories" [paginator]="true" [rows]="rows" [first]="first"
+          [tableStyle]="{ 'min-width': '50rem' }" [rowsPerPageOptions]="[5, 10, 20]">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>STT</th>
+              <th>Tiêu đề</th>
+              <th>Ảnh bìa</th>
+              <th>Trạng thái</th>
+              <th>Người đăng</th>
+              <th>Số chương</th>
+              <th>Thao tác</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-story let-i="rowIndex">
+            <tr>
+              <td>{{ i + 1 + first }}</td>
+              <td>{{ story.title }}</td>
+              <td>
+                <img [src]="story.coverImage" [alt]="story.title" width="100" class="shadow-4" />
+              </td>
+              <td>
+                <span [ngClass]="getSeverity(story.status)">{{ story.status }}</span>
+              </td>
 
-                <td>{{story.unit }}</td>
+              <td>{{ story.publisherName }}</td>
+              <td>{{ story.totalChapter }}</td>
+              <td>
+                <div style="position: relative;">
+                  <p-menu #menu [model]="items" [popup]="true" appendTo="body" />
+                  <i class="pi pi-ellipsis-h round-icon" (click)="menu.toggle($event)"
+                    (click)="setCurrentStory(story)"></i>
+                </div>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+      <p-tabPanel header="Tất cả truyện">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p-button icon="pi pi-refresh" (click)="loadStories()" severity="info" />
+          </div>
+          <div>
+            <c-input-group class="mb-3">
+              <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
+                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+              <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
+                (click)="searchStory()">
+                Tìm kiếm
+              </button>
+            </c-input-group>
+          </div>
 
-                <td><p-tag [value]="story.quantity" /></td>
-                <td>
-                  <div style="position: relative;">
-                    <p-menu #menu [model]="items" [popup]="true" appendTo="body" (click)="test()" />
-                    <i class="pi pi-ellipsis-h round-icon" (click)="openMenu($event, story, menu)"></i>
+        </div>
+        <p-table #dt [value]="stories" [paginator]="true" [rows]="rows" [first]="first"
+          [tableStyle]="{ 'min-width': '50rem' }" [rowsPerPageOptions]="[5, 10, 20]">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>STT</th>
+              <th>Tiêu đề</th>
+              <th>Ảnh bìa</th>
+              <th>Trạng thái</th>
+              <th>Người đăng</th>
+              <th>Số chương</th>
+              <th>Thao tác</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-story let-i="rowIndex">
+            <tr>
+              <td>{{ i + 1 + first }}</td>
+              <td>{{ story.title }}</td>
+              <td>
+                <img [src]="story.coverImage" [alt]="story.title" width="100" class="shadow-4" />
+              </td>
+              <td>
+                <span [ngClass]="getSeverity(story.status)">{{ story.status }}</span>
+              </td>
 
+              <td>{{ story.publisherName }}</td>
+              <td>{{ story.totalChapter }}</td>
+              <td>
+                <div style="position: relative;">
+                  <p-menu #menu [model]="items" [popup]="true" appendTo="body" />
+                  <i class="pi pi-ellipsis-h round-icon" (click)="menu.toggle($event)"
+                    (click)="setCurrentStory(story)"></i>
+                </div>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+      <p-tabPanel header="Phê duyệt">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p-button icon="pi pi-refresh" (click)="loadPendingStories()" severity="info" />
+          </div>
+          <div>
+            <c-input-group class="mb-3">
+              <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
+                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+              <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
+                (click)="searchStory()">
+                Lọc truyện
+              </button>
+            </c-input-group>
+          </div>
 
-                  </div>
-                </td>
-              </tr>
+        </div>
+        <p-table #dt [value]="pendingStories" [paginator]="true" [rows]="rows" [first]="first"
+          [tableStyle]="{ 'min-width': '50rem' }" [rowsPerPageOptions]="[5, 10, 20]">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>STT</th>
+              <th>Tiêu đề</th>
+              <th>Ảnh bìa</th>
+              <th>Trạng thái</th>
+              <th>Người đăng</th>
+              <th>Số chương</th>
+              <th>Thao tác</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-story let-i="rowIndex">
+            <tr>
+              <td>{{ i + 1 + first }}</td>
+              <td>{{ story.title }}</td>
+              <td>
+                <img [src]="story.coverImage" [alt]="story.title" width="100" class="shadow-4" />
+              </td>
+              <td>
+                <span [ngClass]="getSeverity(story.status)">{{ story.status }}</span>
+              </td>
 
-            </ng-template>
-          </p-table> -->
-        </p-tabpanel>
-        <p-tabpanel value="2">
-          <p class="m-0">
-            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti
-            atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique
-            sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum
-            facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil
-            impedit quo minus.
-          </p>
-        </p-tabpanel>
-      </p-tabpanels>
-    </p-tabs>
+              <td>{{ story.publisherName }}</td>
+              <td>{{ story.totalChapter }}</td>
+              <td>
+                <div style="position: relative;">
+                  <p-menu #menu [model]="itemApproval" [popup]="true" appendTo="body"></p-menu>
+                  <i class="pi pi-ellipsis-h round-icon"
+                     (click)="menu.toggle($event); setCurrentStory(story)"
+                     style="cursor: pointer; font-size: 1.2rem;"></i>
+                </div>
+              </td>
 
-
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+    </p-tabView>
   </c-card-body>
 </c-card>
-
-
