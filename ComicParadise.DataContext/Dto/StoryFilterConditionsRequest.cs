@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ComicParadise.DataContext.Dto
 {
-    public class StoryFilterRequest
+    public class StoryFilterConditionsRequest
     {
         public bool? IsManga { get; set; } 
         public bool? IsNovel { get; set; } 

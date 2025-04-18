@@ -22,5 +22,13 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true, result));
         }
 
+
+        [HttpGet("Get-report")]
+        public async Task<ActionResult> GetReport(string reportType)
+        {
+            var result = await _reportRepository.GetReportAsync(reportType);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
     }
 }

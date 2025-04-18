@@ -10,7 +10,7 @@ namespace ComicParadise.Repository.Common
     public interface IStoryRepository
     {
         Task<string> AddStoryAsync(AddStoryDto createStoryDto);
-        Task<List<StoryInfor>> GetStoriesAsync();
+        Task<List<StoryInfor>> GetStoriesAsync(int? userID, string? storyStatus);
         Task<string> UpdateStatusAsync(string status, int storyID);
         Task<StoryDetail> GetStoryByIdAsync(int storyID);
         Task<string> UpdateStoryAsync(UpdateStoryDto storyDto);
@@ -26,7 +26,8 @@ namespace ComicParadise.Repository.Common
         Task<bool> RatingStoryAsync(RatingStoryDto ratingStoryDto);
         Task<int?> GetUserRating(int storyID, int userID);
         Task<int?> GetStoryRatingAsync(int storyID);
-        Task<List<dynamic>> FilterStoryAsync(StoryFilterRequest filter);
+        Task<List<dynamic>> FilterStoryByConditionsAsync(StoryFilterConditionsRequest filter);
+        Task<List<dynamic>> FilterStoriesByCategoryIdsAsync(List<int> categoryIds);
 
     }
 }

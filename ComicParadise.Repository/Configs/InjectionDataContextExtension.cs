@@ -27,6 +27,7 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<IStatisticalReportRepository, StatisticalReportRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IChatbotRepository, ChatbotRepository>();
 
             // Register AutoMapper
             services.AddAutoMapper(typeof(CategoryProfile));

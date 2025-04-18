@@ -28,9 +28,9 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string> (true, result));
         }
         [HttpGet("Get-all-stories")]
-        public async Task<ActionResult> GetAllStory()
+        public async Task<ActionResult> GetAllStory(int? userID, string? storyStatus)
         {
-            var result = await _storyRepository.GetStoriesAsync();
+            var result = await _storyRepository.GetStoriesAsync(userID, storyStatus);
             return Ok(new BaseResponse<List<StoryInfor>>(true, result));
         }
 
@@ -70,10 +70,17 @@ namespace ComicParadise.Api.Controllers
         }
 
 
-        [HttpPost("Filter-stories")]
-        public async Task<ActionResult> FilterStory(StoryFilterRequest storyFilterRequest)
+        [HttpPost("Filter-story-by-conditions")]
+        public async Task<ActionResult> FilterStoryByConditions(StoryFilterConditionsRequest storyFilterRequest)
         {
-            var result = await _storyRepository.FilterStoryAsync(storyFilterRequest);
+            var result = await _storyRepository.FilterStoryByConditionsAsync(storyFilterRequest);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
+        [HttpPost("Filter-story-by-categories")]
+        public async Task<ActionResult> FilterStoryByCategories(List<int> categoryIds)
+        {
+            var result = await _storyRepository.FilterStoriesByCategoryIdsAsync(categoryIds);
             return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
 
@@ -83,7 +90,6 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.GetCurrentUpdateStoriesAsync(days);
             return Ok(new BaseResponse<IEnumerable<dynamic>>(true, result));
         }
-
 
         [HttpGet("Get-top-story")]
         public async Task<ActionResult> GetTopStory(string topType)

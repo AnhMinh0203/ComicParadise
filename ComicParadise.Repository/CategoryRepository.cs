@@ -99,17 +99,28 @@ namespace ComicParadise.Repository
         #region Get categories for user side
         public async Task<IEnumerable<dynamic>> GetCategoriesForUserAsync()
         {
-            var result = await (from c in _context.Categories
-                                join cd in _context.CategoryDetails on c.CategoryID equals cd.CategoryID
-                                group cd by new { c.CategoryID, c.CategoryName } into cg
-                                select new
-                                {
-                                    label = cg.Key.CategoryName,
-                                    items = cg.Select(sub => new
-                                    {
-                                        label = sub.SubCategoryName
-                                    })
-                                }).AsNoTracking().ToListAsync();
+            /* var result = await (from c in _context.Categories
+                                 join cd in _context.CategoryDetails on c.CategoryID equals cd.CategoryID
+                                 group cd by new { c.CategoryID, c.CategoryName } into cg
+                                 select new
+                                 {
+                                     label = cg.Key.CategoryName,
+                                     items = cg.Select(sub => new
+                                     {
+                                         label = sub.SubCategoryName
+                                     })
+                                 }).AsNoTracking().ToListAsync();
+             return result;*/
+
+            var result = await _context.Categories
+                               .Select(c => new
+                               {
+                                   CategoryID = c.CategoryID,
+                                   CategoryName = c.CategoryName
+                               })
+                               .AsNoTracking()
+                               .ToListAsync();
+
             return result;
         }
         #endregion

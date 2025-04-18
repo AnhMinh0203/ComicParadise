@@ -55,6 +55,15 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     return new AmazonS3Client(awsConfig["AccessKey"], awsConfig["SecretKey"], region);
 });
 
+// For Gemini
+builder.Services.AddHttpClient();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

@@ -10,5 +10,6 @@ namespace ComicParadise.Repository.Interface
     public interface IReportRepository
     {
         Task<string> CreateReportAsync(ReportDto reportDto);
+        Task<List<dynamic>> GetReportAsync(string reportType);
     }
 }

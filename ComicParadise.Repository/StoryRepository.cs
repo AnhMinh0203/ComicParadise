@@ -229,24 +229,67 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get stories
-        public async Task<List<StoryInfor>> GetStoriesAsync()
+        public async Task<List<StoryInfor>> GetStoriesAsync(int? userID, string? storyStatus)
         {
             try
             {
-                List<StoryInfor> listStories = await (from s in _context.Stories
-                                                      join u in _context.Users on s.PublisherID equals u.UserID
-                                                      join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
-                                                      select new StoryInfor
-                                                      {
-                                                          StoryID = s.StoryID,
-                                                          Title = s.Title,
-                                                          CoverImage = s.CoverImage,
-                                                          Status = s.Status,
-                                                          PublisherName = u.Username,
-                                                          TotalChapter = chapters.Count()
-                                                      })
-                                         .ToListAsync();
-                return listStories;
+                if(userID != null)
+                {
+                   
+
+                    List<StoryInfor> listStories = await (from s in _context.Stories
+                                                          join u in _context.Users on s.PublisherID equals u.UserID
+                                                          join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
+                                                          where s.PublisherID == userID && s.Status != "Pending"
+                                                          select new StoryInfor
+                                                          {
+                                                              StoryID = s.StoryID,
+                                                              Title = s.Title,
+                                                              CoverImage = s.CoverImage,
+                                                              Status = s.Status,
+                                                              PublisherName = u.Username,
+                                                              TotalChapter = chapters.Count()
+                                                          })
+                                        .ToListAsync();
+                    return listStories;
+                }
+                else if (storyStatus != null)
+                {
+                    List<StoryInfor> listStories = await (from s in _context.Stories
+                                                          join u in _context.Users on s.PublisherID equals u.UserID
+                                                          join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
+                                                          where s.Status == storyStatus && s.Status == "Pending"
+                                                          select new StoryInfor
+                                                          {
+                                                              StoryID = s.StoryID,
+                                                              Title = s.Title,
+                                                              CoverImage = s.CoverImage,
+                                                              Status = s.Status,
+                                                              PublisherName = u.Username,
+                                                              TotalChapter = chapters.Count()
+                                                          })
+                                        .ToListAsync();
+                    return listStories;
+                }
+                else
+                {
+                    List<StoryInfor> listStories = await (from s in _context.Stories
+                                                          join u in _context.Users on s.PublisherID equals u.UserID
+                                                          join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
+                                                          where s.Status != "Pending"
+                                                          select new StoryInfor
+                                                          {
+                                                              StoryID = s.StoryID,
+                                                              Title = s.Title,
+                                                              CoverImage = s.CoverImage,
+                                                              Status = s.Status,
+                                                              PublisherName = u.Username,
+                                                              TotalChapter = chapters.Count()
+                                                          })
+                                        .ToListAsync();
+                    return listStories;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -964,8 +1007,8 @@ namespace ComicParadise.Repository
 
         #endregion
 
-        #region Filter story
-        public async Task<List<dynamic>> FilterStoryAsync(StoryFilterRequest filter)
+        #region Filter story by conditions
+        public async Task<List<dynamic>> FilterStoryByConditionsAsync(StoryFilterConditionsRequest filter)
         {
             try
             {
@@ -1058,6 +1101,57 @@ namespace ComicParadise.Repository
                 throw new Exception("Lỗi khi lọc truyện: " + ex.Message);
             }
         }
+        #endregion
+
+        #region Filter story by categories
+        public async Task<List<dynamic>> FilterStoriesByCategoryIdsAsync(List<int> categoryIds)
+        {
+            try
+            {
+                // Lấy danh sách các StoryID có ít nhất 1 CategoryID nằm trong list
+                var filteredStoryIds = await _context.StoryCategoriesMapping
+                    .Where(sc => categoryIds.Contains(sc.CategoryID))
+                    .Select(sc => sc.StoryID)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Tiếp tục truy vấn chi tiết truyện như cũ
+                var query = from s in _context.Stories
+                            join u in _context.Users on s.PublisherID equals u.UserID
+                            where filteredStoryIds.Contains(s.StoryID)
+                            let latestChapter = _context.Chapters
+                                .Where(c => c.StoryID == s.StoryID)
+                                .OrderByDescending(c => c.CreatedAt)
+                                .FirstOrDefault()
+                            let chapterCount = _context.Chapters
+                                .Count(c => c.StoryID == s.StoryID)
+                            let averageRating = _context.Ratings
+                                .Where(r => r.StoryID == s.StoryID)
+                                .Select(r => (double?)r.RatingValue)
+                                .Average() ?? 0
+                            select new
+                            {
+                                StoryID = s.StoryID,
+                                Title = s.Title,
+                                CoverImage = s.CoverImage,
+                                CompletionStatus = s.IsComplete ? "completed" : "updating",
+                                PublisherName = u.Username,
+                                Views = s.Views,
+                                Likes = s.Likes,
+                                Type = s.Type,
+                                LastestChapter = latestChapter != null ? latestChapter.ChapterNumber : 0,
+                                ChapterCount = chapterCount,
+                                AverageRating = averageRating
+                            };
+
+                return await query.ToListAsync<dynamic>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi lọc truyện theo thể loại: " + ex.Message);
+            }
+        }
+
         #endregion
     }
 }
