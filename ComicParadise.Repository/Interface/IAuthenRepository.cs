@@ -11,5 +11,7 @@ namespace ComicParadise.Repository.Common
     {
         Task<AuthenResponse> LoginAsync(SignInModel signInModel);
         Task<string> RegisterAsync(RegisterModel registerModel);
+        Task<string> RequestPasswordResetAsync(string email);
+        Task<string> ResetPasswordAsync(string rawToken, string newPassword);
     }
 }

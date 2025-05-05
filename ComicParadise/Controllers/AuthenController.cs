@@ -30,5 +30,20 @@ namespace ComicParadise.Api.Controllers
             var response = await _authenRepository.RegisterAsync(register);
             return Ok(new BaseResponse<string>(true,response));
         }
+
+
+        [HttpPost("Request-password-reset")]
+        public async Task<ActionResult> RequestPasswordReset(string email)
+        {
+            var response = await _authenRepository.RequestPasswordResetAsync(email);
+            return Ok(new BaseResponse<string>(true, response));
+        }
+
+        [HttpPost("Reset-password")]
+        public async Task<ActionResult> ResetPassword(string rawToken, string newPassword)
+        {
+            var response = await _authenRepository.ResetPasswordAsync(rawToken, newPassword);
+            return Ok(new BaseResponse<string>(true, response));
+        }
     }
 }

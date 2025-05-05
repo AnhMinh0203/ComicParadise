@@ -1153,5 +1153,67 @@ namespace ComicParadise.Repository
         }
 
         #endregion
+
+        #region Filter story by category name
+        public async Task<List<dynamic>> FilterStoriesByCategoryNameAsync(string categoryName)
+        {
+            try
+            {
+                // Tìm CategoryID từ categoryName
+                var category = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.CategoryName == categoryName);
+
+                if (category == null)
+                {
+                    return new List<dynamic>(); // Không tìm thấy thể loại
+                }
+
+                int? categoryId = category.CategoryID;
+
+                // Lấy danh sách các StoryID có CategoryID tương ứng
+                var filteredStoryIds = await _context.StoryCategoriesMapping
+                    .Where(sc => sc.CategoryID == categoryId)
+                    .Select(sc => sc.StoryID)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Truy vấn thông tin chi tiết truyện
+                var query = from s in _context.Stories
+                            join u in _context.Users on s.PublisherID equals u.UserID
+                            where filteredStoryIds.Contains(s.StoryID)
+                            let latestChapter = _context.Chapters
+                                .Where(c => c.StoryID == s.StoryID)
+                                .OrderByDescending(c => c.CreatedAt)
+                                .FirstOrDefault()
+                            let chapterCount = _context.Chapters
+                                .Count(c => c.StoryID == s.StoryID)
+                            let averageRating = _context.Ratings
+                                .Where(r => r.StoryID == s.StoryID)
+                                .Select(r => (double?)r.RatingValue)
+                                .Average() ?? 0
+                            select new
+                            {
+                                StoryID = s.StoryID,
+                                Title = s.Title,
+                                CoverImage = s.CoverImage,
+                                CompletionStatus = s.IsComplete ? "completed" : "updating",
+                                PublisherName = u.Username,
+                                Views = s.Views,
+                                Likes = s.Likes,
+                                Type = s.Type,
+                                LastestChapter = latestChapter != null ? latestChapter.ChapterNumber : 0,
+                                ChapterCount = chapterCount,
+                                AverageRating = averageRating
+                            };
+
+                return await query.ToListAsync<dynamic>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi lọc truyện theo tên thể loại: " + ex.Message);
+            }
+        }
+
+        #endregion
     }
 }

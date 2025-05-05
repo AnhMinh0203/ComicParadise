@@ -28,6 +28,7 @@ namespace ComicParadise.Repository.Common
         Task<int?> GetStoryRatingAsync(int storyID);
         Task<List<dynamic>> FilterStoryByConditionsAsync(StoryFilterConditionsRequest filter);
         Task<List<dynamic>> FilterStoriesByCategoryIdsAsync(List<int> categoryIds);
+        Task<List<dynamic>> FilterStoriesByCategoryNameAsync(string categoryName);
 
     }
 }

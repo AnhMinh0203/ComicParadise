@@ -84,6 +84,13 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
 
+        [HttpGet("Filter-story-by-category-name")]
+        public async Task<ActionResult> FilterStoryByCategoryName(string categoryName)
+        {
+            var result = await _storyRepository.FilterStoriesByCategoryNameAsync(categoryName);
+            return Ok(new BaseResponse<List<dynamic>>(true, result));
+        }
+
         [HttpGet("Get-current-update-story")]
         public async Task<ActionResult> GetCurrentUpdateStory(int days)
         {

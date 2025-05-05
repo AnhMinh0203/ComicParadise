@@ -28,7 +28,10 @@ namespace ComicParadise.DataContext.Database
         public DbSet<Report> Reports { get; set; }
         public DbSet<BookMark> BookMarks { get; set; }
         public DbSet<Rating> Ratings { get; set; }
-
+        public DbSet<Tutorial> Tutorials { get; set; }
+        public DbSet<FooterContent> FooterContents { get; set; }
+        public DbSet<Banner> HomepageBanners { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,6 +53,17 @@ namespace ComicParadise.DataContext.Database
 
             modelBuilder.Entity<Rating>()
               .HasKey(r => new { r.RatingID });
+
+            modelBuilder.Entity<Tutorial>()
+             .HasKey(t => new { t.TutorialID });
+
+            modelBuilder.Entity<FooterContent>()
+            .HasKey(f => new { f.FooterContentID });
+
+            modelBuilder.Entity<Banner>()
+            .HasKey(b => new { b.BannerID });
+
+            modelBuilder.Entity<PasswordResetToken>().HasKey(p => new { p.UserID, p.Token });
 
             base.OnModelCreating(modelBuilder);
         }

@@ -2,6 +2,7 @@
 using ComicParadise.DataContext.Mapping;
 using ComicParadise.Repository.Common;
 using ComicParadise.Repository.Interface;
+using ComicParadise.Repository.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +29,10 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IChatbotRepository, ChatbotRepository>();
+            services.AddScoped<ITutorialRepository, TutorialManagementRepository>();
+            services.AddScoped<IFooterContentRepository, FooterManagementRepository>();
+            services.AddScoped<IBannerManagementRepository, BannerManagementRepository>();
+            services.AddScoped<IEmailService, EmailService>();
 
             // Register AutoMapper
             services.AddAutoMapper(typeof(CategoryProfile));

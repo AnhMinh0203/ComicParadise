@@ -12,6 +12,10 @@ using ComicParadise.DataContext.Models;
 using ComicParadise.Repository.Common;
 using ComicParadise.Repository;
 using ComicParadise.DataContext.Dto;
+using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
+using System.Security.Cryptography;
+using System.Net;
+using ComicParadise.Repository.Interface;
 
 namespace ComicParadise.Repository
 {
@@ -19,11 +23,13 @@ namespace ComicParadise.Repository
     {
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AuthenRepository(IConfiguration configuration, AppDbContext appDbContext)
+        public AuthenRepository(IConfiguration configuration, AppDbContext appDbContext, IEmailService emailService)
         {
             _configuration = configuration;
             _context = appDbContext;
+            _emailService = emailService;
         }
 
         #region Login 
@@ -127,7 +133,7 @@ namespace ComicParadise.Repository
             try
             {
                 var isExsistAccount = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerModel.Email || u.Phone == registerModel.Phone);
-                 if (isExsistAccount != null)
+                if (isExsistAccount != null)
                 {
                     return "Người dùng đã tồn tại";
                 };
@@ -160,8 +166,85 @@ namespace ComicParadise.Repository
 
 
         }
+        #endregion
+
+        #region Request password reset
+        public async Task<string> RequestPasswordResetAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            // Tạo phản hồi giả dù user không tồn tại
+            if (user == null)
+            {
+                await Task.Delay(500); // tránh timing attack
+                return "Nếu email tồn tại, bạn sẽ nhận được hướng dẫn qua email.";
+            }
+
+            // Tạo token ngẫu nhiên
+            var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+            // Hash token (SHA-256)
+            using var sha256 = SHA256.Create();
+            var hashedToken = Convert.ToHexString(sha256.ComputeHash(Encoding.UTF8.GetBytes(rawToken)));
+
+            // Tính thời gian hết hạn (ví dụ: 30 phút)
+            var expiry = DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds();
+
+            // Lưu vào bảng token
+            var resetToken = new PasswordResetToken
+            {
+                UserID = user.UserID,
+                Token = hashedToken,
+                TokenExpiry = expiry
+            };
+
+            _context.PasswordResetTokens.Add(resetToken);
+            await _context.SaveChangesAsync();
+
+
+            // Tạo link gửi cho người dùng
+            var resetLink = $"http://localhost:4200/reset-password?token={WebUtility.UrlEncode(rawToken)}";
+
+            await _emailService.SendEmailAsync(email, "Khôi phục mật khẩu",
+                $"Vui lòng nhấn vào liên kết sau để đặt lại mật khẩu:\n\n{resetLink}");
+
+            return "Nếu email tồn tại, bạn sẽ nhận được hướng dẫn qua email.";
+        }
+        #endregion
+
+        public async Task<string> ResetPasswordAsync(string rawToken, string newPassword)
+        {
+            // Hash lại token để so sánh
+            using var sha256 = SHA256.Create();
+            var hashedToken = Convert.ToHexString(sha256.ComputeHash(Encoding.UTF8.GetBytes(rawToken)));
+            Console.WriteLine(hashedToken.GetType());
+
+            var tokenEntry = await _context.PasswordResetTokens
+                .FirstOrDefaultAsync(t => t.Token == hashedToken);
+
+            if (tokenEntry == null || tokenEntry.TokenExpiry < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+            {
+                return "Mã đặt lại không hợp lệ hoặc đã hết hạn.";
+            }
+
+            var user = await _context.Users.FindAsync(tokenEntry.UserID);
+            if (user == null) return "Người dùng không tồn tại.";
+
+            // Hash mật khẩu mới (ví dụ dùng BCrypt)
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string hash = BCrypt.Net.BCrypt.HashPassword(newPassword, salt);
+            user.PasswordHash = hash;
+
+            // Xóa token sau khi dùng
+            _context.PasswordResetTokens.Remove(tokenEntry);
+            await _context.SaveChangesAsync();
+
+            return "Đặt lại mật khẩu thành công!";
+        }
+
+
 
     }
-    #endregion
+
 }
 
