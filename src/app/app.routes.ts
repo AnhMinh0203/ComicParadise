@@ -5,6 +5,7 @@ import { InforStoryComponent } from './comic-paradise/infor-story/infor-story.co
 import { ChapterDetailComponent } from './comic-paradise/chapter-detail/chapter-detail.component';
 import { AboutUsComponent } from './comic-paradise/about-us/about-us.component';
 import { RegisterComponent } from './core/authen/register/register.component';
+import { ResetPasswordComponent } from './core/authen/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'about-us', component: AboutUsComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   { path: '**', redirectTo: 'home' },
 ];

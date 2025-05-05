@@ -33,6 +33,7 @@ export class AppComponent {
   delta: any;
   isLogin: boolean = false;
   isRegister: boolean = false;
+  isResetPassword: boolean = false;
   // Biến lưu trữ nội dung HTML an toàn
   contentHtml: SafeHtml = '';
 
@@ -40,6 +41,7 @@ export class AppComponent {
     this.router.events.subscribe(() => {
       this.isLogin = this.router.url.includes('/login');
       this.isRegister = this.router.url.includes('/register');
+      this.isResetPassword = this.router.url.includes('/reset-password');
     });
   }
 

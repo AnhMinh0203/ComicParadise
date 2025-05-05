@@ -26,7 +26,9 @@ import { SharedModule } from '../../share/shared.module';
 })
 export class LoginComponent {
   loginForm: any;
+  isForgotPassword: boolean = false;
   test: any
+  email: string = '';
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -72,12 +74,12 @@ export class LoginComponent {
   }
 
   onForgotPassword() {
-    console.log('Chuyển hướng đến trang quên mật khẩu');
+    this.isForgotPassword = !this.isForgotPassword;
   }
 
-  onRegister() {
-    console.log('Chuyển hướng đến trang đăng ký');
-  }
+  // onRegister() {
+  //   console.log('Chuyển hướng đến trang đăng ký');
+  // }
 
   loginWith(provider: string) {
     console.log(`Đăng nhập với ${provider}`);
@@ -85,5 +87,16 @@ export class LoginComponent {
 
   navigateToRegister(){
     this.router.navigate(['/register']);
+  }
+
+  requestPasswordReset(){
+    const email = encodeURIComponent(this.email); // Mã hóa email để sử dụng trong URL
+    this._authenService.requestPasswordReset(email).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: res.data});
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message });
+      }
+    } );
   }
 }

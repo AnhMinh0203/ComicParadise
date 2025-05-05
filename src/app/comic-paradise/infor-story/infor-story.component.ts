@@ -40,19 +40,7 @@ import { RatingModule } from 'primeng/rating';
 export class InforStoryComponent {
   selectStoryType: any;
   markChapterNumber: any;
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private _chapterService: chapterService,
-    private _storyService: storyService,
-    private messageService: MessageService,
-    private _commentService: CommentService,
-    private _reportService: ReportService,
-    private confirmationService: ConfirmationService,
-    private signalRService: SignalRService,
-  ) { }
-
+  filterStoryByCategoriesResults: any[] = [];
   comments: any[] = [];
   commentInput: any;
   commenReplytInput: any;
@@ -115,6 +103,19 @@ export class InforStoryComponent {
       }
     }
   ];
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private _chapterService: chapterService,
+    private _storyService: storyService,
+    private messageService: MessageService,
+    private _commentService: CommentService,
+    private _reportService: ReportService,
+    private confirmationService: ConfirmationService,
+    private signalRService: SignalRService,
+  ) { }
 
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe(async params => {
@@ -261,7 +262,7 @@ export class InforStoryComponent {
 
   // --- Comment ---//
   postComment() {
-    if(!this.commentInput) {
+    if (!this.commentInput) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung bình luận" });
       return;
     }
@@ -546,7 +547,7 @@ export class InforStoryComponent {
     }
     console.log(model)
     this._storyService.ratingStory(model).subscribe((res: any) => {
-      if (res && res.isSuccess && res.data ) {
+      if (res && res.isSuccess && res.data) {
         this.messageService.add({ severity: "success", summary: "Thông báo", detail: "Đánh giá thành công" });
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
@@ -563,7 +564,7 @@ export class InforStoryComponent {
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
       }
-    } );
+    });
   }
 
   getStoryRating(storyID: number) {
@@ -575,7 +576,7 @@ export class InforStoryComponent {
       } else {
         this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
       }
-    } );
+    });
   }
 
   countTotalComments(comments: any[]): number {
@@ -589,4 +590,20 @@ export class InforStoryComponent {
     }
     return total;
   }
+
+  test(categoryName: any) {
+    alert(categoryName)
+  }
+
+  // getStoriesByCategoryName(categoryName: any) {
+  //   this._storyService.filterStoryByCategoryName(categoryName).subscribe((res: any) => {
+  //     this.filterStoryByCategoriesResults = res.data;
+  //     this._storyService.setFilterStoryByCategories(res.data);
+  //   });
+  // }
+
+  navigateToHomeWithCategory(categoryName: string) {
+    this.router.navigate(['/home'], { queryParams: { category: categoryName } });
+  }
+
 }

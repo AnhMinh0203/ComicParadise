@@ -13,6 +13,8 @@ import { Router } from '@angular/router';
 import { storyService } from '../service/story.service';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ChatbotComponent } from "../../layouts/chatbot/chatbot.component";
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -57,12 +59,14 @@ export class HomeComponent {
   isSearch: boolean = false;
   isFilterByConditions: boolean = false;
   isFilterByCategories: boolean = false;
+  filterStoryByCategoriesResults: any;
 
   constructor(
     private router: Router,
     private _storyService: storyService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private route: ActivatedRoute
   ) { }
 
 
@@ -70,6 +74,13 @@ export class HomeComponent {
   isDarkMode = false;
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const categoryName = params['category'];
+      if (categoryName) {
+        this.getStoriesByCategoryName(categoryName);
+      }
+    });
+
     this.imageLoaded = this.images.map(() => false);
 
     // Subscribe để lắng nghe dữ liệu searchStories từ service
@@ -177,5 +188,10 @@ export class HomeComponent {
     this.displayLimit = 4; // Quay lại 4 truyện
   }
 
-
+  getStoriesByCategoryName(categoryName: any) {
+    this._storyService.filterStoryByCategoryName(categoryName).subscribe((res: any) => {
+      this.filterStoryByCategoriesResults = res.data;
+      this._storyService.setFilterStoryByCategories(res.data);
+    });
+  }
 }

@@ -1,4 +1,4 @@
-<p-toast/>
+<p-toast />
 <div class="login-container ">
   <div class="row justify-content-center">
     <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-4">
@@ -12,7 +12,7 @@
           <input id="passwordHash" type="password" formControlName="passwordHash" class="form-control mb-3"
             placeholder="Nhập mật khẩu" />
           <div class="d-flex justify-content-end forget-password mb-3">
-            <a (click)="onForgotPassword()" class="pointer" href="#"><b>Quên mật khẩu?</b></a>
+            <a (click)="onForgotPassword()" class="pointer"><b>Quên mật khẩu?</b></a>
           </div>
           <div class="w-100 mb-3 mt-5">
             <p-button label="Đăng nhập" severity="success" [style]="{width: '100%'}" (onClick)="onLogin()"></p-button>
@@ -22,7 +22,6 @@
         <div class="social-login d-flex justify-content-center align-items-center mt-3 mb-3">
           <i (click)="loginWith('Google')" class="pi pi-google"></i>
           <i (click)="loginWith('Facebook')" class="pi pi-facebook"></i>
-
         </div>
 
         <div class="links d-flex justify-content-center mt-3">
@@ -32,3 +31,16 @@
     </div>
   </div>
 </div>
+
+<!-- Forgot password -->
+<p-dialog header="Quên mật khẩu" [(visible)]="isForgotPassword" [style]="{ width: '25rem' }" [modal]="true"
+  [draggable]="false">
+  <div class="flex items-center gap-4 mb-8">
+    <label for="email" class="font-semibold w-24">Nhập email của tài khoản</label>
+    <input pInputText id="email" [(ngModel)]="email" class="flex-auto" autocomplete="off" />
+  </div>
+  <div class="d-flex justify-content-end my-2">
+    <p-button label="Hủy" severity="secondary" (click)="isForgotPassword = false" />
+    <p-button label="Gửi" class="ms-2" (click)="isForgotPassword = false" (click)="requestPasswordReset()" />
+  </div>
+</p-dialog>

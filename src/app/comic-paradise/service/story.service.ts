@@ -93,6 +93,16 @@ export class storyService {
       );
   }
 
+  filterStoryByCategoryName(categoryName: any) {
+    const apiUrl = `${this.serviceUri}/Filter-story-by-category-name?categoryName=${categoryName}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
+
   setSearchStories(stories: any[]) {
     this.searchStoriesSubject.next(stories);
   }

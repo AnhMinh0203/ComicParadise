@@ -26,4 +26,22 @@ export class AuthenService {
       })
     );
   }
+
+  requestPasswordReset(email:any){
+    return this.http.post(`${this.apiUrl}/Request-password-reset?email=${email}`, null)
+    .pipe(
+      catchError((error: any) => {
+        throw error;
+      })
+    );
+  }
+
+  resetPassword(model:any){
+    return this.http.post(`${this.apiUrl}/Reset-password?rawToken=${model.rawToken}&newPassword=${model.newPassword}`, null)
+    .pipe(
+      catchError((error: any) => {
+        throw error;
+      })
+    );
+  }
 }

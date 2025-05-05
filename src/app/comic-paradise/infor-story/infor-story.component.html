@@ -40,11 +40,8 @@
           <p class="story-author"><strong class="me-3">Tác giả:</strong> {{this.author}}</p>
           <div class="d-flex align-items-center flex-wrap">
             <strong class="me-2">Thể loại:</strong>
-            <p-tag severity="info" value="Hành động" [rounded]="true" class="m-1" />
-            <p-tag severity="info" value="Kinh dị" [rounded]="true" class="m-1" />
-
             <ng-container *ngFor="let cate of categoriesSelect">
-              <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1" />
+              <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1 clickable-tag"  (click)="navigateToHomeWithCategory(cate.categoryName)"/>
             </ng-container>
           </div>
 
