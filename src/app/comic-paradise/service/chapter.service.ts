@@ -16,10 +16,14 @@ export class chapterService {
     return this.http.get(apiUrl);
   }
 
-  getChapterContent(storyId: number, chapterNumber: number, userID: any): Observable<any> {
-    var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}&userID=${userID}`;
+  getChapterContent(storyId: number, chapterNumber: number, userID?: any): Observable<any> {
+    let apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}`;
+    if (userID != null) {
+      apiUrl += `&userID=${userID}`;
+    }
     return this.http.get(apiUrl);
   }
+
 
   getChaptersByStoryID(storyID: number) {
     var apiUrl = `${this.serviceUri}/Get-chapters-by-storyID?storyID=${storyID}`;

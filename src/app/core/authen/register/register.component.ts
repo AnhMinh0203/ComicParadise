@@ -41,8 +41,8 @@ export class RegisterComponent {
   ) {
     this.registerForm = this.fb.group({
       userName: ['', [Validators.required]],
-      phone: ['', [Validators.required]],
-      email: ['', [Validators.required]],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]{9,11}$')]],
+      email: ['', [Validators.required, Validators.email]],
       passwordHash: ['', [Validators.required]],
       passwordHashConfirm: ['', [Validators.required]], // Thêm xác nhận mật khẩu
       role: [false] // Thêm isPublisher vào form
@@ -54,6 +54,42 @@ export class RegisterComponent {
   }
 
   onRegister() {
+    if (this.registerForm.controls['email'].errors?.['email']) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cảnh báo',
+        detail: 'Email không hợp lệ!'
+      });
+      return;
+    }
+
+    if (this.registerForm.controls['phone'].errors?.['pattern']) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cảnh báo',
+        detail: 'Số điện thoại không hợp lệ!'
+      });
+      return;
+    }
+
+    if (this.registerForm.invalid) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cảnh báo',
+        detail: 'Vui lòng nhập đầy đủ thông tin!'
+      });
+      return;
+    }
+
+    if (this.registerForm.value.passwordHash !== this.registerForm.value.passwordHashConfirm) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cảnh báo',
+        detail: 'Mật khẩu xác nhận không khớp!'
+      });
+      return;
+    }
+
     const model = {
       username: this.registerForm.value.userName,
       phone: this.registerForm.value.phone,
@@ -80,7 +116,7 @@ export class RegisterComponent {
     console.log(`Đăng nhập với ${provider}`);
   }
 
-  navigateToLogin(){
+  navigateToLogin() {
     this.router.navigate(['/login']);
   }
 }

@@ -1,5 +1,5 @@
 <p-toast/>
-<div class="container mt-150">
+<div class="container mt-100">
   <div class="row">
     <div class="my-2">
       <div class="slide-container">
@@ -263,7 +263,7 @@
                           <i class="pi pi-eye"></i> {{story.views}}
                         </div>
                       </div>
-                      <div class="top-infor-read-now text-center d-flex justify-content-end">
+                      <div class="top-infor-read-now text-center d-flex justify-content-end" (click)="navigateToInforStory(story.storyID)">
                         <button class="read-now-btn">Đọc Ngay</button>
                       </div>
                     </div>
@@ -352,7 +352,7 @@
                           <i class="pi pi-eye"></i> {{story.views}}
                         </div>
                       </div>
-                      <div class="top-infor-read-now text-center d-flex justify-content-end">
+                      <div class="top-infor-read-now text-center d-flex justify-content-end" (click)="navigateToInforStory(story.storyID)">
                         <button class="read-now-btn">Đọc Ngay</button>
                       </div>
                     </div>
@@ -441,7 +441,7 @@
                           <i class="pi pi-eye"></i> {{story.views}}
                         </div>
                       </div>
-                      <div class="top-infor-read-now text-center d-flex justify-content-end">
+                      <div class="top-infor-read-now text-center d-flex justify-content-end" (click)="navigateToInforStory(story.storyID)">
                         <button class="read-now-btn">Đọc Ngay</button>
                       </div>
                     </div>

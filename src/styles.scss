@@ -1,4 +1,3 @@
-/* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
 
 :root {
@@ -156,3 +155,29 @@ body {
 .dark-theme .rating-container{
   background-color: #1e1e1e !important;
 }
+
+// .dark-theme .fix-top {
+//   background-color: var(--background-color) !important;
+//   color: var(--text-color) !important;
+// }
+// .navbar {
+//   background-color: var(--background-color) !important;;  /* Hoặc màu sáng mà anh muốn */
+// }
+
+
+.navbar {
+  background-color: #1a1a1a !important; /* Màu tối mặc định */
+  color: #ffffff !important;           /* Chữ trắng */
+  opacity: 1 !important;               /* Đảm bảo không trong suốt */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* Thêm bóng nếu cần */
+}
+
+.dark-theme .navbar {
+  background-color: #333333 !important;  /* Màu tối cho navbar */
+  color: #ffffff !important;  /* Màu chữ sáng cho navbar */
+  /* Đảm bảo navbar không bị trong suốt */
+  background: rgba(0, 0, 0, 0.85) !important;  /* Hoặc có thể dùng màu tối cụ thể */
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

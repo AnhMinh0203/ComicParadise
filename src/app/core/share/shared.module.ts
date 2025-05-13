@@ -39,6 +39,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { TagModule } from 'primeng/tag';
 import { TreeModule } from 'primeng/tree';
 import { ScrollTopModule } from 'primeng/scrolltop';
+
+
 @NgModule({
   imports: [
     CommonModule,
@@ -68,7 +70,7 @@ import { ScrollTopModule } from 'primeng/scrolltop';
     InputGroupAddonModule,
     InputGroupModule,
     SkeletonModule,
-    Skeleton
+    Skeleton,
   ],
   exports: [
     CommonModule,

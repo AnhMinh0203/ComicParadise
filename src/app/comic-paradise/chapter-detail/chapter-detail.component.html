@@ -2,11 +2,11 @@
 <div class="container my-5">
   <div class="d-flex justify-content-center ">
     <!-- Chapter action -->
-    <p-speeddial [model]="chapterActions" direction="down"
-      [style]="{ position: 'fixed', top: '6.2rem', right: '1rem', zIndex: 1000 }">
+    <p-speeddial [model]="chapterActions" direction="up"
+      [style]="{ position: 'fixed', top: '30.5rem', right: '1.3rem', zIndex: 1000 }">
     </p-speeddial>
 
-    <div class="col-12 col-sm-12 col-md-8 col-lg-6 col-xl-6 mt-5">
+    <div class="col-12 col-sm-12 col-md-8 col-lg-6 col-xl-6 mt-1">
       <!-- Fixed Top Navigator -->
       <div id="topNavigator" class="chapter-navigator fixed-top d-flex justify-content-center align-items-center gap-3"
         [class.hidden]="!showTopNavigator">
@@ -27,11 +27,12 @@
       </div>
 
       <!-- Nội dung truyện -->
-      <div *ngIf="chapterContent.chapterType === 'Images'" class="mt-3">
+      <div *ngIf="chapterContent && chapterContent.chapterType === 'Images'" class="mt-3">
         <div *ngFor="let imageUrl of chapterContent.imageUrls">
           <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
         </div>
       </div>
+
 
       <!-- Điều hướng chương -->
       <div class="d-flex justify-content-center align-items-center mt-4 gap-3">

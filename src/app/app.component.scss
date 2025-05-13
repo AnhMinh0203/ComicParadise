@@ -9,3 +9,16 @@
 .content-wrapper iframe {
   height: 400px;
 }
+
+.fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #1a1a1a;
+  padding: 6px 15px;
+  color: white !important;
+  box-shadow: 0 2px 10px rgba(132, 132, 132, 0.2);
+}
+

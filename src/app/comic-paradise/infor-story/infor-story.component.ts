@@ -18,6 +18,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { SignalRService } from '../../layouts/service/signalR.service';
 import { ReportService } from '../service/report.service';
 import { RatingModule } from 'primeng/rating';
+
 @Component({
   selector: 'app-infor-story',
   imports: [
@@ -31,7 +32,7 @@ import { RatingModule } from 'primeng/rating';
     AvatarModule,
     CommonModule,
     RadioButtonModule,
-    RatingModule
+    RatingModule,
   ],
   providers: [MessageService, ConfirmationService, SignalRService],
   templateUrl: './infor-story.component.html',
@@ -127,10 +128,14 @@ export class InforStoryComponent {
         await this.getCommentsByStoryID(this.storyID);
 
         this.getStoryDetail(this.storyID);
-        this.checkIsLikeStory();
-        this.getMarkChapter();
         this.getStoryRating(this.storyID);
-        this.getUserRating(this.storyID, this.currentUserId);
+
+        if(this.currentUserId) {
+          this.checkIsLikeStory();
+          this.getMarkChapter();
+          this.getUserRating(this.storyID, this.currentUserId);
+        }
+
 
 
         this.activatedRoute.queryParams.subscribe(queryParams => {
@@ -142,8 +147,6 @@ export class InforStoryComponent {
             }, 500); // Có thể điều chỉnh thời gian chờ nếu cần
           }
         });
-
-        console.log("--- Chapter number ---")
 
       }
 
@@ -262,10 +265,16 @@ export class InforStoryComponent {
 
   // --- Comment ---//
   postComment() {
+    if(!this.currentUserId) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để bình luận" });
+      return;
+    }
+
     if (!this.commentInput) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung bình luận" });
       return;
     }
+
 
     const comment = {
       StoryID: this.storyID,
@@ -305,6 +314,11 @@ export class InforStoryComponent {
   }
 
   replyComment(comment: any) {
+    if(!this.currentUserId) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để bình luận" });
+      return;
+    }
+
     if (!this.commenReplytInput) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung phản hồi" });
       return;
@@ -359,7 +373,10 @@ export class InforStoryComponent {
   }
 
   onLike(comment: any) {
-    console.log(comment);
+    if(!this.currentUserId) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập" });
+      return;
+    }
     if (comment.isLiked) {
       // Hủy like
       comment.likes = (comment.likes || 0) - 1;
@@ -392,6 +409,10 @@ export class InforStoryComponent {
   }
 
   onDislike(comment: any) {
+    if(!this.currentUserId) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập" });
+      return;
+    }
 
     if (comment.isDisliked) {
       comment.disLikes = (comment.disLikes || 0) - 1;
@@ -423,6 +444,11 @@ export class InforStoryComponent {
 
 
   onLikeStory() {
+    if(!this.currentUserId) {
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để thích truyện" });
+      return;
+    }
+
     this.isLiked = !this.isLiked;
     this._storyService.likeStory(this.currentUserId, this.storyID).subscribe((res: any) => {
       if (res && res.isSuccess) {
@@ -540,12 +566,17 @@ export class InforStoryComponent {
   }
 
   ratingStory() {
+    if(!this.currentUserId){
+      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để đánh giá" });
+      return;
+    }
+
     const model = {
       StoryID: this.storyID,
       UserID: this.currentUserId,
       RatingValue: this.userRating
     }
-    console.log(model)
+
     this._storyService.ratingStory(model).subscribe((res: any) => {
       if (res && res.isSuccess && res.data) {
         this.messageService.add({ severity: "success", summary: "Thông báo", detail: "Đánh giá thành công" });

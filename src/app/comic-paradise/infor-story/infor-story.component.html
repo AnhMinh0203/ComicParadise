@@ -41,7 +41,8 @@
           <div class="d-flex align-items-center flex-wrap">
             <strong class="me-2">Thể loại:</strong>
             <ng-container *ngFor="let cate of categoriesSelect">
-              <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1 clickable-tag"  (click)="navigateToHomeWithCategory(cate.categoryName)"/>
+              <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1 clickable-tag"
+                (click)="navigateToHomeWithCategory(cate.categoryName)" />
             </ng-container>
           </div>
 
@@ -257,7 +258,7 @@
 
 <!-- Report story form -->
 <p-dialog header="Báo cáo truyện" [closable]="true" [modal]="true" [(visible)]="isReportStoryForm"
-[style]="{ width: '40vw' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" (onHide)="resetReportForm()"
+  [style]="{ width: '40vw' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" (onHide)="resetReportForm()"
   [draggable]="false" [resizable]="false">
 
   <div *ngFor="let reason of reportStoryReasons" class="mb-3 d-flex align-items-center">

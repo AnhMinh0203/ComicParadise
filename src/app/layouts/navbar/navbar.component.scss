@@ -11,6 +11,10 @@
   box-shadow: 0 2px 10px rgba(132, 132, 132, 0.2);
 }
 
+.navbar.non-fixed {
+  position: static; /* or position: sticky; top: 0; */
+}
+
 /* Left Side */
 .navbar-right,
 .navbar-left {

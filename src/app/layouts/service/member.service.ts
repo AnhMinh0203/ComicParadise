@@ -32,7 +32,7 @@ export class memberService {
   }
 
   getReadingHistoriesByRange(memberID: any, range: any) {
-    var apiUrl = `${this.serviceUri}/Get-reading-histories?userID=${memberID}&range=${range}`;
+    var apiUrl = `${this.serviceUri}/Get-reading-histories-by-range?userID=${memberID}&range=${range}`;
     return this.http.get(apiUrl)
       .pipe(
         catchError((error: any) => {

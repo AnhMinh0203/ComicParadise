@@ -45,7 +45,9 @@ export class ChapterDetailComponent {
     this.storyID = +this.route.snapshot.paramMap.get('storyID')!;
     this.chapterNumber = +this.route.snapshot.paramMap.get('chapterNumber')!;
     this.loadChapterContent();
-    this.checkBookmarkStatus();
+    if(this.currentUserId) {
+      this.checkBookmarkStatus();
+    }
     this.mockChapterList();
 
     // this.chapterActions = [
@@ -83,12 +85,16 @@ export class ChapterDetailComponent {
 
 
   loadChapterContent(): void {
-    this._chapterService.getChapterContent(this.storyID, this.chapterNumber, this.currentUserId)
+    const userID = this.currentUserId != null ? this.currentUserId : undefined;
+
+    this._chapterService.getChapterContent(this.storyID, this.chapterNumber, userID)
       .subscribe(res => {
         this.chapterContent = res.data;
+        console.log("Chapter content: ", this.chapterContent);
         this.cdr.detectChanges();
       });
   }
+
 
   goToPreviousChapter() {
     // Gọi hàm để load chương trước
@@ -131,6 +137,11 @@ export class ChapterDetailComponent {
   }
 
   markChapterNumber() {
+    if (this.currentUserId == null) {
+      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng đăng nhập' });
+      return;
+    }
+
     const model = {
       StoryID: this.storyID,
       ChapterNumber: this.chapterNumber,

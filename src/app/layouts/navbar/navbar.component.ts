@@ -7,7 +7,7 @@ import { ConfirmationService, MegaMenuItem, MenuItem, MessageService } from 'pri
 import { SidebarService } from '../service/sidebar.service';
 import { categoryService } from '../service/category.service';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { Menu } from 'primeng/menu';
 import { storyService } from '../../comic-paradise/service/story.service';
@@ -16,7 +16,7 @@ import { BadgeModule } from 'primeng/badge';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { SignalRService } from '../service/signalR.service';
 import { notificationService } from '../service/notification.service';
-import { lastValueFrom, Subscription } from 'rxjs';
+import { filter, lastValueFrom, Subscription } from 'rxjs';
 import { Password, PasswordModule } from 'primeng/password';
 import { memberService } from '../service/member.service';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -26,6 +26,7 @@ import { SharedService } from '../service/share.service';
 import { DropdownModule } from 'primeng/dropdown';
 @Component({
   selector: 'app-navbar',
+  standalone: true,
   imports: [
     SharedModule,
     ToggleSwitchModule,
@@ -137,7 +138,7 @@ export class NavbarComponent {
 
   displayCategoryDialog = false;
   categoryColumns: any[][] = [];
-
+  isChapterDetail: boolean = false;
 
   constructor(
     private themeService: ThemeService,
@@ -152,7 +153,14 @@ export class NavbarComponent {
     private signalRService: SignalRService,
     private _memberService: memberService,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.isChapterDetail = (event as NavigationEnd).urlAfterRedirects.includes('/chapter-content');
+    });
+   }
 
   logout() {
     localStorage.removeItem('user');
@@ -168,6 +176,11 @@ export class NavbarComponent {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.userID = user.userID;
+
+    if (!this.userID) {
+      return;
+    }
+
     this.userInitial = this.getUserInitial(user.username || '');
     this.getCategories();
     this.initializeSignalR();
@@ -449,7 +462,6 @@ export class NavbarComponent {
   async getReadingHistoriesByRange(filter: string) {
     this.selectedHistoryFilter = filter;
     const res: any = await lastValueFrom(this._memberService.getReadingHistoriesByRange(this.userID, filter));
-    console.log('Kết quả API:', res);
 
     if (res && res.isSuccess) {
       this.historyStories = res.data;
