@@ -494,15 +494,18 @@ namespace ComicParadise.Repository
             var result = from s in _context.Stories
                          join rh in _context.ReadingHistories on s.StoryID equals rh.StoryID
                          where rh.UserID == userID
+                         group new { s, rh } by new { s.StoryID, s.Title, s.CoverImage, s.Views } into g
+                         orderby g.Max(x => x.rh.LastReadAt) ascending // Sắp xếp theo thời gian đọc mới nhất
                          select new ReadingHistoryDto
                          {
-                             StoryID = s.StoryID,
-                             Title = s.Title,
-                             CoverImage = s.CoverImage,
-                             Views = s.Views,
-                             LastReadAt = rh.LastReadAt,
+                             StoryID = g.Key.StoryID,
+                             Title = g.Key.Title,
+                             CoverImage = g.Key.CoverImage,
+                             Views = g.Key.Views,
+                             LastReadAt = g.Max(x => x.rh.LastReadAt) // Lấy thời gian đọc mới nhất
                          };
-            return Task.FromResult(result.Distinct());
+
+            return Task.FromResult(result);
         }
         #endregion
 
@@ -516,26 +519,23 @@ namespace ComicParadise.Repository
             else if (range == "7days")
                 startDate = DateTime.UtcNow.AddDays(-7);
 
-            var result = (from s in _context.Stories
-                          join rh in _context.ReadingHistories on s.StoryID equals rh.StoryID
-                          where rh.UserID == userID && (range == "all" || rh.LastReadAt >= startDate)
-                          select new ReadingHistoryDto
-                          {
-                              StoryID = s.StoryID,
-                              Title = s.Title,
-                              CoverImage = s.CoverImage,
-                              Views = s.Views,
-                              LastReadAt = rh.LastReadAt,
-                          })
-                         .GroupBy(rh => rh.StoryID)  // Nhóm theo StoryID
-                         .Select(g => g.OrderByDescending(x => x.LastReadAt).FirstOrDefault()) // Chọn lần đọc gần nhất
-                         .AsQueryable();
+            var result = from s in _context.Stories
+                         join rh in _context.ReadingHistories on s.StoryID equals rh.StoryID
+                         where rh.UserID == userID && (range == "all" || rh.LastReadAt >= startDate)
+                         group new { s, rh } by new { s.StoryID, s.Title, s.CoverImage, s.Views } into g
+                         orderby g.Max(x => x.rh.LastReadAt) ascending // Sắp xếp từ lâu nhất đến gần nhất
+                         select new ReadingHistoryDto
+                         {
+                             StoryID = g.Key.StoryID,
+                             Title = g.Key.Title,
+                             CoverImage = g.Key.CoverImage,
+                             Views = g.Key.Views,
+                             LastReadAt = g.Max(x => x.rh.LastReadAt) // Lấy thời gian đọc mới nhất
+                         };
 
             return Task.FromResult(result);
         }
         #endregion
-
-
 
         #region Delete member 
         public async Task<string> DeleteMemberAsync(int userID)

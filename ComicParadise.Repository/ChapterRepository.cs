@@ -266,7 +266,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get chapter content
-        public async Task<ChapterContentDto?> GetChapterContentAsync(int storyID, int chapterNumber, int userID)
+        public async Task<ChapterContentDto?> GetChapterContentAsync(int storyID, int chapterNumber, int? userID)
         {
 
 
@@ -287,15 +287,18 @@ namespace ComicParadise.Repository
             story.Views += 1;
 
             /* Tạo lịch sử */
-            var readingHistory = new ReadingHistory
+            if(userID != null)
             {
-                UserID = userID,
-                StoryID = storyID,
-                LastReadAt = DateTime.Now
-            };
-            _context.ReadingHistories.Add(readingHistory);
+                var readingHistory = new ReadingHistory
+                {
+                    UserID = userID,
+                    StoryID = storyID,
+                    LastReadAt = DateTime.Now
+                };
+                _context.ReadingHistories.Add(readingHistory);
+            }
+            
             await _context.SaveChangesAsync();
-
 
             ChapterContentDto chapterContentDto = new ChapterContentDto();
             chapterContentDto.ChapterType = chapter.ChapterType;

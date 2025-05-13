@@ -31,7 +31,7 @@ namespace ComicParadise.Api.Controllers
         }
 
         [HttpGet("Get-chapter-content")]
-        public async Task<ActionResult> GetChapterContent (int storyID, int chapterNumber, int userID)
+        public async Task<ActionResult> GetChapterContent (int storyID, int chapterNumber, int? userID)
         {
             var result = await _chapterRepository.GetChapterContentAsync(storyID, chapterNumber, userID);
             return Ok(new BaseResponse<ChapterContentDto>(true, result));
