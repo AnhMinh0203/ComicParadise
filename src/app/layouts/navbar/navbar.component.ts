@@ -24,6 +24,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { ListboxModule } from 'primeng/listbox';
 import { SharedService } from '../service/share.service';
 import { DropdownModule } from 'primeng/dropdown';
+import { AuthenService } from '../../core/authen/service/authen.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -44,23 +45,12 @@ import { DropdownModule } from 'primeng/dropdown';
   providers: [ConfirmationService, MessageService, SignalRService,
   ],
   templateUrl: './navbar.component.html',
-  animations: [
-    trigger('togglePassword', [
-      transition(':enter', [
-        style({ opacity: 0, height: '0px' }),
-        animate('300ms ease-in-out', style({ opacity: 1, height: '*' }))
-      ]),
-      transition(':leave', [
-        animate('500ms ease-in-out', style({ opacity: 0, height: '0px' }))
-      ])
-    ])
-  ],
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
   isDarkMode: boolean = false;
   // categoryItems: MegaMenuItem[] | undefined;
-  categoryItems:any;
+  categoryItems: any;
   visibleNotify: any;
   searchKey: any;
   searchStoryResults: any;
@@ -75,13 +65,13 @@ export class NavbarComponent {
   primaryImg: any;
   primaryImgDisplay: any;
   inforMember: any = {};
-  isChangePassword: boolean = false;
   newPassword: any;
   comfirmPassword: any;
   oldPassword: any;
   historyStories: any[] = [];
   selectedHistoryFilter: string = 'all';
   visibleInterestingForm: any;
+  visibleChangePasswordForm: any;
   favoriteStories: any[] = [];
   newNotifications: any[] = [];
   oldNotifications: any[] = [];
@@ -108,6 +98,7 @@ export class NavbarComponent {
     { label: 'Hồ sơ', icon: 'pi pi-user', command: () => this.showFormUpdateMemberInfor() },
     { label: 'Yêu thích', icon: 'pi pi-heart', command: () => this.showFormFavoriteStories() },
     { label: 'Lịch sử', icon: 'pi pi-history', command: async () => await this.showFormHistoryStories() },
+    { label: 'Đổi mật khẩu', icon: 'pi pi-lock', command: async () => await this.showFormChangePassword() },
     { label: 'Đăng xuất', icon: 'pi pi-sign-out', command: () => this.logout() }
   ]
 
@@ -147,6 +138,7 @@ export class NavbarComponent {
     private _storyService: storyService,
     private _notificationService: notificationService,
     private _sharedService: SharedService,
+    private _authenService: AuthenService,
     private http: HttpClient,
     private router: Router,
     private messageService: MessageService,
@@ -160,7 +152,7 @@ export class NavbarComponent {
     ).subscribe((event: NavigationEnd) => {
       this.isChapterDetail = (event as NavigationEnd).urlAfterRedirects.includes('/chapter-content');
     });
-   }
+  }
 
   logout() {
     localStorage.removeItem('user');
@@ -210,7 +202,7 @@ export class NavbarComponent {
       this.unreadNotification = count;
     });
 
-    this._sharedService.loadNotifications$.subscribe(()=>{
+    this._sharedService.loadNotifications$.subscribe(() => {
       this.loadNotifications();
     })
     this.loadNotifications();
@@ -320,7 +312,7 @@ export class NavbarComponent {
     this.displayCategoryDialog = true;
   }
 
-  showDialogFilter(){
+  showDialogFilter() {
     this.visibleFilter = true;
   }
 
@@ -352,10 +344,10 @@ export class NavbarComponent {
     });
   }
 
-  filterStoryByCategories(){
+  filterStoryByCategories() {
     const selectedCategoryIds = this.categoryItems
-      .filter((category:any) => category.selected)
-      .map((category:any) => category.categoryID);
+      .filter((category: any) => category.selected)
+      .map((category: any) => category.categoryID);
 
     this._storyService.filterStoryByCategories(selectedCategoryIds).subscribe((res: any) => {
       this.filterStoryByCategoriesResults = res.data;
@@ -405,13 +397,6 @@ export class NavbarComponent {
     reader.readAsDataURL(file);
   }
 
-  onChangePassword() {
-    this.isChangePassword = !this.isChangePassword;
-    if (!this.isChangePassword) {
-      this.newPassword = '';
-      this.comfirmPassword = '';
-    }
-  }
 
   updateMember() {
     const formData = new FormData();
@@ -445,6 +430,36 @@ export class NavbarComponent {
     });
   }
 
+  changePassword() {
+    if (!this.oldPassword || !this.newPassword || !this.comfirmPassword) {
+      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Vui lòng nhập đầy đủ thông tin' });
+      return;
+    }
+
+    if (this.newPassword !== this.comfirmPassword) {
+      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Mật khẩu không khớp' });
+      return;
+    }
+    const formData = new FormData();
+    formData.append("userID", this.userID);
+    formData.append("oldPassword", this.oldPassword);
+    formData.append("newPassword", this.newPassword);
+    const changePasswordData = {
+      userID: this.userID,
+      oldPassword: this.oldPassword,
+      newPassword: this.newPassword
+    };
+
+    this._authenService.changePassword(changePasswordData).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+      }
+      else {
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+      }
+    });
+  }
+
   showFormUpdateMemberInfor() {
     this._memberService.getMemberById(this.userID).subscribe((res: any) => {
       this.inforMember = res.data;
@@ -457,6 +472,10 @@ export class NavbarComponent {
   async showFormHistoryStories() {
     await this.getReadingHistoriesByRange("all");
     this.visibleReadingHistoryForm = true;
+  }
+
+  async showFormChangePassword() {
+    this.visibleChangePasswordForm = true;
   }
 
   async getReadingHistoriesByRange(filter: string) {
@@ -527,8 +546,32 @@ export class NavbarComponent {
     this.onLikeStory(story.storyID)
   }
 
-  onLikeStory(storyID: any) {
+  toggleDeleteHistory(story: any, event: Event) {
+    event.stopPropagation(); // Ngăn chặn sự kiện click lan sang parent div
+    if(story != null){
+      this.onDeleteHistory(story.storyID)
+    }
+    else{
+      this.onDeleteHistory(null)
+
+    }
+
+  }
+
+  onLikeStory(storyID?: any) {
     this._storyService.likeStory(this.userID, storyID).subscribe();
+  }
+
+  onDeleteHistory(storyID?: any) {
+    this._memberService.deleteReadingHistory(this.userID, storyID).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this.getReadingHistoriesByRange(this.selectedHistoryFilter);
+      }
+      else{
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+      }
+    })
   }
 
   toggleSearchMobile() {
@@ -549,9 +592,9 @@ export class NavbarComponent {
     })
   }
 
-  updateIsReadStatus(){
+  updateIsReadStatus() {
     const notificationIds = this.newNotifications.map(noti => noti.notificationID);
-    this._notificationService.updateIsReadStatus(notificationIds).subscribe((res:any)=>{
+    this._notificationService.updateIsReadStatus(notificationIds).subscribe((res: any) => {
       this.unreadNotification = 0;
       this.cdr.detectChanges();
     })

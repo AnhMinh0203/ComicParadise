@@ -1,9 +1,9 @@
-<p-toast/>
+<p-toast />
 <div class="container my-5">
   <div class="d-flex justify-content-center ">
     <!-- Chapter action -->
     <p-speeddial [model]="chapterActions" direction="up"
-      [style]="{ position: 'fixed', top: '30.5rem', right: '1.3rem', zIndex: 1000 }">
+      [style]="{ position: 'fixed', top: '24.5rem', right: '1.3rem', zIndex: 1000 }">
     </p-speeddial>
 
     <div class="col-12 col-sm-12 col-md-8 col-lg-6 col-xl-6 mt-1">
@@ -17,8 +17,9 @@
         </div>
 
         <p-dropdown [options]="chapterList" [(ngModel)]="selectedChapter" optionLabel="title" placeholder="Chọn chương"
-          [filter]="true" class="chapter-dropdown" (onChange)="onChapterSelect($event.value)">
+          (onChange)="onChapterSelect($event.value)">
         </p-dropdown>
+
 
         <div class="nav-icon d-flex justify-content-center align-items-center" [class.disabled]="!hasNextChapter"
           (click)="hasNextChapter && goToNextChapter()" pTooltip="Chương tiếp theo">

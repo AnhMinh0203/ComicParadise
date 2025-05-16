@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, HostListener } from '@angular/core';
 import { SharedModule } from '../../core/share/shared.module';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { chapterService } from '../service/chapter.service';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
@@ -34,7 +34,8 @@ export class ChapterDetailComponent {
 
 
   constructor(
-    private route: ActivatedRoute,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
     private _chapterService: chapterService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
@@ -42,29 +43,18 @@ export class ChapterDetailComponent {
   ) { }
 
   ngOnInit(): void {
-    this.storyID = +this.route.snapshot.paramMap.get('storyID')!;
-    this.chapterNumber = +this.route.snapshot.paramMap.get('chapterNumber')!;
-    this.loadChapterContent();
-    if(this.currentUserId) {
-      this.checkBookmarkStatus();
-    }
-    this.mockChapterList();
+    this.activatedRoute.paramMap.subscribe(params => {
+      this.storyID = +params.get('storyID')!;
+      this.chapterNumber = +params.get('chapterNumber')!;
+      this.loadChapterList();
+      this.loadChapterContent();
 
-    // this.chapterActions = [
-    //   {
-    //     icon: this.isBookmarked ? 'pi pi-bookmark-fill' : 'pi pi-bookmark',
-    //     command: () => {
-    //       this.markChapterNumber();
-    //     }
-    //   },
-    //   {
-    //     icon: 'pi pi-refresh',
-    //     command: () => {
-    //       this.messageService.add({ severity: 'success', summary: 'Update', detail: 'Data Updated' });
-    //     }
-    //   },
-    // ];
+      if (this.currentUserId) {
+        this.checkBookmarkStatus();
+      }
+    });
   }
+
 
   get chapterActions(): MenuItem[] {
     return [
@@ -77,36 +67,56 @@ export class ChapterDetailComponent {
       {
         icon: 'pi pi-refresh',
         command: () => {
-          this.messageService.add({ severity: 'success', summary: 'Update', detail: 'Data Updated' });
+          this.loadChapterContent(true);
+        }
+      },
+      {
+        icon: 'pi pi-arrow-left',
+        command: () => {
+          this.router.navigate(['/infor-story', this.storyID]);
+        }
+      },
+      {
+        icon: 'pi pi-home',
+        command: () => {
+          this.router.navigate(['/home']);
         }
       },
     ];
   }
 
 
-  loadChapterContent(): void {
+  loadChapterContent(showToast: boolean = false): void {
     const userID = this.currentUserId != null ? this.currentUserId : undefined;
 
     this._chapterService.getChapterContent(this.storyID, this.chapterNumber, userID)
       .subscribe(res => {
         this.chapterContent = res.data;
-        console.log("Chapter content: ", this.chapterContent);
+        if (showToast) {
+          this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: 'Chương đã được tải lại' });
+        }
         this.cdr.detectChanges();
+      }, err => {
+        if (showToast) {
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải lại chương' });
+        }
       });
   }
 
 
+
   goToPreviousChapter() {
-    // Gọi hàm để load chương trước
+    this.router.navigate(['/chapter-content', this.storyID, this.chapterNumber - 1]);
   }
 
   goToNextChapter() {
-    // Gọi hàm để load chương tiếp theo
+    this.router.navigate(['/chapter-content', this.storyID, this.chapterNumber + 1]);
   }
 
   onChapterSelect(chapter: any) {
-    // Điều hướng hoặc load chương tương ứng
+    this.router.navigate(['/chapter-content', this.storyID, chapter.number]);
   }
+
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
@@ -123,18 +133,18 @@ export class ChapterDetailComponent {
     this.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
   }
 
-  mockChapterList() {
-    this.chapterList = [
-      { title: 'Chương 1: Khởi đầu', number: 1 },
-      { title: 'Chương 2: Gặp gỡ định mệnh', number: 2 },
-      { title: 'Chương 3: Bí mật được hé lộ', number: 3 },
-      { title: 'Chương 4: Đối đầu kẻ thù', number: 4 },
-      { title: 'Chương 5: Sự thật cay đắng', number: 5 }
-    ];
+  // mockChapterList() {
+  //   this.chapterList = [
+  //     { title: 'Chương 1: Khởi đầu', number: 1 },
+  //     { title: 'Chương 2: Gặp gỡ định mệnh', number: 2 },
+  //     { title: 'Chương 3: Bí mật được hé lộ', number: 3 },
+  //     { title: 'Chương 4: Đối đầu kẻ thù', number: 4 },
+  //     { title: 'Chương 5: Sự thật cay đắng', number: 5 }
+  //   ];
 
-    // chọn chương hiện tại nếu muốn
-    this.selectedChapter = this.chapterList[0];
-  }
+  //   // chọn chương hiện tại nếu muốn
+  //   this.selectedChapter = this.chapterList[0];
+  // }
 
   markChapterNumber() {
     if (this.currentUserId == null) {
@@ -151,9 +161,9 @@ export class ChapterDetailComponent {
     this._chapterService.markChapter(model).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.isBookmarked = !this.isBookmarked;
-        this.messageService.add({ severity: 'success', summary: "Thông báo" , detail: res.data });
+        this.messageService.add({ severity: 'success', summary: "Thông báo", detail: res.data });
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Thất bại', detail:  res.data });
+        this.messageService.add({ severity: 'error', summary: 'Thất bại', detail: res.data });
       }
     });
   }
@@ -171,5 +181,26 @@ export class ChapterDetailComponent {
         this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: res.data });
       }
     });
+  }
+
+  loadChapterList(): void {
+    this._chapterService.getChapterList(this.storyID).subscribe((res: any) => {
+      this.chapterList = res.data.map((number: any) => ({
+        title: `Chương ${number}`,
+        number: number
+      }));
+
+      this.selectedChapter = this.chapterList.find(c => c.number === this.chapterNumber);
+      this.checkHasPrevNext();
+      this.cdr.detectChanges();
+    }, (err) => {
+      this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải danh sách chương' });
+    });
+  }
+
+  checkHasPrevNext() {
+    const chapterNumbers = this.chapterList.map(c => c.number);
+    this.hasPreviousChapter = chapterNumbers.includes(this.chapterNumber - 1);
+    this.hasNextChapter = chapterNumbers.includes(this.chapterNumber + 1);
   }
 }

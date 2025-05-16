@@ -51,4 +51,16 @@ export class memberService {
       );
   }
 
+  deleteReadingHistory(userID: any, storyID: any) {
+    let apiUrl = `${this.serviceUri}/Delete-reading-history?userID=${userID}`;
+    if (storyID !== null && storyID !== undefined) {
+      apiUrl += `&storyID=${storyID}`;
+    }
+
+    return this.http.delete(apiUrl).pipe(
+      catchError((error: any) => {
+        throw error;
+      })
+    );
+  }
 }

@@ -58,7 +58,15 @@ export class chapterService {
           throw error;
         })
       );
-
   }
 
+  getChapterList(storyID: number) {
+    var apiUrl = `${this.serviceUri}/Get-chapter-list?storyID=${storyID}`;
+    return this.http.get<number[]>(apiUrl).pipe(
+      catchError((error: any) => {
+        console.error('Error in getChapterList: ', error);
+        throw error;
+      })
+    );
+  }
 }

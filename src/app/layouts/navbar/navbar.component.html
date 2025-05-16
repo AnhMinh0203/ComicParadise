@@ -1,7 +1,7 @@
 <p-toast />
 
 <nav class="navbar d-flex justify-content-between align-categoryItems-center"
-[ngClass]="{'non-fixed': isChapterDetail}">
+  [ngClass]="{'non-fixed': isChapterDetail}">
 
   <!-- Left Side -->
   <div class="d-flex">
@@ -28,7 +28,7 @@
       </div>
 
       <div class="filter-icon" (click)="showDialogFilter()">
-        <i class="pi pi-cog"></i>
+        <i class="pi pi-sliders-h"></i>
       </div>
     </div>
   </div>
@@ -154,18 +154,22 @@
     <div class="member-infor">
       <div class="row">
         <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
-          <h6 class="mt-5"><b>1. Ảnh đại diện</b></h6>
+          <h6 class="mt-2"><b>1. Ảnh đại diện</b></h6>
           <div class="d-flex justify-content-start">
             <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
               (onSelect)="onUpload($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
           </div>
-          <div class="mt-3 border">
+          <div class="mt-3 d-flex justify-content-center">
             <p-image *ngIf="primaryImgDisplay" [src]="primaryImgDisplay" alt="Image" width="100%" [preview]="true" />
           </div>
+
+          <!-- <div class="avatar-wrapper mt-5">
+            <img [src]="primaryImgDisplay" alt="Avatar" class="avatar-img" />
+          </div> -->
         </div>
 
         <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
-          <h6 class="mt-5"><b>2. Thông tin cá nhân</b></h6>
+          <h6 class="mt-2"><b>2. Thông tin cá nhân</b></h6>
           <div class="row">
 
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
@@ -216,7 +220,7 @@
               </div>
             </div>
 
-            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+            <!-- <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
               <div class="d-flex flex-column" *ngIf="isChangePassword" [@togglePassword]>
                 <label for="address" class="block mt-3">Mật khẩu cũ</label>
                 <p-password [(ngModel)]="oldPassword" [feedback]="false" [toggleMask]="true"
@@ -231,16 +235,14 @@
                   styleClass="w-100 format-input" class=" format-input w-100" />
 
               </div>
-            </div>
+            </div> -->
 
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
-              <div class="d-flex flex-column">
-                <div class="d-flex justify-content-end mt-5">
-                  <p-button label="Đổi mật khẩu" (click)="onChangePassword()" styleClass="w-100 format-input"
-                    class=" format-input w-100 me-2" />
-                  <p-button label="Cập nhật" (click)="updateMember()" styleClass="w-100 format-input"
-                    class=" format-input w-100 ms-2" />
-                </div>
+              <div class="d-flex justify-content-end mt-5">
+                <!-- <p-button label="Đổi mật khẩu" (click)="onChangePassword()" styleClass="w-100 format-input"
+                    class=" format-input w-100 me-2" /> -->
+                <p-button label="Cập nhật" (click)="updateMember()" styleClass="w-100 format-input"
+                  class=" format-input w-100 ms-2 mb-2" />
               </div>
             </div>
           </div>
@@ -253,9 +255,9 @@
 
 <!-- Reading histories -->
 <div class="card flex justify-center">
-  <p-dialog [(visible)]="visibleReadingHistoryForm" [modal]="true" [closable]="true" [header]="'Lịch sử đọc truyện'"
-    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw', height: '80vh' }"
-    [baseZIndex]="10000">
+  <p-dialog [(visible)]="visibleReadingHistoryForm" [modal]="true" [closable]="true" [draggable]="false"
+    [header]="'Lịch sử đọc truyện'" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '80vw', height: '90vh' }" [baseZIndex]="10000">
     <div class="history-range d-flex my-2">
       <div class="me-2">
         <p-tag value="Tất cả" [rounded]="true" [severity]="selectedHistoryFilter === 'all' ? 'success' : 'secondary'"
@@ -275,25 +277,36 @@
 
     <ng-container *ngIf="historyStories.length > 0; else noData">
       <p-listbox [options]="historyStories.slice().reverse()" optionLabel="title"
-        [style]="{width: '100%',height: '85%'}">
+        [style]="{width: '100%',height: '80%'}">
         <ng-template let-story pTemplate="item" [style]="{width: '100%',height: '100%'}">
-          <div class="d-flex w-100 items-center gap-3 p-2 border-b border-gray-200"
+          <div class="d-flex w-100 justify-content-between align-items-center w-100 gap-3 p-2 border-b border-gray-200"
             (click)="navigateToInforStory(story.storyID)">
+            <div class="d-flex w-100 items-center gap-3 p-2 border-b border-gray-200">
+              <img [src]="story.coverImage" alt="Thumbnail"
+                class="rounded-md object-cover shadow-sm border border-gray-300" style="width: 56px; height: 80px;">
 
+              <div>
+                <div class="font-semibold text-lg text-gray-800"><b>{{ story.title }}</b></div>
+                <ng-container *ngFor="let cate of story.categories">
+                  <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1 clickable-tag" />
+                </ng-container>
+                <div class="text-sm text-gray-500">Lượt xem: {{ story.views }}</div>
+                <!-- <div class="text-sm text-gray-500"> {{ getTimeAgo(story.lastReadAt )}}</div> -->
 
-            <img [src]="story.coverImage" alt="Thumbnail"
-              class="rounded-md object-cover shadow-sm border border-gray-300" style="width: 56px; height: 80px;">
-
-            <div>
-              <div class="font-semibold text-lg text-gray-800"><b>{{ story.title }}</b></div>
-              <div class="text-sm text-gray-500">Lượt xem: {{ story.views }}</div>
-
-              <div class="text-sm text-gray-500"> {{ getTimeAgo(story.lastReadAt )}}</div>
+              </div>
+            </div>
+            <div class="favorite-item-icon" (click)="toggleDeleteHistory(story, $event)">
+              <i class="pi pi-trash text-gray-400" style="font-size: 1.2rem;"></i>
             </div>
           </div>
         </ng-template>
       </p-listbox>
     </ng-container>
+
+    <div class="d-flex mt-3">
+      <p-button label="Xóa tất cả" (click)="toggleDeleteHistory(null,$event)" styleClass="w-100 format-input"
+        class=" format-input w-100" />
+    </div>
 
     <ng-template #noData>
       <div class="text-center p-4">
@@ -310,9 +323,9 @@
 
 <!-- Favorite stories -->
 <div class="card flex justify-center">
-  <p-dialog [(visible)]="visibleInterestingForm" [modal]="true" [closable]="true" [header]="'Truyện yêu thích'"
-    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw', height: '70vh' }"
-    [baseZIndex]="10000">
+  <p-dialog [(visible)]="visibleInterestingForm" [modal]="true" [closable]="true" [draggable]="false"
+    [header]="'Truyện yêu thích'" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '80vw', height: '70vh' }" [baseZIndex]="10000">
 
     <ng-container *ngIf="favoriteStories.length > 0; else noData">
       <p-listbox [options]="favoriteStories.slice().reverse()" optionLabel="title"
@@ -328,13 +341,17 @@
 
               <div>
                 <div class="font-semibold text-lg text-gray-800"><b>{{ story.title }}</b></div>
-                <div class="text-sm text-gray-500">Lượt xem: {{ story.views }}</div>
 
-                <div class="text-sm text-gray-500">Ngày đăng: {{ getTimeAgo(story.createdAt )}}</div>
+                <ng-container *ngFor="let cate of story.categories">
+                  <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1 clickable-tag" />
+                </ng-container>
+
+                <div class="text-sm text-gray-500">Lượt xem: {{ story.views }}</div>
               </div>
             </div>
             <div class="favorite-item-icon" (click)="toggleFavorite(story, $event)">
-              <i [ngClass]="story.isLiked ? 'pi pi-heart-fill text-danger' : 'pi pi-heart text-gray-400'"></i>
+              <i [ngClass]="story.isLiked ? 'pi pi-heart-fill text-danger' : 'pi pi-heart text-gray-400'"
+                style="font-size: 1.2rem;"></i>
             </div>
           </div>
 
@@ -431,5 +448,37 @@
     <button pButton type="button" label="Áp dụng" icon="pi pi-check" class="p-button-sm w-100"
       (click)="filterStoryByCategories()"></button>
   </div>
-
 </p-dialog>
+
+<!-- Change password -->
+<div class="card flex justify-center">
+  <p-dialog header="Đổi mật khẩu" [(visible)]="visibleChangePasswordForm" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '40vw' }" [draggable]="false"
+    [resizable]="false">
+    <div class="member-infor">
+      <div class="row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+          <div class="d-flex flex-column">
+            <label for="address" class="block mt-3">Mật khẩu cũ</label>
+            <p-password [(ngModel)]="oldPassword" [feedback]="false" [toggleMask]="true" styleClass="w-100 format-input"
+              class=" format-input w-100" />
+
+            <label for="address" class="block mt-3">Mật khẩu mới</label>
+            <p-password [(ngModel)]="newPassword" [feedback]="false" [toggleMask]="true" styleClass="w-100 format-input"
+              class=" format-input w-100" />
+
+            <label for="address" class="block mt-3">Xác nhận mật khẩu</label>
+            <p-password [(ngModel)]="comfirmPassword" [feedback]="false" [toggleMask]="true"
+              styleClass="w-100 format-input" class=" format-input w-100" />
+
+          </div>
+          <div class="col-12 mt-3">
+            <p-button label="Cập nhật" (click)="changePassword()" styleClass="w-100 format-input"
+              class=" format-input w-100" />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+</div>

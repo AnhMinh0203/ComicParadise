@@ -44,4 +44,13 @@ export class AuthenService {
       })
     );
   }
+
+  changePassword(model:any){
+    return this.http.post(`${this.apiUrl}/Change-password`, model)
+    .pipe(
+      catchError((error: any) => {
+        throw error;
+      })
+    );
+  }
 }

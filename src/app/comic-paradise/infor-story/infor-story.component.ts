@@ -167,7 +167,6 @@ export class InforStoryComponent {
 
 
   navigateToChapterContent(storyID: number, chapterNumber: number) {
-    console.log('Navigating to:', storyID, chapterNumber);
     this.router.navigate(['/chapter-content', storyID, chapterNumber]);
   }
 
