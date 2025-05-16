@@ -82,5 +82,12 @@ namespace ComicParadise.Api.Controllers
             var result = await _memberRepository.GetMemberById(userID);
             return Ok(new BaseResponse<User>(true, result));
         }
+
+        [HttpDelete("Delete-reading-history")]
+        public async Task<ActionResult> DeleteReadingHistory(int userID, int? storyID)
+        {
+            var result = await _memberRepository.DeleteReadingHistoryAsync(userID, storyID);
+            return Ok(new BaseResponse<string>(true,result));
+        }
     }
 }

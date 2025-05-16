@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComicParadise.DataContext.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,6 @@ namespace ComicParadise.DataContext.Dto
         public string CoverImage { get; set; }
         public int Views {  get; set; } 
         public DateTime LastReadAt { get; set; }
+        public List<Category> Categories { get; set; }
     }
 }

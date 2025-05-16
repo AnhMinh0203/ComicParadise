@@ -87,5 +87,12 @@ namespace ComicParadise.Api.Controllers
             var result = await _chapterRepository.GetMarkChapterAsync(userID, storyID);
             return Ok(new BaseResponse<ChapterLinkDto>(true, result));
         }
+
+        [HttpGet("Get-chapter-list")]
+        public async Task<ActionResult> GetChapterList(int storyID)
+        {
+            var result = await _chapterRepository.GetAllChapterListAsync( storyID);
+            return Ok(new BaseResponse<List<int>>(true, result));
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ComicParadise.DataContext.Utils;
+﻿using ComicParadise.DataContext.Dto;
+using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,13 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult> ResetPassword(string rawToken, string newPassword)
         {
             var response = await _authenRepository.ResetPasswordAsync(rawToken, newPassword);
+            return Ok(new BaseResponse<string>(true, response));
+        }
+
+        [HttpPost("Change-password")]
+        public async Task<ActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            var response = await _authenRepository.ChangePasswordAsync(changePasswordDto);
             return Ok(new BaseResponse<string>(true, response));
         }
     }

@@ -416,12 +416,6 @@ namespace ComicParadise.Repository
                 {
                     existingUser.IsLock = user.IsLock;
                 }
-                if (!string.IsNullOrEmpty(user.PasswordHash))
-                {
-                    string salt = BCrypt.Net.BCrypt.GenerateSalt();
-                    string hash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash, salt);
-                    existingUser.PasswordHash = hash;
-                }
 
                 // Kiểm tra và xử lý thay đổi trạng thái IsComment
                 if (user.IsComment.HasValue && existingUser.IsComment != user.IsComment)
@@ -449,7 +443,7 @@ namespace ComicParadise.Repository
                     Console.WriteLine($"Sent notification to group: {existingUser.UserID}");
                     await _context.SaveChangesAsync();
 
-  
+
                 }
                 else
                 {
@@ -501,6 +495,10 @@ namespace ComicParadise.Repository
                              StoryID = g.Key.StoryID,
                              Title = g.Key.Title,
                              CoverImage = g.Key.CoverImage,
+                             Categories = (from sc in _context.StoryCategoriesMapping
+                                           join c in _context.Categories on sc.CategoryID equals c.CategoryID
+                                           where sc.StoryID == g.Key.StoryID
+                                           select c).ToList(),
                              Views = g.Key.Views,
                              LastReadAt = g.Max(x => x.rh.LastReadAt) // Lấy thời gian đọc mới nhất
                          };
@@ -529,6 +527,10 @@ namespace ComicParadise.Repository
                              StoryID = g.Key.StoryID,
                              Title = g.Key.Title,
                              CoverImage = g.Key.CoverImage,
+                             Categories = (from sc in _context.StoryCategoriesMapping
+                                           join c in _context.Categories on sc.CategoryID equals c.CategoryID
+                                           where sc.StoryID == g.Key.StoryID
+                                           select c).ToList(),
                              Views = g.Key.Views,
                              LastReadAt = g.Max(x => x.rh.LastReadAt) // Lấy thời gian đọc mới nhất
                          };
@@ -549,6 +551,37 @@ namespace ComicParadise.Repository
             await _context.SaveChangesAsync();
             return "Xóa thành viên thành công";
         }
+        #endregion
+
+        #region Delete history
+        public async Task<string> DeleteReadingHistoryAsync(int userID, int? storyID)
+        {
+            try
+            {
+                if (storyID == null)
+                {
+                    var allHistories = _context.ReadingHistories.Where(rh => rh.UserID == userID);
+                    _context.ReadingHistories.RemoveRange(allHistories);
+                }
+                else
+                {
+                    var storyExists = await _context.Stories.AnyAsync(s => s.StoryID == storyID);
+                    if (!storyExists)
+                    {
+                        return "Truyện không tồn tại";
+                    }
+                    var historiesToDelete = _context.ReadingHistories.Where(rh => rh.UserID == userID && rh.StoryID == storyID);
+                    _context.ReadingHistories.RemoveRange(historiesToDelete);
+                }
+                await _context.SaveChangesAsync();
+                return "Xóa lịch sử thành công";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi xóa lịch sử đọc: {ex.Message}");
+            }
+        }
+
         #endregion
 
     }

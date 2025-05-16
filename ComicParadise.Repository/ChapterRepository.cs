@@ -805,5 +805,26 @@ namespace ComicParadise.Repository
             }
         }
         #endregion
+
+        #region Get all chapter numbers by storyID
+        public async Task<List<int>> GetAllChapterListAsync(int storyID)
+        {
+            try
+            {
+                var chapterNumbers = await _context.Chapters
+                    .Where(c => c.StoryID == storyID)
+                    .OrderBy(c => c.ChapterNumber)
+                    .Select(c => c.ChapterNumber)
+                    .ToListAsync();
+
+                return chapterNumbers;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching chapter numbers: {ex.Message}");
+            }
+        }
+        #endregion
+
     }
 }

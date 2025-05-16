@@ -242,7 +242,53 @@ namespace ComicParadise.Repository
             return "Đặt lại mật khẩu thành công!";
         }
 
+        public async Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+        {
+            // Kiểm tra tính hợp lệ của dữ liệu đầu vào
+            if (changePasswordDto == null ||
+                string.IsNullOrWhiteSpace(changePasswordDto.OldPassword) ||
+                string.IsNullOrWhiteSpace(changePasswordDto.NewPassword))
+            {
+                return "Vui lòng nhập đầy đủ thông tin";
+            }
 
+            try
+            {
+                // Lấy thông tin người dùng từ cơ sở dữ liệu bằng UserID
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == changePasswordDto.UserID);
+                if (user == null)
+                {
+                    return "Người dùng không tồn tại";
+                }
+
+                // Kiểm tra mật khẩu cũ
+                if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, user.PasswordHash))
+                {
+                    return "Mật khẩu cũ không đúng";
+                }
+
+                // Kiểm tra độ dài và tính hợp lệ của mật khẩu mới
+  /*              if (changePasswordDto.NewPassword.Length < 6) // Giới hạn mật khẩu tối thiểu 6 ký tự (có thể thay đổi tùy yêu cầu)
+                {
+                    return "Mật khẩu mới phải có ít nhất 6 ký tự";
+                }*/
+
+                // Mã hóa mật khẩu mới
+                string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword, salt);
+
+                // Cập nhật mật khẩu mới trong cơ sở dữ liệu
+                user.PasswordHash = newPasswordHash;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return "Đổi mật khẩu thành công";
+            }
+            catch (Exception ex)
+            {
+                return $"Lỗi: {ex.Message}";
+            }
+        }
 
     }
 

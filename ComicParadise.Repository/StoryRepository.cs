@@ -933,8 +933,13 @@ namespace ComicParadise.Repository
                                      Title = s.Title,
                                      CoverImage = s.CoverImage,
                                      CreatedAt = s.CreatedAt,
+                                     Views = s.Views,
                                      Likes = s.Likes,
-                                     IsLiked = true
+                                     IsLiked = true,
+                                     Categories = (from sc in _context.StoryCategoriesMapping
+                                                   join c in _context.Categories on sc.CategoryID equals c.CategoryID
+                                                   where sc.StoryID == s.StoryID
+                                                   select c).ToList(),
                                  }).ToListAsync<dynamic>();
             return stories;
         }

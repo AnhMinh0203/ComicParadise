@@ -19,6 +19,6 @@ namespace ComicParadise.Repository.Common
         Task<IQueryable<ReadingHistoryDto>> GetReadingHistoryByRangeAsync(int userID, string range);
         Task<string> DeleteMemberAsync(int userID);
         Task<User?> GetMemberById(int userID);
-
+        Task<string> DeleteReadingHistoryAsync(int userID, int? storyID);
     }
 }
