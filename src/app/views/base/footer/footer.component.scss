@@ -1,0 +1,60 @@
+.container-footer {
+  background: #121212;
+  color: #fff;
+  padding: 40px 0;
+  text-align: center;
+  box-shadow: 0px -5px 15px rgba(255, 255, 255, 0.3);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+.footer-logo{
+  width: 350px; /* Điều chỉnh kích thước tổng thể */
+  height: 80px; /* Chiều cao cố định */
+  overflow: hidden; /* Cắt phần thừa của ảnh */
+
+}
+.footer-logo img {
+    object-fit: cover;
+  width: 100%;
+  filter: drop-shadow(0px 0px 10px rgba(0, 162, 255, 0.5));
+  transition: transform 0.3s ease-in-out;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+  text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8);
+}
+
+.footer-social a {
+  font-size: 24px;
+  color: #fff;
+  margin: 0 10px;
+  transition: 0.3s;
+}
+
+.footer-social a:hover {
+  color: #ffffff;
+  text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.7);
+}
+
+.footer-bottom {
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.7;
+}

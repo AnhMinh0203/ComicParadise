@@ -37,6 +37,7 @@ import { FormModule } from '@coreui/angular';
 import { AvatarModule } from 'primeng/avatar';
 import { TagModule } from 'primeng/tag';
 import { TreeModule } from 'primeng/tree';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @NgModule({
   imports: [
@@ -95,5 +96,6 @@ import { TreeModule } from 'primeng/tree';
     InputGroupAddonModule,
     InputGroupModule
   ],
+  providers: [ConfirmationService, MessageService],
 })
 export class SharedModule { }

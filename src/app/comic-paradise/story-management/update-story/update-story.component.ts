@@ -52,7 +52,7 @@ export class UpdateStoryComponent {
   isAddMangaPdf: boolean = false;
   isAddMangaImgs: boolean = false;
 
-  typeStoryOptions: any[] = [{ label: 'Tiểu thuyết', value: 'Novel' }, { label: 'Truyện tranh', value: 'Manga' }];
+  typeStoryOptions: any[] = [{ label: 'Truyện tranh', value: 'Manga' }, { label: 'Tiểu thuyết', value: 'Novel' }];
   typeMangaOptions: any[] = [{ label: 'PDF', value: 'PDF' }, { label: 'Ảnh', value: 'Images' }];
   selectStoryType: any;
   selectMangaType: any;

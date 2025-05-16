@@ -45,14 +45,24 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Quản lý hệ thống',
-    url: '/base',
+    url: '/system-management',
     iconComponent: { name: 'cil-puzzle' },
     children: [
       {
-        name: 'Accordion',
-        url: '/base/accordion',
+        name: 'Hướng dẫn sử dụng',
+        url: '/system-management/tutorial',
         icon: 'nav-icon-bullet'
       },
+      {
+        name: 'Quản lý chân trang',
+        url: '/system-management/footer',
+        icon: 'nav-icon-bullet'
+      },
+      // {
+      //   name: 'Banner',
+      //   url: '/system-management/banner',
+      //   icon: 'nav-icon-bullet'
+      // },
     ]
   },
 

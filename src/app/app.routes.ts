@@ -48,7 +48,7 @@ export const routes: Routes = [
         loadChildren: () => import('./comic-paradise/statistical-report-management/routes').then((m) => m.routes)
       },
       {
-        path: 'base',
+        path: 'system-management',
         loadChildren: () => import('./views/base/routes').then((m) => m.routes)
       },
 

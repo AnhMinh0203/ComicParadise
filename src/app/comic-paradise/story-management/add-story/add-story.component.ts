@@ -87,7 +87,7 @@ export class AddstoryComponent {
 
   ) { }
 
-  typeOptions: any[] = [{ label: 'Tiểu thuyết', value: 'Novel' }, { label: 'Truyện tranh', value: 'Manga' }];
+  typeOptions: any[] = [ { label: 'Truyện tranh', value: 'Manga' }, { label: 'Tiểu thuyết', value: 'Novel' }];
   selectType: any;
 
   ngOnInit() {

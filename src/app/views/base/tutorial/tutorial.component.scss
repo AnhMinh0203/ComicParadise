@@ -1,0 +1,28 @@
+.p-select{
+  width: 100% !important;
+}
+
+::ng-deep .tutorial-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+::ng-deep .overlay-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.2); /* Overlay mờ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+::ng-deep .custom-spinner {
+  z-index: 10000;
+}
+

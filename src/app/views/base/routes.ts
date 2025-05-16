@@ -13,13 +13,26 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'accordion',
-        loadComponent: () => import('./accordion/accordions.component').then(m => m.AccordionsComponent),
+        path: 'tutorial',
+        loadComponent: () => import('./tutorial/tutorial.component').then(m => m.TutorialComponent),
         data: {
-          title: 'Accordion'
+          title: 'Hướng dẫn sử dụng'
         }
       },
-
+      {
+        path: 'footer',
+        loadComponent: () => import('./footer/footer.component').then(m => m.FooterComponent),
+        data: {
+          title: 'Chân trang'
+        }
+      },
+      {
+        path: 'banner',
+        loadComponent: () => import('./banner/banner.component').then(m => m.BannerComponent),
+        data: {
+          title: 'Banner'
+        }
+      },
     ]
   }
 ];
