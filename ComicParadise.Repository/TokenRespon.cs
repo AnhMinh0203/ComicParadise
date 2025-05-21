@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using ComicParadise.DataContext.Models;
 
 namespace ComicParadise.Repository
 {
@@ -20,25 +21,29 @@ namespace ComicParadise.Repository
             _config = config;
         }
 
-        public string GenerateJwtToken(UserAuthen account, int idUser)
+        public string GenerateJwtToken(User user)
         {
-            // tạo token có hiệu lực trong 1 ngày
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserID.ToString()),
+                new Claim("username", user.Username ?? ""),
+                new Claim("identifier", user.Email ?? user.Phone ?? "")
+            };
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]{
-                   // Thêm thông tin userId vào token
-                    new Claim(JwtRegisteredClaimNames.Sub, idUser.ToString()),
-                    new Claim("userName", account.FullName),
-                    new Claim("identifier", account.Identifier)
-                }),
-                Expires = DateTime.UtcNow.AddDays(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature) // Ký token bằng HMAC SHA256
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-            var token = tokenHandler.CreateToken(tokenDescriptor);  // Tạo token
-            return tokenHandler.WriteToken(token); // Trả về token dưới dạng chuỗi
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
+
 
 
         public int? ValidateJwtToken(string? token)

@@ -140,37 +140,16 @@ namespace ComicParadise.Repository
         {
             try
             {
-                string chapterType = chapterDto.ChapterType;
+                string storyType = chapterDto.StoryType;
                 string blobPrefix = $"{_containerMangaStory}/{chapterDto.StoryID}/{chapterDto.ChapterNumber}"; // Ví dụ: "manga/123/1/"
 
-                if (chapterType == "PDF")
+                if (storyType == "Manga")
                 {
-                    string pdfFileName = "chapter.pdf";
-                    string blobName = pdfFileName;
-                    string pdfUrl = await UploadFileToS3(chapterDto.PdfFile, blobPrefix, blobName);
-
                     var chapter = new Chapter
                     {
                         StoryID = chapterDto.StoryID,
                         ChapterNumber = chapterDto.ChapterNumber,
                         Title = chapterDto.Title,
-                        ChapterType = "PDF",
-                        SourceUrl = pdfUrl
-                    };
-                    _context.Chapters.Add(chapter);
-                    await _context.SaveChangesAsync();
-
-                    return pdfUrl;
-                }
-                else if (chapterType == "Images")
-                {
-                    // Xử lý nhiều ảnh
-                    var chapter = new Chapter
-                    {
-                        StoryID = chapterDto.StoryID,
-                        ChapterNumber = chapterDto.ChapterNumber,
-                        Title = chapterDto.Title,
-                        ChapterType = "Images",
                         SourceUrl = null
                     };
                     _context.Chapters.Add(chapter);
@@ -212,10 +191,23 @@ namespace ComicParadise.Repository
                         throw new Exception($"Lỗi khi tạo thông báo: {notificationResult}");
                     }
 
-                    return "Chapter với nhiều ảnh đã được đăng tải thành công";
                 }
 
-                return "Loại ảnh không hợp lệ";
+                else if (storyType == "Novel")
+                {
+                    var chapter = new Chapter
+                    {
+                        StoryID = chapterDto.StoryID,
+                        ChapterNumber = chapterDto.ChapterNumber,
+                        Title = chapterDto.Title,
+                        SourceUrl = null,
+                        Content = chapterDto.Content
+                    };
+                    _context.Chapters.Add(chapter);
+                    await _context.SaveChangesAsync();
+                }
+
+                return "Đăng tải chương thành công";
             }
             catch (DbUpdateException dbEx)
             {
@@ -301,19 +293,13 @@ namespace ComicParadise.Repository
             await _context.SaveChangesAsync();
 
             ChapterContentDto chapterContentDto = new ChapterContentDto();
-            chapterContentDto.ChapterType = chapter.ChapterType;
+            chapterContentDto.StoryType = story.Type;
+            chapterContentDto.Content = chapter.Content;
 
-            if (chapterContentDto.ChapterType == "PDF")
-            {
-                chapterContentDto.PdfUrl = chapter.SourceUrl;
-            }
-            else
-            {
-                chapterContentDto.ImageUrls = await (from ci in _context.ChapterImages
-                                                     where ci.ChapterId == chapter.ChapterID
-                                                     orderby ci.Order
-                                                     select ci.ImagePath).ToListAsync();
-            }
+            chapterContentDto.ImageUrls = await (from ci in _context.ChapterImages
+                                                 where ci.ChapterId == chapter.ChapterID
+                                                 orderby ci.Order
+                                                 select ci.ImagePath).ToListAsync();
             return chapterContentDto;
         }
 

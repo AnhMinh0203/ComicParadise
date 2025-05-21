@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using Amazon.S3;
 using Amazon.S3.Model;
+using ComicParadise.DataContext.Utils;
 
 namespace ComicParadise.Repository
 {
@@ -233,14 +234,15 @@ namespace ComicParadise.Repository
         {
             try
             {
-                if(userID != null)
+                if (userID != null)
                 {
-                   
+
 
                     List<StoryInfor> listStories = await (from s in _context.Stories
                                                           join u in _context.Users on s.PublisherID equals u.UserID
                                                           join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
-                                                          where s.PublisherID == userID && s.Status != "Pending"
+                                                          where s.PublisherID == userID
+                                                          /*&& s.Status != "Pending"*/
                                                           select new StoryInfor
                                                           {
                                                               StoryID = s.StoryID,
@@ -276,7 +278,7 @@ namespace ComicParadise.Repository
                     List<StoryInfor> listStories = await (from s in _context.Stories
                                                           join u in _context.Users on s.PublisherID equals u.UserID
                                                           join c in _context.Chapters on s.StoryID equals c.StoryID into chapters
-                                                          where s.Status != "Pending"
+                                                          /*                                        where s.Status != "Pending"*/
                                                           select new StoryInfor
                                                           {
                                                               StoryID = s.StoryID,
@@ -289,7 +291,7 @@ namespace ComicParadise.Repository
                                         .ToListAsync();
                     return listStories;
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -628,6 +630,7 @@ namespace ComicParadise.Repository
                                              .OrderByDescending(c => c.CreatedAt)
                                              .FirstOrDefault()
                                          where latestChapter != null && latestChapter.CreatedAt >= recentDate
+                                         && s.Type == "Manga"
                                          select new
                                          {
                                              StoryID = s.StoryID,
@@ -635,6 +638,7 @@ namespace ComicParadise.Repository
                                              CoverImage = s.CoverImage,
                                              Views = s.Views,
                                              Likes = s.Likes,
+                                             Type = s.Type,
                                              LastestChapter = latestChapter.ChapterNumber,
                                              CreatedAt = latestChapter.CreatedAt
                                          })
@@ -650,6 +654,7 @@ namespace ComicParadise.Repository
                                                 .OrderByDescending(c => c.CreatedAt)
                                                 .FirstOrDefault()
                                          where latestChapter != null
+                                         && s.Type == "Manga"
                                          select new
                                          {
                                              StoryID = s.StoryID,
@@ -657,6 +662,7 @@ namespace ComicParadise.Repository
                                              CoverImage = s.CoverImage,
                                              Views = s.Views,
                                              Likes = s.Likes,
+                                             Type = s.Type,
                                              LastestChapter = latestChapter.ChapterNumber,
                                              CreatedAt = latestChapter.CreatedAt
                                          })
@@ -702,6 +708,7 @@ namespace ComicParadise.Repository
 
                 var topStories = await (from s in _context.Stories
                                         where s.CreatedAt >= startDate && s.CreatedAt <= endDate
+                                         && s.Type == "Manga"
                                         select new
                                         {
                                             StoryID = s.StoryID,
@@ -723,6 +730,7 @@ namespace ComicParadise.Repository
                 if (!topStories.Any() || topStories.Count() < 12)
                 {
                     topStories = await (from s in _context.Stories
+                                        where s.Type == "Manga"
                                         select new
                                         {
                                             StoryID = s.StoryID,
@@ -770,6 +778,7 @@ namespace ComicParadise.Repository
                                                 .OrderByDescending(c => c.CreatedAt)
                                                 .FirstOrDefault()
                                             where latestChapter != null
+                                             && s.Type == "Manga"
                                             select new
                                             {
                                                 StoryID = s.StoryID,
@@ -792,6 +801,7 @@ namespace ComicParadise.Repository
                                                 .OrderByDescending(c => c.CreatedAt)
                                                 .FirstOrDefault()
                                             where latestChapter != null
+                                            && s.Type == "Manga"
                                             select new
                                             {
                                                 StoryID = s.StoryID,
@@ -812,6 +822,40 @@ namespace ComicParadise.Repository
                                             .ToListAsync<dynamic>();
             }
             return recommendedStories;
+        }
+        #endregion
+
+        #region Get novel
+        public async Task<PagedResult<StoryDto>> GetNovelStories(int pageIndex, int pageSize)
+        {
+            var skip = (pageIndex - 1) * pageSize;
+
+            var query = _context.Stories
+                .AsNoTracking()
+                .Where(s => s.Type == "Novel");
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(s => s.Views)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(s => new StoryDto
+                {
+                    StoryID = s.StoryID,
+                    Title = s.Title,
+                    CoverImage = s.CoverImage,
+                    Views = s.Views,
+                    Likes = s.Likes,
+                    Type = s.Type
+                })
+                .ToListAsync();
+
+            return new PagedResult<StoryDto>
+            {
+                Items = items,
+                TotalCount = totalCount
+            };
         }
         #endregion
 
@@ -946,7 +990,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Rating story
-        public async Task<bool> RatingStoryAsync (RatingStoryDto ratingStoryDto)
+        public async Task<bool> RatingStoryAsync(RatingStoryDto ratingStoryDto)
         {
             try
             {
@@ -976,17 +1020,17 @@ namespace ComicParadise.Repository
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            }   
+            }
         }
         #endregion
 
         #region Get user rating 
-        public async Task<int?> GetUserRating (int storyID, int userID)
+        public async Task<int?> GetUserRating(int storyID, int userID)
         {
             var isExistRating = await _context.Ratings
-                                            .Where(r => r.UserID ==  userID && r.StoryID == storyID)
+                                            .Where(r => r.UserID == userID && r.StoryID == storyID)
                                             .FirstOrDefaultAsync();
-            if(isExistRating == null)
+            if (isExistRating == null)
             {
                 return null;
             }
@@ -995,7 +1039,7 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get story rating 
-        public async Task<int?> GetStoryRatingAsync (int storyID)
+        public async Task<int?> GetStoryRatingAsync(int storyID)
         {
             var ratings = await _context.Ratings
                                 .Where(r => r.StoryID == storyID)
@@ -1003,7 +1047,7 @@ namespace ComicParadise.Repository
 
             if (ratings == null || ratings.Count == 0)
             {
-                return null; 
+                return null;
             }
             var average = ratings.Average(r => r.RatingValue);
             return (int)Math.Round(average);
@@ -1061,7 +1105,7 @@ namespace ComicParadise.Repository
                     {
                         query = query.Where(s => typeFilters.Contains(s.Type));
                     }
-                   
+
                 }
 
                 if (!string.IsNullOrEmpty(filter.CompletionStatus) && filter.CompletionStatus != "all")

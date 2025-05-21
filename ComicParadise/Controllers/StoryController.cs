@@ -112,6 +112,13 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<List<dynamic>>(true, result));
         }
 
+        [HttpGet("Get-novel-stories")]
+        public async Task<ActionResult> GetNovelStory (int pageIndex, int pageSize)
+        {
+            var result = await _storyRepository.GetNovelStories(pageIndex, pageSize);
+            return Ok(new BaseResponse<PagedResult<StoryDto>>(true, result));
+        }
+
         [HttpPost("Like-story")]
         public async Task<ActionResult> LikeStory(int userID, int storyID)
         {

@@ -2,6 +2,7 @@
 using ComicParadise.DataContext.Models;
 using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ComicParadise.Api.Controllers
@@ -52,6 +53,7 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true,result));
         }
 
+/*        [Authorize]*/
         [HttpGet("Get-categories-for-user")]
         public async Task<ActionResult> GetCategoriesForUser()
         {

@@ -17,6 +17,8 @@ namespace ComicParadise.DataContext.Models
         public string? Role { get; set; }
         public string? Status { get; set; }
         public string? Avatar {  get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? ExpiryDate { get; set; }
         public bool? IsComment { get; set; } = true;
         public bool? IsLock { get; set; } = false;
         public DateTime CreatedAt { get; set; }

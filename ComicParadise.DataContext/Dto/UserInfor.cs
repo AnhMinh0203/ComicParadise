@@ -11,6 +11,7 @@ namespace ComicParadise.DataContext.Dto
         public int UserID { get; set; }
         public string? Username { get; set; }
         public string? Identifier { get; set; }
+        public string? Avatar { get; set; }
     }
 
 }

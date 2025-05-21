@@ -1,4 +1,5 @@
 ﻿using ComicParadise.DataContext.Dto;
+using ComicParadise.DataContext.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,6 @@ namespace ComicParadise.Repository.Common
         Task<List<dynamic>> FilterStoryByConditionsAsync(StoryFilterConditionsRequest filter);
         Task<List<dynamic>> FilterStoriesByCategoryIdsAsync(List<int> categoryIds);
         Task<List<dynamic>> FilterStoriesByCategoryNameAsync(string categoryName);
-
+        Task<PagedResult<StoryDto>> GetNovelStories(int pageIndex, int pageSize);
     }
 }

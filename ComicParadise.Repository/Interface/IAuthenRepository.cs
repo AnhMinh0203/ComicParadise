@@ -15,5 +15,7 @@ namespace ComicParadise.Repository.Common
         Task<string> RequestPasswordResetAsync(string email);
         Task<string> ResetPasswordAsync(string rawToken, string newPassword);
         Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
+
+        Task<AuthenResponse> RefreshTokenAsync(string refreshToken);
     }
 }

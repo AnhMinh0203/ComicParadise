@@ -8,8 +8,8 @@ namespace ComicParadise.DataContext.Dto
 {
     public class ChapterContentDto
     {
-        public string ChapterType { get; set; }
-        public string? PdfUrl { get; set; } 
+        public string StoryType { get; set; }
+        public string? Content { get; set; }
         public List<string>? ImageUrls { get; set; }
     }
 }

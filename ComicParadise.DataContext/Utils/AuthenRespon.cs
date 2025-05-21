@@ -11,6 +11,7 @@ namespace ComicParadise.DataContext.Utils
     {
         public string? Message { get; set; }
         public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
         public int? Status { get; set; }
         public UserInfor User { get; set; }
     }

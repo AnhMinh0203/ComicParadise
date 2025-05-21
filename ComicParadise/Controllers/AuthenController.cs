@@ -53,5 +53,13 @@ namespace ComicParadise.Api.Controllers
             var response = await _authenRepository.ChangePasswordAsync(changePasswordDto);
             return Ok(new BaseResponse<string>(true, response));
         }
+
+        [HttpPost("Refresh-token")]
+        public async Task<ActionResult<AuthenResponse>> RefreshToken(RefreshRequest request)
+        {
+            var response = await _authenRepository.RefreshTokenAsync(request.RefreshToken);
+            return Ok(response);
+
+        }
     }
 }

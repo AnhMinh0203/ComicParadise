@@ -45,39 +45,13 @@ namespace ComicParadise.Repository
                     Status = 400
                 };
             }
+
             try
             {
-                UserAuthen? userAuthen = new UserAuthen();
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Phone == signInModel.Identifier || u.Email == signInModel.Identifier);
 
-                if (Regex.IsMatch(signInModel.Identifier, @"^\d+$"))
-                {
-                    userAuthen = await _context.Users
-                        .Where(u => u.Phone == signInModel.Identifier)
-                        .Select(u => new UserAuthen
-                        {
-                            UserId = u.UserID,
-                            FullName = u.Username,
-                            Identifier = u.Phone,
-                            PasswordHash = u.PasswordHash,
-                        })
-                        .FirstOrDefaultAsync();
-                }
-                else
-                {
-                    userAuthen = await _context.Users
-                        .Where(u => u.Email == signInModel.Identifier)
-                        .Select(u => new UserAuthen
-                        {
-                            UserId = u.UserID,
-                            FullName = u.Username,
-                            Identifier = u.Email,
-                            PasswordHash = u.PasswordHash,
-                        })
-                        .FirstOrDefaultAsync();
-
-                }
-
-                if (userAuthen == null)
+                if (user == null)
                 {
                     return new AuthenResponse
                     {
@@ -86,45 +60,102 @@ namespace ComicParadise.Repository
                     };
                 }
 
-                // Check pass
-                if (!BCrypt.Net.BCrypt.Verify(signInModel.PasswordHash, userAuthen.PasswordHash))
+                if (!BCrypt.Net.BCrypt.Verify(signInModel.PasswordHash, user.PasswordHash))
                 {
                     return new AuthenResponse
                     {
                         Message = "Mật khẩu chưa đúng",
-                        Token = null,
                         Status = 401
                     };
                 }
 
+                // Tạo access token
                 var tokenRespon = new TokenRespon(_configuration);
-                var token = tokenRespon.GenerateJwtToken(userAuthen, userAuthen.UserId);
-                UserInfor userInfor = new UserInfor
-                {
-                    UserID = userAuthen.UserId,
-                    Username = userAuthen.FullName,
-                    Identifier = userAuthen.Identifier,
+                var accessToken = tokenRespon.GenerateJwtToken(user);
 
-                };
+                // Tạo refresh token
+                user.RefreshToken = Guid.NewGuid().ToString();
+                user.ExpiryDate = DateTime.UtcNow.AddDays(7);
+
+                await _context.SaveChangesAsync();
 
                 return new AuthenResponse
                 {
                     Message = "Login Successfully",
-                    Token = token,
+                    Token = accessToken,
+                    RefreshToken = user.RefreshToken,
                     Status = 200,
-                    User = userInfor
+                    User = new UserInfor
+                    {
+                        UserID = user.UserID,
+                        Username = user.Username,
+                        Avatar = user.Avatar,
+                        Identifier = user.Email ?? user.Phone
+                    }
                 };
             }
             catch (Exception ex)
             {
                 return new AuthenResponse
                 {
-                    Message = $"SQL Error: {ex.Message}",
-                    Token = null,
+                    Message = $"Lỗi hệ thống: {ex.Message}",
                     Status = 500
                 };
             }
         }
+        #endregion
+
+        #region Refresh token
+        public async Task<AuthenResponse> RefreshTokenAsync(string refreshToken)
+        {
+            var Test = refreshToken;
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user == null)
+            {
+                return new AuthenResponse
+                {
+                    Message = "Refresh token không hợp lệ.",
+                    Status = 401
+                };
+            }
+
+            if (user.ExpiryDate < DateTime.UtcNow)
+            {
+                return new AuthenResponse
+                {
+                    Message = "Refresh token đã hết hạn.",
+                    Status = 403
+                };
+            }
+
+            // Tạo access token mới
+            var tokenRespon = new TokenRespon(_configuration);
+            var newAccessToken = tokenRespon.GenerateJwtToken(user);
+
+            // Nếu muốn xoay vòng refresh token
+            user.RefreshToken = Guid.NewGuid().ToString();
+            user.ExpiryDate = DateTime.UtcNow.AddDays(7);
+            await _context.SaveChangesAsync();
+
+            return new AuthenResponse
+            {
+                Message = "Refresh thành công",
+                Token = newAccessToken,
+                RefreshToken = user.RefreshToken,
+                Status = 200,
+                User = new UserInfor
+                {
+                    UserID = user.UserID,
+                    Username = user.Username,
+                    Avatar = user.Avatar,
+                    Identifier = user.Email ?? user.Phone
+                }
+            };
+        }
+
         #endregion
 
         #region Register
@@ -212,6 +243,7 @@ namespace ComicParadise.Repository
         }
         #endregion
 
+        #region Reset password
         public async Task<string> ResetPasswordAsync(string rawToken, string newPassword)
         {
             // Hash lại token để so sánh
@@ -241,7 +273,9 @@ namespace ComicParadise.Repository
 
             return "Đặt lại mật khẩu thành công!";
         }
+        #endregion
 
+        #region Change password
         public async Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
             // Kiểm tra tính hợp lệ của dữ liệu đầu vào
@@ -266,13 +300,6 @@ namespace ComicParadise.Repository
                 {
                     return "Mật khẩu cũ không đúng";
                 }
-
-                // Kiểm tra độ dài và tính hợp lệ của mật khẩu mới
-  /*              if (changePasswordDto.NewPassword.Length < 6) // Giới hạn mật khẩu tối thiểu 6 ký tự (có thể thay đổi tùy yêu cầu)
-                {
-                    return "Mật khẩu mới phải có ít nhất 6 ký tự";
-                }*/
-
                 // Mã hóa mật khẩu mới
                 string salt = BCrypt.Net.BCrypt.GenerateSalt();
                 string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword, salt);
@@ -289,6 +316,7 @@ namespace ComicParadise.Repository
                 return $"Lỗi: {ex.Message}";
             }
         }
+        #endregion
 
     }
 
