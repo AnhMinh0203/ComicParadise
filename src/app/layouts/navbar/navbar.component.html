@@ -80,7 +80,10 @@
     <!-- User Section -->
     <div class="user-section">
       <div class="avatar" *ngIf="userID">
-        <p-avatar [label]="userInitial" shape="circle" (click)="userMenu.toggle($event)" />
+        <p-avatar *ngIf="userID" [label]="!userAvatarUrl ? userInitial : undefined" [image]="userAvatarUrl || undefined"
+          shape="circle" (click)="userMenu.toggle($event)" styleClass="custom-avatar"></p-avatar>
+
+
         <p-menu #userMenu [model]="userMenuItems" [popup]="true" appendTo="body" />
       </div>
 

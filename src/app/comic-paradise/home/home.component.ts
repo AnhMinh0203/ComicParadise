@@ -51,6 +51,7 @@ export class HomeComponent {
   filterStoryByConditions: any[] = [];
   filterStoryByCategories: any[] = [];
   advanceStories: any[] = [];
+  novelStories: any;
   selectedTab: string = "0";
   topType: string = "month";
   displayLimit: number = 4;
@@ -60,6 +61,9 @@ export class HomeComponent {
   isFilterByConditions: boolean = false;
   isFilterByCategories: boolean = false;
   filterStoryByCategoriesResults: any;
+
+  pageIndex: number = 1;
+  pageSize: number = 12;
 
   constructor(
     private router: Router,
@@ -125,6 +129,7 @@ export class HomeComponent {
     this.getCurrentUpdateStories()
     this.getTopStories();
     this.getAdvanceStories();
+    this.getNovelStories();
   }
 
   navigateToInforStory(storyID: number) {
@@ -174,6 +179,17 @@ export class HomeComponent {
       this.isLoadingStories = false;
     }, 3000);
 
+  }
+
+  getNovelStories(){
+    this._storyService.getNovelStories(this.pageIndex,this.pageSize).subscribe((res: any) => {
+      if (res && res.isSuccess) {
+        this.novelStories = res.data;
+      }
+      console.log("--- novel stories ---")
+      console.log(this.novelStories)
+    })
+    this.isLoadingStories = false;
   }
 
 

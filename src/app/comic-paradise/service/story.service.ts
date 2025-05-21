@@ -184,4 +184,14 @@ export class storyService {
         })
       );
   }
+
+  getNovelStories(pageIndex: number, pageSize: number) {
+    const apiUrl = `${this.serviceUri}/Get-novel-stories?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 }

@@ -179,5 +179,10 @@ body {
   background: rgba(0, 0, 0, 0.85) !important;  /* Hoặc có thể dùng màu tối cụ thể */
 }
 
+.dark-theme .chapter-text-content {
+  color: #ffffff !important; /* chữ màu đen */
+}
+
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

@@ -32,6 +32,10 @@ export class ChapterDetailComponent {
   // chapterActions: MenuItem[] = [];
   isBookmarked: any; // trạng thái đánh dấu chương
 
+  // Text to speech
+  speechSynthesis: SpeechSynthesis = window.speechSynthesis;
+  utterance: SpeechSynthesisUtterance | null = null;
+  voices: SpeechSynthesisVoice[] = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -53,6 +57,12 @@ export class ChapterDetailComponent {
         this.checkBookmarkStatus();
       }
     });
+
+    // Text to speech
+    window.speechSynthesis.onvoiceschanged = () => {
+      // Đảm bảo voices đã load xong
+      this.voices = window.speechSynthesis.getVoices();
+    };
   }
 
 
@@ -203,4 +213,42 @@ export class ChapterDetailComponent {
     this.hasPreviousChapter = chapterNumbers.includes(this.chapterNumber - 1);
     this.hasNextChapter = chapterNumbers.includes(this.chapterNumber + 1);
   }
+
+  // --- Text to speech ---
+  readAloud() {
+    if (this.chapterContent && this.chapterContent.storyType === 'Novel') {
+      const rawText = this.stripHtmlTags(this.chapterContent.content);
+      const voices = window.speechSynthesis.getVoices();
+      console.log("--- voices");
+      console.log(this.voices);
+      console.log("--- voices");
+
+      // Tìm voice tiếng Việt
+      const vietnameseVoice = this.voices.find(voice =>
+        voice.lang === 'vi-VN' || voice.name.toLowerCase().includes('vietnam')
+      );
+
+      this.utterance = new SpeechSynthesisUtterance(rawText);
+      this.utterance.lang = 'vi-VN';
+      this.utterance.voice = vietnameseVoice || null;
+      this.utterance.rate = 1;
+      this.utterance.pitch = 1;
+
+      window.speechSynthesis.speak(this.utterance);
+    }
+  }
+
+
+  // Hàm dừng đọc
+  stopReading() {
+    this.speechSynthesis.cancel();
+  }
+
+  // Hàm loại bỏ thẻ HTML để lấy text sạch
+  stripHtmlTags(html: string): string {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  }
 }
+

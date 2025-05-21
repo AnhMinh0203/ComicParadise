@@ -59,7 +59,8 @@ export class LoginComponent {
       if (res && res.status === 200) {
 
         localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
+        localStorage.setItem('user', JSON.stringify(res.user)); // user có thể là object, nên vẫn giữ JSON.stringify
+        localStorage.setItem('refreshToken', res.refreshToken);
 
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Đăng nhập thành công!' });
         setTimeout(() => {
@@ -85,18 +86,18 @@ export class LoginComponent {
     console.log(`Đăng nhập với ${provider}`);
   }
 
-  navigateToRegister(){
+  navigateToRegister() {
     this.router.navigate(['/register']);
   }
 
-  requestPasswordReset(){
+  requestPasswordReset() {
     const email = encodeURIComponent(this.email); // Mã hóa email để sử dụng trong URL
     this._authenService.requestPasswordReset(email).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: res.data});
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: res.data });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message });
       }
-    } );
+    });
   }
 }

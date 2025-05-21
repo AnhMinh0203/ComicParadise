@@ -58,6 +58,7 @@ export class NavbarComponent {
   filterStoryByCategoriesResults: any;
   userID: any;
   userInitial: string = '';
+userAvatarUrl?: string;
 
   // Actions personal
   visibleUpdateForm: boolean = false;
@@ -174,6 +175,7 @@ export class NavbarComponent {
     }
 
     this.userInitial = this.getUserInitial(user.username || '');
+    this.userAvatarUrl = user.avatar || null;
     this.getCategories();
     this.initializeSignalR();
 
@@ -548,10 +550,10 @@ export class NavbarComponent {
 
   toggleDeleteHistory(story: any, event: Event) {
     event.stopPropagation(); // Ngăn chặn sự kiện click lan sang parent div
-    if(story != null){
+    if (story != null) {
       this.onDeleteHistory(story.storyID)
     }
-    else{
+    else {
       this.onDeleteHistory(null)
 
     }
@@ -568,7 +570,7 @@ export class NavbarComponent {
         this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
         this.getReadingHistoriesByRange(this.selectedHistoryFilter);
       }
-      else{
+      else {
         this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
       }
     })

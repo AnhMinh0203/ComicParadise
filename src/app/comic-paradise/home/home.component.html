@@ -1,4 +1,4 @@
-<p-toast/>
+<p-toast />
 <div class="container mt-100">
   <div class="row">
     <div class="my-2">
@@ -22,7 +22,8 @@
     </div>
 
     <!-- Search and filter stories result -->
-    <div class="searchAndFilterStoryArea" [ngClass]="{'visible': isSearch || isFilterByConditions || isFilterByCategories}">
+    <div class="searchAndFilterStoryArea"
+      [ngClass]="{'visible': isSearch || isFilterByConditions || isFilterByCategories}">
       <h4>Kết quả</h4>
       <div class="row">
         <!-- Search -->
@@ -107,10 +108,9 @@
     </div>
 
     <div class="container my-3" *ngIf="!isSearch || !isFilterByConditions">
-      <h5 class="mt-5">Truyện đề cử</h5>
+      <h5>Cập nhật gần đây</h5>
       <div class="row">
-
-        <!-- Skeleton của mục truyện đề cử -->
+        <!-- Skeleton của mục cập nhật gần đây -->
         <ng-container *ngIf="isLoadingStories">
           <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2" *ngFor="let item of [1,2,3,4,5,6]">
             <div class="story-item d-flex flex-column" style="height: 415px;">
@@ -156,7 +156,7 @@
         </ng-container>
         <!------>
 
-        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 " *ngFor="let story of advanceStories">
+        <div *ngFor="let story of currentUpdateStories" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
           <div class="story-item" (click)="navigateToInforStory(story.storyID)">
             <div class="story-item-img">
               <img [src]="story.coverImage" alt="Slide Image">
@@ -180,7 +180,6 @@
           </div>
         </div>
       </div>
-
 
       <div class="row">
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -263,19 +262,28 @@
                           <i class="pi pi-eye"></i> {{story.views}}
                         </div>
                       </div>
-                      <div class="top-infor-read-now text-center d-flex justify-content-end" (click)="navigateToInforStory(story.storyID)">
+                      <div class="top-infor-read-now text-center d-flex justify-content-end"
+                        (click)="navigateToInforStory(story.storyID)">
                         <button class="read-now-btn">Đọc Ngay</button>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="d-flex my-2 top-next align-items-center justify-content-center"
+                <!-- <div class="d-flex my-2 top-next align-items-center justify-content-center"
                   *ngIf="topStories && displayLimit < topStories.length">
                   <div class="top-next-icon me-1">
                     <i class="pi pi-angle-down"></i>
                   </div>
                   <div class="top-next-text" (click)="showMore()">
                     Xem thêm
+                  </div>
+                </div> -->
+                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3">
+                  <div *ngIf="topStories && displayLimit < topStories.length" (click)="showMore()">
+                    <i class="pi pi-angle-down"></i> Xem thêm
+                  </div>
+                  <div *ngIf="displayLimit > 4" (click)="showLess()">
+                    <i class="pi pi-angle-up"></i> Thu gọn
                   </div>
                 </div>
               </p-tabpanel>
@@ -352,19 +360,28 @@
                           <i class="pi pi-eye"></i> {{story.views}}
                         </div>
                       </div>
-                      <div class="top-infor-read-now text-center d-flex justify-content-end" (click)="navigateToInforStory(story.storyID)">
+                      <div class="top-infor-read-now text-center d-flex justify-content-end"
+                        (click)="navigateToInforStory(story.storyID)">
                         <button class="read-now-btn">Đọc Ngay</button>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="d-flex my-2 top-next align-items-center justify-content-center"
+                <!-- <div class="d-flex my-2 top-next align-items-center justify-content-center"
                   *ngIf="topStories && displayLimit < topStories.length">
                   <div class="top-next-icon me-1">
                     <i class="pi pi-angle-down"></i>
                   </div>
                   <div class="top-next-text" (click)="showMore()">
                     Xem thêm
+                  </div>
+                </div> -->
+                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3">
+                  <div *ngIf="topStories && displayLimit < topStories.length" (click)="showMore()">
+                    <i class="pi pi-angle-down"></i> Xem thêm
+                  </div>
+                  <div *ngIf="displayLimit > 4" (click)="showLess()">
+                    <i class="pi pi-angle-up"></i> Thu gọn
                   </div>
                 </div>
               </p-tabpanel>
@@ -441,7 +458,8 @@
                           <i class="pi pi-eye"></i> {{story.views}}
                         </div>
                       </div>
-                      <div class="top-infor-read-now text-center d-flex justify-content-end" (click)="navigateToInforStory(story.storyID)">
+                      <div class="top-infor-read-now text-center d-flex justify-content-end"
+                        (click)="navigateToInforStory(story.storyID)">
                         <button class="read-now-btn">Đọc Ngay</button>
                       </div>
                     </div>
@@ -461,7 +479,81 @@
         </div>
       </div>
 
-      <h5>Cập nhật gần đây</h5>
+      <h5 class="mt-5">Truyện đề cử</h5>
+      <div class="row">
+
+        <!-- Skeleton của mục truyện đề cử -->
+        <ng-container *ngIf="isLoadingStories">
+          <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2" *ngFor="let item of [1,2,3,4,5,6]">
+            <div class="story-item d-flex flex-column" style="height: 415px;">
+              <div class="story-item-img">
+                <p-skeleton height="280px" [style]="{
+                  'border-top-left-radius': '8px',
+                  'border-top-right-radius': '8px',
+                  'border-bottom-left-radius': '0',
+                  'border-bottom-right-radius': '0'
+                }">
+                </p-skeleton>
+
+              </div>
+              <div class="story-item-infor d-flex flex-column justify-content-between" style="flex: 1;">
+                <div>
+                  <div class="mb-2">
+                    <p-skeleton width="80%"></p-skeleton>
+                  </div>
+                  <div class="mb-2">
+                    <p-skeleton width="60%"></p-skeleton>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <p-skeleton [style]="{
+                      width: '35px',
+                      height: '16px',
+                      'border-radius': '10px'
+                    }">
+                  </p-skeleton>
+                  <p-skeleton [style]="{
+                      width: '35px',
+                      height: '16px',
+                      'border-radius': '10px'
+                    }">
+                  </p-skeleton>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </ng-container>
+        <!------>
+
+        <div class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 " *ngFor="let story of advanceStories">
+          <div class="story-item" (click)="navigateToInforStory(story.storyID)">
+            <div class="story-item-img">
+              <img [src]="story.coverImage" alt="Slide Image">
+            </div>
+            <div class="story-item-infor d-flex flex-column">
+              <div class="story-infor-name ">
+                {{story.title}}
+              </div>
+              <div class="story-infor-chapter ">
+                New chapter: {{story.lastestChapter}}
+              </div>
+              <div class="story-infor-reaction d-flex justify-content-between aligh-items-center">
+                <div class="reaction-heart">
+                  <i class="pi pi-heart-fill me-2"></i> {{story.likes}}
+                </div>
+                <div class="reaction-view">
+                  <i class="pi pi-eye me-2"></i> {{story.views}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h5 class="mt-5">Tiểu thuyết</h5>
       <div class="row">
         <!-- Skeleton của mục cập nhật gần đây -->
         <ng-container *ngIf="isLoadingStories">
@@ -509,7 +601,7 @@
         </ng-container>
         <!------>
 
-        <div *ngFor="let story of currentUpdateStories" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
+        <div *ngFor="let story of novelStories?.items" class="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 ">
           <div class="story-item" (click)="navigateToInforStory(story.storyID)">
             <div class="story-item-img">
               <img [src]="story.coverImage" alt="Slide Image">
@@ -537,5 +629,7 @@
   </div>
 </div>
 <!-- <p-scrolltop /> -->
+
 <!-- Chatbot -->
 <app-chatbot></app-chatbot>
+
