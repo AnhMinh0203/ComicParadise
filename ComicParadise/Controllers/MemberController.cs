@@ -2,12 +2,14 @@
 using ComicParadise.DataContext.Models;
 using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ComicParadise.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+/*    [Authorize]*/
     public class MemberController : ControllerBase
     {
         private readonly IMemberRepository _memberRepository; 
@@ -17,6 +19,7 @@ namespace ComicParadise.Api.Controllers
         }
 
         [HttpGet("Get-all-members")]
+/*        [AllowAnonymous]*/
         public async Task<ActionResult> GetAllMembers()
         {
             var result = await _memberRepository.GetAllMembersAsync();
@@ -62,6 +65,7 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<IQueryable<ReadingHistoryDto>>(true,result));
         }
 
+        [AllowAnonymous]
         [HttpGet("Get-reading-histories-by-range")]
         public async Task<ActionResult> GetReadingHistoryByRange(int userID, string range)
         {
@@ -76,6 +80,7 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true,result));
         }
 
+        [AllowAnonymous]
         [HttpGet("Get-member-by-id")]
         public async Task<ActionResult> GetMemebrById(int userID)
         {

@@ -40,23 +40,5 @@ namespace ComicParadise.Repository.Services
 
             await _smtpClient.SendMailAsync(mailMessage);
         }
-
-        /*public async Task TestSendEmailAsync()
-        {
-            string toEmail = "leanhminh0203@gmail.com";
-            string subject = "Test gửi email từ hệ thống";
-            string body = "Chào Minh,\n\nĐây là email test được gửi từ hệ thống sử dụng _emailService.";
-
-            try
-            {
-                // Gửi email
-                await SendEmailAsync(toEmail, subject, body);
-                Console.WriteLine("Gửi email thành công!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Gửi email thất bại: {ex.Message}");
-            }
-        }*/
     }
 }

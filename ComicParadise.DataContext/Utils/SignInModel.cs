@@ -8,7 +8,7 @@ namespace ComicParadise.DataContext.Utils
 {
     public class SignInModel
     {
-        public string? Identifier { get; set; }
-        public string? PasswordHash { get; set; }
+        public string Identifier { get; set; }
+        public string PasswordHash { get; set; }
     }
 }

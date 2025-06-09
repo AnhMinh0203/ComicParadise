@@ -16,6 +16,7 @@ using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 using System.Security.Cryptography;
 using System.Net;
 using ComicParadise.Repository.Interface;
+using Azure.Core;
 
 namespace ComicParadise.Repository
 {
@@ -24,67 +25,47 @@ namespace ComicParadise.Repository
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly ITokenRepository _tokenResonse;
 
-        public AuthenRepository(IConfiguration configuration, AppDbContext appDbContext, IEmailService emailService)
+        public AuthenRepository(
+            IConfiguration configuration,
+            AppDbContext appDbContext,
+            IEmailService emailService,
+            ITokenRepository tokenRespon)
         {
             _configuration = configuration;
             _context = appDbContext;
             _emailService = emailService;
+            _tokenResonse = tokenRespon;
         }
 
-        #region Login 
-        public async Task<AuthenResponse> LoginAsync(SignInModel signInModel)
+        #region Login - Done
+        public async Task<BaseResponse_V2<AuthenResponse>> LoginAsync(SignInModel signInModel)
         {
-            if (signInModel == null ||
-                string.IsNullOrWhiteSpace(signInModel.Identifier) ||
-                string.IsNullOrWhiteSpace(signInModel.PasswordHash))
-            {
-                return new AuthenResponse
-                {
-                    Message = "Vui lòng nhập đủ thông tin",
-                    Status = 400
-                };
-            }
-
             try
             {
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Phone == signInModel.Identifier || u.Email == signInModel.Identifier);
+                var user = await _context.Users.FirstOrDefaultAsync(u =>
+                    signInModel.Identifier.Contains("@") ? u.Email == signInModel.Identifier : u.Phone == signInModel.Identifier);
 
                 if (user == null)
                 {
-                    return new AuthenResponse
-                    {
-                        Message = "Người dùng không tồn tại.",
-                        Status = 404
-                    };
+                    return BaseResponse_V2<AuthenResponse>.NotFound("Email không tồn tại, vui lòng nhập chính xác");
                 }
 
                 if (!BCrypt.Net.BCrypt.Verify(signInModel.PasswordHash, user.PasswordHash))
                 {
-                    return new AuthenResponse
-                    {
-                        Message = "Mật khẩu chưa đúng",
-                        Status = 401
-                    };
+                    return BaseResponse_V2<AuthenResponse>.NotFound("Mật khẩu chưa đúng");
                 }
 
-                // Tạo access token
-                var tokenRespon = new TokenRespon(_configuration);
-                var accessToken = tokenRespon.GenerateJwtToken(user);
-
-                // Tạo refresh token
+                var accessToken = _tokenResonse.GenerateJwtToken(user);
                 user.RefreshToken = Guid.NewGuid().ToString();
                 user.ExpiryDate = DateTime.UtcNow.AddDays(7);
 
                 await _context.SaveChangesAsync();
-
-                return new AuthenResponse
+                return BaseResponse_V2<AuthenResponse>.Success("Đăng nhập thành công", new AuthenResponse
                 {
-                    Message = "Login Successfully",
-                    Token = accessToken,
-                    RefreshToken = user.RefreshToken,
-                    Status = 200,
+         
+                    AccessToken = accessToken,
                     User = new UserInfor
                     {
                         UserID = user.UserID,
@@ -92,233 +73,223 @@ namespace ComicParadise.Repository
                         Avatar = user.Avatar,
                         Identifier = user.Email ?? user.Phone
                     }
-                };
+                });
             }
             catch (Exception ex)
             {
-                return new AuthenResponse
-                {
-                    Message = $"Lỗi hệ thống: {ex.Message}",
-                    Status = 500
-                };
+                return BaseResponse_V2<AuthenResponse>.Fail(ex.Message);
             }
         }
         #endregion
 
-        #region Refresh token
-        public async Task<AuthenResponse> RefreshTokenAsync(string refreshToken)
+        #region Refresh token - Done
+        public async Task<BaseResponse_V2<string>> RefreshTokenAsync(string accessToken)
         {
-            var Test = refreshToken;
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
-
-            if (user == null)
+            var userID = _tokenResonse.ValidateJwtToken(accessToken);
+            if (userID == null)
             {
-                return new AuthenResponse
-                {
-                    Message = "Refresh token không hợp lệ.",
-                    Status = 401
-                };
+                return BaseResponse_V2<string>.Fail("Token không hợp lệ");
             }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == userID);
 
             if (user.ExpiryDate < DateTime.UtcNow)
             {
-                return new AuthenResponse
-                {
-                    Message = "Refresh token đã hết hạn.",
-                    Status = 403
-                };
+                return BaseResponse_V2<string>.Fail("Refresh token đã hết hạn");
             }
 
-            // Tạo access token mới
-            var tokenRespon = new TokenRespon(_configuration);
-            var newAccessToken = tokenRespon.GenerateJwtToken(user);
+            var newAccessToken = _tokenResonse.GenerateJwtToken(user);
+            return BaseResponse_V2<string>.Success("Refresh thành công", newAccessToken);
+        }
 
-            // Nếu muốn xoay vòng refresh token
-            user.RefreshToken = Guid.NewGuid().ToString();
-            user.ExpiryDate = DateTime.UtcNow.AddDays(7);
+        #endregion
+
+        #region Register - Done
+        public async Task<BaseResponse_V2<string>> RegisterAsync(RegisterModel registerModel)
+        {
+            var isExsistAccount = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerModel.Email || u.Phone == registerModel.Phone);
+            if (isExsistAccount != null)
+            {
+                return BaseResponse_V2<string>.Fail("Người dùng đã tồn tại");
+            };
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string hash = BCrypt.Net.BCrypt.HashPassword(registerModel.PasswordHash, salt);
+
+            var newUser = new User
+            {
+                Username = registerModel.Username,
+                Email = registerModel.Email,
+                Phone = registerModel.Phone,
+                PasswordHash = hash,
+                Role = registerModel.Role,
+                Status = "Active",
+                Avatar = null,
+                IsComment = true,
+                IsLock = false,
+                CreatedAt = DateTime.Now,
+            };
+
+            _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return new AuthenResponse
+            return BaseResponse_V2<string>.Success("Tạo tài khoản thành công");
+        }
+        #endregion
+
+        #region Request password reset - Done
+        public async Task<BaseResponse_V2<string>> RequestPasswordResetAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+                return BaseResponse_V2<string>.NotFound("Email không tồn tại");
+
+            var rawBytes = RandomNumberGenerator.GetBytes(64);
+            var rawToken = Convert.ToBase64String(rawBytes)
+                .Replace("+", "-").Replace("/", "_").Replace("=", "");
+
+            var hashedToken = Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
+
+            var expiry = DateTimeOffset.UtcNow.AddMinutes(10).ToUnixTimeSeconds();
+
+            _context.PasswordResetTokens.RemoveRange(
+                _context.PasswordResetTokens.Where(t => t.UserID == user.UserID));
+
+            _context.PasswordResetTokens.Add(new PasswordResetToken
             {
-                Message = "Refresh thành công",
-                Token = newAccessToken,
-                RefreshToken = user.RefreshToken,
-                Status = 200,
+                UserID = user.UserID,
+                Token = hashedToken,
+                TokenExpiry = expiry,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+
+            var frontendUrl = _configuration["App:FrontendUserUrls"];
+            var resetLink = $"{frontendUrl}/reset-password?token={rawToken}";
+
+            await _emailService.SendEmailAsync(email, "Khôi phục mật khẩu",
+                $"Nhấn vào đây để đặt lại mật khẩu:\n\n{resetLink}");
+
+            return BaseResponse_V2<string>.Success("Vui lòng kiểm tra email");
+        }
+        #endregion
+
+        #region Reset password - Done
+        public async Task<BaseResponse_V2<string>> ResetPasswordAsync(string rawToken, string newPassword)
+        {
+            // Đổi base64url về base64 chuẩn (thêm padding nếu thiếu)
+            string base64Token = rawToken.Replace("-", "+").Replace("_", "/");
+            base64Token = base64Token.PadRight(base64Token.Length + (4 - base64Token.Length % 4) % 4, '=');
+
+            var hashedToken = Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
+
+            var tokenEntry = await _context.PasswordResetTokens.FirstOrDefaultAsync(t => t.Token == hashedToken);
+            if (tokenEntry == null || tokenEntry.TokenExpiry < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                return BaseResponse_V2<string>.Fail("Token không hợp lệ hoặc đã hết hạn");
+
+            var user = await _context.Users.FindAsync(tokenEntry.UserID);
+            if (user == null)
+                return BaseResponse_V2<string>.NotFound("Người dùng không tồn tại");
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            _context.PasswordResetTokens.Remove(tokenEntry);
+            await _context.SaveChangesAsync();
+
+            return BaseResponse_V2<string>.Success("Đặt lại mật khẩu thành công!");
+        }
+        #endregion
+
+        #region Change password - Done
+        public async Task<BaseResponse_V2<string>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == changePasswordDto.UserID);
+                if (user == null)
+                {
+                    return BaseResponse_V2<string>.Fail("Người dùng đã tồn tại");
+                }
+
+                if (!IsPasswordValid(changePasswordDto.OldPassword, user.PasswordHash))
+                {
+                    return BaseResponse_V2<string>.Fail("Mật khẩu cũ không đúng");
+                }
+
+                string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword, salt);
+
+                user.PasswordHash = newPasswordHash;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return BaseResponse_V2<string>.Success("Đổi mật khẩu thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse_V2<string>.Fail("Đã xảy ra lỗi hệ thống");
+            }
+        }
+        #endregion
+
+        #region Login with Google 
+        public async Task<BaseResponse_V2<AuthenResponse>> LoginWithGoogleAsync(string email, string name)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = email,
+                    Username = name,
+                    Phone = "N/A",
+                    PasswordHash = "",
+                    Avatar = "",
+                    RefreshToken = Guid.NewGuid().ToString(),
+                    ExpiryDate = DateTime.UtcNow.AddDays(7),
+                    CreatedAt = DateTime.UtcNow,
+                    Role = "Reader",
+                    Status = "Active",
+                    IsComment = true,
+                    IsLock = false
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                user.RefreshToken = Guid.NewGuid().ToString();
+                user.ExpiryDate = DateTime.UtcNow.AddDays(7);
+                await _context.SaveChangesAsync();
+            }
+            var accessToken = _tokenResonse.GenerateJwtToken(user);
+
+            return BaseResponse_V2<AuthenResponse>.Success("Đăng nhập bằng Google thành công", new AuthenResponse
+            {
+                AccessToken = accessToken,
                 User = new UserInfor
                 {
                     UserID = user.UserID,
                     Username = user.Username,
                     Avatar = user.Avatar,
-                    Identifier = user.Email ?? user.Phone
-                }
-            };
-        }
-
-        #endregion
-
-        #region Register
-        public async Task<string> RegisterAsync(RegisterModel registerModel)
-        {
-            try
-            {
-                var isExsistAccount = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerModel.Email || u.Phone == registerModel.Phone);
-                if (isExsistAccount != null)
-                {
-                    return "Người dùng đã tồn tại";
-                };
-                string salt = BCrypt.Net.BCrypt.GenerateSalt();
-                string hash = BCrypt.Net.BCrypt.HashPassword(registerModel.PasswordHash, salt);
-
-                var newUser = new User
-                {
-                    Username = registerModel.Username,
-                    Email = registerModel.Email,
-                    Phone = registerModel.Phone,
-                    PasswordHash = hash,
-                    Role = registerModel.Role,
-                    Status = "Active",
-                    Avatar = null,
-                    IsComment = true,
-                    IsLock = false,
-                    CreatedAt = DateTime.Now,
-                };
-
-                _context.Users.Add(newUser);
-                await _context.SaveChangesAsync();
-
-                return "Tạo tài khoản thành công";
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-
-        }
-        #endregion
-
-        #region Request password reset
-        public async Task<string> RequestPasswordResetAsync(string email)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-            // Tạo phản hồi giả dù user không tồn tại
-            if (user == null)
-            {
-                await Task.Delay(500); // tránh timing attack
-                return "Nếu email tồn tại, bạn sẽ nhận được hướng dẫn qua email.";
-            }
-
-            // Tạo token ngẫu nhiên
-            var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-
-            // Hash token (SHA-256)
-            using var sha256 = SHA256.Create();
-            var hashedToken = Convert.ToHexString(sha256.ComputeHash(Encoding.UTF8.GetBytes(rawToken)));
-
-            // Tính thời gian hết hạn (ví dụ: 30 phút)
-            var expiry = DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds();
-
-            // Lưu vào bảng token
-            var resetToken = new PasswordResetToken
-            {
-                UserID = user.UserID,
-                Token = hashedToken,
-                TokenExpiry = expiry
-            };
-
-            _context.PasswordResetTokens.Add(resetToken);
-            await _context.SaveChangesAsync();
-
-
-            // Tạo link gửi cho người dùng
-            var resetLink = $"http://localhost:4200/reset-password?token={WebUtility.UrlEncode(rawToken)}";
-
-            await _emailService.SendEmailAsync(email, "Khôi phục mật khẩu",
-                $"Vui lòng nhấn vào liên kết sau để đặt lại mật khẩu:\n\n{resetLink}");
-
-            return "Nếu email tồn tại, bạn sẽ nhận được hướng dẫn qua email.";
-        }
-        #endregion
-
-        #region Reset password
-        public async Task<string> ResetPasswordAsync(string rawToken, string newPassword)
-        {
-            // Hash lại token để so sánh
-            using var sha256 = SHA256.Create();
-            var hashedToken = Convert.ToHexString(sha256.ComputeHash(Encoding.UTF8.GetBytes(rawToken)));
-            Console.WriteLine(hashedToken.GetType());
-
-            var tokenEntry = await _context.PasswordResetTokens
-                .FirstOrDefaultAsync(t => t.Token == hashedToken);
-
-            if (tokenEntry == null || tokenEntry.TokenExpiry < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
-            {
-                return "Mã đặt lại không hợp lệ hoặc đã hết hạn.";
-            }
-
-            var user = await _context.Users.FindAsync(tokenEntry.UserID);
-            if (user == null) return "Người dùng không tồn tại.";
-
-            // Hash mật khẩu mới (ví dụ dùng BCrypt)
-            string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            string hash = BCrypt.Net.BCrypt.HashPassword(newPassword, salt);
-            user.PasswordHash = hash;
-
-            // Xóa token sau khi dùng
-            _context.PasswordResetTokens.Remove(tokenEntry);
-            await _context.SaveChangesAsync();
-
-            return "Đặt lại mật khẩu thành công!";
-        }
-        #endregion
-
-        #region Change password
-        public async Task<string> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
-        {
-            // Kiểm tra tính hợp lệ của dữ liệu đầu vào
-            if (changePasswordDto == null ||
-                string.IsNullOrWhiteSpace(changePasswordDto.OldPassword) ||
-                string.IsNullOrWhiteSpace(changePasswordDto.NewPassword))
-            {
-                return "Vui lòng nhập đầy đủ thông tin";
-            }
-
-            try
-            {
-                // Lấy thông tin người dùng từ cơ sở dữ liệu bằng UserID
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == changePasswordDto.UserID);
-                if (user == null)
-                {
-                    return "Người dùng không tồn tại";
+                    Identifier = user.Email,
                 }
 
-                // Kiểm tra mật khẩu cũ
-                if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, user.PasswordHash))
-                {
-                    return "Mật khẩu cũ không đúng";
-                }
-                // Mã hóa mật khẩu mới
-                string salt = BCrypt.Net.BCrypt.GenerateSalt();
-                string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword, salt);
+                
+            });
+        }
+        #endregion
 
-                // Cập nhật mật khẩu mới trong cơ sở dữ liệu
-                user.PasswordHash = newPasswordHash;
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-
-                return "Đổi mật khẩu thành công";
-            }
-            catch (Exception ex)
-            {
-                return $"Lỗi: {ex.Message}";
-            }
+        #region Check valid password - Done
+        private bool IsPasswordValid(string inputPassword, string storedHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
         }
         #endregion
 
     }
-
 }
 

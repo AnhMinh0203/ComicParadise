@@ -3,6 +3,7 @@ using ComicParadise.DataContext.Models;
 using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository;
 using ComicParadise.Repository.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ComicParadise.Api.Controllers
@@ -43,6 +44,7 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true,result));
         }
 
+/*        [Authorize]*/
         [HttpDelete("Delete-comment")]
         public async Task<ActionResult> DeleteComment (int commentID)
         {

@@ -11,6 +11,7 @@ namespace ComicParadise.DataContext.Models
         public int UserID { get; set; }
         public string Token { get; set; } 
         public long TokenExpiry { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
 }

@@ -6,9 +6,5 @@ using System.Threading.Tasks;
 
 namespace ComicParadise.DataContext.Utils
 {
-    public class RefreshRequest
-    {
-        public string RefreshToken { get; set; }
-    }
 
 }

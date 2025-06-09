@@ -46,6 +46,7 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true, result));
         }
 
+        [Authorize]
         [HttpDelete("Delete-Category")]
         public async Task<ActionResult> DeleteCategory (int categoryID)
         {
@@ -53,7 +54,7 @@ namespace ComicParadise.Api.Controllers
             return Ok(new BaseResponse<string>(true,result));
         }
 
-/*        [Authorize]*/
+        [Authorize]
         [HttpGet("Get-categories-for-user")]
         public async Task<ActionResult> GetCategoriesForUser()
         {

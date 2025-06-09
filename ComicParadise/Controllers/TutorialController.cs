@@ -3,6 +3,7 @@ using ComicParadise.DataContext.Models;
 using ComicParadise.DataContext.Utils;
 using ComicParadise.Repository.Common;
 using ComicParadise.Repository.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ComicParadise.Api.Controllers

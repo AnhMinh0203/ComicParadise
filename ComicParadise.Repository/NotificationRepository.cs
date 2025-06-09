@@ -129,7 +129,7 @@ namespace ComicParadise.Repository
 
                     if (!followers.Any())
                     {
-                        return "Không có độc giả nào theo dõi truyện này";
+                        return "Đăng tải thành công";
                     }
 
                     // Tạo thông báo cho từng user trong nhóm

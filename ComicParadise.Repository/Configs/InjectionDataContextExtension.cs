@@ -33,6 +33,7 @@ namespace ComicParadise.Repository.Configs
             services.AddScoped<IFooterContentRepository, FooterManagementRepository>();
             services.AddScoped<IBannerManagementRepository, BannerManagementRepository>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ITokenRepository, TokenRepository>();
 
             // Register AutoMapper
             services.AddAutoMapper(typeof(CategoryProfile));
