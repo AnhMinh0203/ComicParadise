@@ -165,8 +165,8 @@ namespace ComicParadise.Repository
                     return $"Hiện tại website có tổng cộng {count} truyện.";*/
 
                 case "popular":
-                    var topStories = await _storyRepository.GetTopStoriesAsync("week"); 
-                    string topList = string.Join("\n", topStories.Select(s => $"- {s.Title}"));
+                    var topStories = await _storyRepository.GetTopStoriesAsync("week",1,15); 
+                    string topList = string.Join("\n", topStories.Items.Select(s => $"- {s.Title}"));
                     return $"Các truyện nổi bật hiện nay:\n{topList}";
 
                 case "search":

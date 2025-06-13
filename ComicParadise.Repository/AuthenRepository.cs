@@ -177,7 +177,6 @@ namespace ComicParadise.Repository
         #region Reset password - Done
         public async Task<BaseResponse_V2<string>> ResetPasswordAsync(string rawToken, string newPassword)
         {
-            // Đổi base64url về base64 chuẩn (thêm padding nếu thiếu)
             string base64Token = rawToken.Replace("-", "+").Replace("_", "/");
             base64Token = base64Token.PadRight(base64Token.Length + (4 - base64Token.Length % 4) % 4, '=');
 

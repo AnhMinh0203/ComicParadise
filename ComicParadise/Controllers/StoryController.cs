@@ -92,24 +92,24 @@ namespace ComicParadise.Api.Controllers
         }
 
         [HttpGet("Get-current-update-story")]
-        public async Task<ActionResult> GetCurrentUpdateStory(int days)
+        public async Task<ActionResult> GetCurrentUpdateStory(int days, int pageIndex, int pageSize)
         {
-            var result = await _storyRepository.GetCurrentUpdateStoriesAsync(days);
-            return Ok(new BaseResponse<IEnumerable<dynamic>>(true, result));
+            var result = await _storyRepository.GetCurrentUpdateStoriesAsync(days, pageIndex, pageSize);
+            return Ok(new BaseResponse<PagedResult<CurrentUpdateStoryDto>>(true, result));
         }
 
         [HttpGet("Get-top-story")]
-        public async Task<ActionResult> GetTopStory(string topType)
+        public async Task<ActionResult> GetTopStory(string topType, int pageIndex, int pageSize)
         {
-            var result = await _storyRepository.GetTopStoriesAsync(topType);
-            return Ok(new BaseResponse<List<dynamic>>(true, result));
+            var result = await _storyRepository.GetTopStoriesAsync(topType, pageIndex, pageSize);
+            return Ok(new BaseResponse<PagedResult<TopStoryDto>>(true, result));
         }
 
         [HttpGet("Get-advance-story")]
-        public async Task<ActionResult> GetAdvanceStory(int userID)
+        public async Task<ActionResult> GetAdvanceStory(int? userID, int pageIndex, int pageSize)
         {
-            var result = await _storyRepository.GetAdvanceStories(userID);
-            return Ok(new BaseResponse<List<dynamic>>(true, result));
+            var result = await _storyRepository.GetAdvanceStories(userID, pageIndex, pageSize);
+            return Ok(new BaseResponse<PagedResult<AdvanceStoryDto>>(true, result));
         }
 
         [HttpGet("Get-novel-stories")]

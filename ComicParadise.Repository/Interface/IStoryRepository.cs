@@ -17,9 +17,9 @@ namespace ComicParadise.Repository.Common
         Task<string> UpdateStoryAsync(UpdateStoryDto storyDto);
         Task<string> DeleteStoryAsync(int storyID);
         Task<List<dynamic>> SearchStoryAsync(string title);
-        Task<IEnumerable<dynamic>> GetCurrentUpdateStoriesAsync(int days);
-        Task<List<dynamic>> GetTopStoriesAsync(string topType);
-        Task<List<dynamic>> GetAdvanceStories(int userID);
+        Task<PagedResult<CurrentUpdateStoryDto>> GetCurrentUpdateStoriesAsync(int days, int pageIndex, int pageSize);
+        Task<PagedResult<TopStoryDto>> GetTopStoriesAsync(string topType, int pageIndex, int pageSize);
+        Task<PagedResult<AdvanceStoryDto>> GetAdvanceStories(int? userID, int pageIndex, int pageSize);
         Task<string> LikeStoryAsync(int userID, int storyID);
         Task<bool> CheckIsLikedAsync(int userID, int storyID);
         Task<List<dynamic>> GetFavoriteStoriesAsync(int userID);

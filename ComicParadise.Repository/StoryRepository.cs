@@ -31,7 +31,7 @@ namespace ComicParadise.Repository
         public StoryRepository(
             AppDbContext context,
             IConfiguration config,
-            BlobServiceClient blobServiceClient,
+            /*            BlobServiceClient blobServiceClient,*/
             IAmazonS3 s3Client)
         {
             _context = context;
@@ -617,77 +617,72 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Get current update story
-        public async Task<IEnumerable<dynamic>> GetCurrentUpdateStoriesAsync(int days)
+        #region Get current update story - Done
+        public async Task<PagedResult<CurrentUpdateStoryDto>> GetCurrentUpdateStoriesAsync(int days, int pageIndex, int pageSize)
         {
-            try
-            {
-                DateTime recentDate = DateTime.Now.AddDays(-days);
+            var recentDate = DateTime.Now.AddDays(-days);
+            int skip = (pageIndex - 1) * pageSize;
 
-                var listStories = await (from s in _context.Stories
-                                         let latestChapter = _context.Chapters
-                                             .Where(c => c.StoryID == s.StoryID)
-                                             .OrderByDescending(c => c.CreatedAt)
-                                             .FirstOrDefault()
-                                         where latestChapter != null && latestChapter.CreatedAt >= recentDate
-                                         && s.Type == "Manga"
-                                         select new
-                                         {
-                                             StoryID = s.StoryID,
-                                             Title = s.Title,
-                                             CoverImage = s.CoverImage,
-                                             Views = s.Views,
-                                             Likes = s.Likes,
-                                             Type = s.Type,
-                                             LastestChapter = latestChapter.ChapterNumber,
-                                             CreatedAt = latestChapter.CreatedAt
-                                         })
-                                         .AsNoTracking()
-                                         .Take(12)
-                                         .ToListAsync();
+            var latestChaptersQuery = _context.Chapters
+                .Where(c => c.CreatedAt == _context.Chapters
+                    .Where(c2 => c2.StoryID == c.StoryID)
+                    .Max(c2 => c2.CreatedAt))
+                .Select(c => new { c.StoryID, c.ChapterNumber, c.CreatedAt });
 
-                if (!listStories.Any() || listStories.Count() < 12)
-                {
-                    listStories = await (from s in _context.Stories
-                                         let latestChapter = _context.Chapters
-                                                .Where(c => c.StoryID == s.StoryID)
-                                                .OrderByDescending(c => c.CreatedAt)
-                                                .FirstOrDefault()
-                                         where latestChapter != null
-                                         && s.Type == "Manga"
-                                         select new
-                                         {
-                                             StoryID = s.StoryID,
-                                             Title = s.Title,
-                                             CoverImage = s.CoverImage,
-                                             Views = s.Views,
-                                             Likes = s.Likes,
-                                             Type = s.Type,
-                                             LastestChapter = latestChapter.ChapterNumber,
-                                             CreatedAt = latestChapter.CreatedAt
-                                         })
-                                         .OrderByDescending(s => s.Views)
-                                         .Take(12)
-                                         .AsNoTracking()
-                                         .ToListAsync();
-                }
-                return listStories;
-            }
-            catch (Exception ex)
+            var query = from c in latestChaptersQuery
+                        join s in _context.Stories on c.StoryID equals s.StoryID
+                        where s.Type == "Manga"
+                        select new CurrentUpdateStoryDto
+                        {
+                            StoryID = s.StoryID,
+                            Title = s.Title,
+                            CoverImage = s.CoverImage,
+                            Views = s.Views,
+                            Likes = s.Likes,
+                            Type = s.Type,
+                            LatestChapter = c.ChapterNumber,
+                            CreatedAt = c.CreatedAt
+                        };
+
+            var recentQuery = query
+                .Where(x => x.CreatedAt >= recentDate)
+                .OrderByDescending(x => x.CreatedAt);
+
+            var fallbackQuery = query
+                .Where(x => x.CreatedAt < recentDate)
+                .OrderByDescending(x => x.Views);
+
+            var combinedQuery = recentQuery.Concat(fallbackQuery);
+
+            var pagedItems = await combinedQuery
+                .AsNoTracking()
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalCount = await combinedQuery.CountAsync();
+            var randomizedItems = pagedItems.OrderBy(x => Guid.NewGuid()).ToList();
+            return new PagedResult<CurrentUpdateStoryDto>
             {
-                throw new Exception(ex.Message);
-            }
+                Items = randomizedItems,
+                TotalCount = totalCount
+            };
         }
+
+
+
+
         #endregion
 
-        #region Get top stories 
-        public async Task<List<dynamic>> GetTopStoriesAsync(string topType)
+        #region Get top stories - Done
+        public async Task<PagedResult<TopStoryDto>> GetTopStoriesAsync(string topType, int pageIndex, int pageSize)
         {
             try
             {
                 DateTime now = DateTime.Now;
                 DateTime startDate;
                 DateTime endDate;
+
                 switch (topType.ToLower())
                 {
                     case "day":
@@ -703,139 +698,184 @@ namespace ComicParadise.Repository
                         endDate = startDate.AddMonths(1).AddSeconds(-1);
                         break;
                     default:
-                        throw new Exception("Invalid top type. Use 'day', 'week', or 'month'.");
+                        throw new ArgumentException("Invalid top type. Use 'day', 'week', or 'month'.");
                 }
 
-                var topStories = await (from s in _context.Stories
-                                        where s.CreatedAt >= startDate && s.CreatedAt <= endDate
-                                         && s.Type == "Manga"
-                                        select new
-                                        {
-                                            StoryID = s.StoryID,
-                                            Title = s.Title,
-                                            CoverImage = s.CoverImage,
-                                            Views = s.Views,
-                                            Likes = s.Likes,
-                                            Description = s.Description,
-                                            Categories = (from smc in _context.StoryCategoriesMapping
-                                                          join c in _context.Categories on smc.CategoryID equals c.CategoryID
-                                                          where smc.StoryID == s.StoryID
-                                                          select c.CategoryName).ToList()
-                                        })
-                                        .AsNoTracking()
-                                        .OrderByDescending(s => s.Views)
-                                        .Take(12)
-                                        .ToListAsync<dynamic>();
+                int skip = (pageIndex - 1) * pageSize;
 
-                if (!topStories.Any() || topStories.Count() < 12)
+                var baseQuery = _context.Stories
+                    .Where(s => s.Type == "Manga")
+                    .Where(s => s.CreatedAt >= startDate && s.CreatedAt <= endDate)
+                    .Select(s => new TopStoryDto
+                    {
+                        StoryID = s.StoryID,
+                        Title = s.Title,
+                        CoverImage = s.CoverImage,
+                        Views = s.Views,
+                        Likes = s.Likes,
+                        Description = s.Description,
+                        Categories = _context.StoryCategoriesMapping
+                            .Where(m => m.StoryID == s.StoryID)
+                            .Join(_context.Categories,
+                                  smc => smc.CategoryID,
+                                  c => c.CategoryID,
+                                  (smc, c) => c.CategoryName)
+                            .ToList()
+                    });
+
+                int totalCount = await baseQuery.CountAsync();
+
+                if (totalCount == 0)
                 {
-                    topStories = await (from s in _context.Stories
-                                        where s.Type == "Manga"
-                                        select new
-                                        {
-                                            StoryID = s.StoryID,
-                                            Title = s.Title,
-                                            CoverImage = s.CoverImage,
-                                            Views = s.Views,
-                                            Likes = s.Likes,
-                                            Description = s.Description,
-                                            Categories = (from smc in _context.StoryCategoriesMapping
-                                                          join c in _context.Categories on smc.CategoryID equals c.CategoryID
-                                                          where smc.StoryID == s.StoryID
-                                                          select c.CategoryName).ToList()
-                                        })
-                                        .AsNoTracking()
-                                        .OrderByDescending(s => s.Views)
-                                        .Take(10)
-                                        .ToListAsync<dynamic>();
+                    baseQuery = _context.Stories
+                        .Where(s => s.Type == "Manga")
+                        .OrderByDescending(s => s.Views)
+                        .Select(s => new TopStoryDto
+                        {
+                            StoryID = s.StoryID,
+                            Title = s.Title,
+                            CoverImage = s.CoverImage,
+                            Views = s.Views,
+                            Likes = s.Likes,
+                            Description = s.Description,
+                            Categories = _context.StoryCategoriesMapping
+                                .Where(m => m.StoryID == s.StoryID)
+                                .Join(_context.Categories,
+                                      smc => smc.CategoryID,
+                                      c => c.CategoryID,
+                                      (smc, c) => c.CategoryName)
+                                .ToList()
+                        });
+
+                    totalCount = await baseQuery.CountAsync();
                 }
 
-                return topStories;
+                var items = await baseQuery
+                    .OrderByDescending(s => s.Views)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var randomizedItems = items.OrderBy(x => Guid.NewGuid()).ToList();
+
+                return new PagedResult<TopStoryDto>
+                {
+                    Items = randomizedItems,
+                    TotalCount = totalCount
+                };
             }
             catch (Exception ex)
             {
                 throw;
             }
-
         }
+
 
         #endregion
 
-        #region Get advance stories
-        public async Task<List<dynamic>> GetAdvanceStories(int userID)
+        #region Get advance stories - Done
+        public async Task<PagedResult<AdvanceStoryDto>> GetAdvanceStories(int? userID, int pageIndex, int pageSize)
         {
-            var userCategories = await (from h in _context.ReadingHistories
-                                        where h.UserID == userID
-                                        join smc in _context.StoryCategoriesMapping on h.StoryID equals smc.StoryID
-                                        select smc.CategoryID)
-                                       .Distinct()
-                                       .ToListAsync();
-            var recommendedStories = await (from s in _context.Stories
-                                            join smc in _context.StoryCategoriesMapping on s.StoryID equals smc.StoryID
-                                            where userCategories.Contains(smc.CategoryID)
-                                            let latestChapter = _context.Chapters
-                                                .Where(c => c.StoryID == s.StoryID)
-                                                .OrderByDescending(c => c.CreatedAt)
-                                                .FirstOrDefault()
-                                            where latestChapter != null
-                                             && s.Type == "Manga"
-                                            select new
-                                            {
-                                                StoryID = s.StoryID,
-                                                Title = s.Title,
-                                                CoverImage = s.CoverImage,
-                                                Views = s.Views,
-                                                Likes = s.Likes,
-                                                LastestChapter = latestChapter.ChapterNumber,
-                                            })
-                                            .AsNoTracking()
-                                            .Distinct()
-                                            .Take(12)
-                                            .ToListAsync<dynamic>();
+            List<int> allStoryIds;
+            int totalCount;
 
-            if (!recommendedStories.Any() || recommendedStories.Count() < 12)
+            if (userID != null)
             {
-                recommendedStories = await (from s in _context.Stories
-                                            let latestChapter = _context.Chapters
-                                                .Where(c => c.StoryID == s.StoryID)
-                                                .OrderByDescending(c => c.CreatedAt)
-                                                .FirstOrDefault()
-                                            where latestChapter != null
-                                            && s.Type == "Manga"
-                                            select new
-                                            {
-                                                StoryID = s.StoryID,
-                                                Title = s.Title,
-                                                CoverImage = s.CoverImage,
-                                                Views = s.Views,
-                                                Likes = s.Likes,
-                                                Description = s.Description,
-                                                Categories = (from smc in _context.StoryCategoriesMapping
-                                                              join c in _context.Categories on smc.CategoryID equals c.CategoryID
-                                                              where smc.StoryID == s.StoryID
-                                                              select c.CategoryName).ToList(),
-                                                LastestChapter = latestChapter.ChapterNumber,
-                                            })
-                                            .AsNoTracking()
-                                            .OrderByDescending(s => s.Views)
-                                            .Take(12)
-                                            .ToListAsync<dynamic>();
+                var userCategoryIds = await _context.ReadingHistories
+                    .Where(h => h.UserID == userID)
+                    .Join(_context.StoryCategoriesMapping,
+                          h => h.StoryID,
+                          smc => smc.StoryID,
+                          (h, smc) => smc.CategoryID)
+                    .Distinct()
+                    .ToListAsync();
+
+                var storyIdsA = await _context.StoryCategoriesMapping
+                    .Where(smc => userCategoryIds.Contains(smc.CategoryID))
+                    .Join(_context.Stories.Where(s => s.Type == "Manga"),
+                          smc => smc.StoryID,
+                          s => s.StoryID,
+                          (smc, s) => s.StoryID)
+                    .Distinct()
+                    .ToListAsync();
+
+                var storyIdsB = await _context.Stories
+                    .Where(s => s.Type == "Manga" &&
+                                !_context.StoryCategoriesMapping
+                                    .Any(smc => smc.StoryID == s.StoryID &&
+                                                userCategoryIds.Contains(smc.CategoryID)))
+                    .Select(s => s.StoryID)
+                    .ToListAsync();
+
+                allStoryIds = storyIdsA.Concat(storyIdsB).Distinct().ToList();
+                totalCount = allStoryIds.Count;
             }
-            return recommendedStories;
+            else
+            {
+                allStoryIds = await _context.Stories
+                    .Where(s => s.Type == "Manga")
+                    .OrderByDescending(s => s.Views)
+                    .Select(s => s.StoryID)
+                    .ToListAsync();
+
+                totalCount = allStoryIds.Count;
+            }
+
+            var pagedStoryIds = allStoryIds
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var stories = await _context.Stories
+                .Where(s => pagedStoryIds.Contains(s.StoryID))
+                .Select(s => new AdvanceStoryDto
+                {
+                    StoryID = s.StoryID,
+                    Title = s.Title,
+                    CoverImage = s.CoverImage,
+                    Views = s.Views,
+                    Likes = s.Likes,
+                    Description = s.Description,
+                    Categories = (from smc in _context.StoryCategoriesMapping
+                                  join c in _context.Categories on smc.CategoryID equals c.CategoryID
+                                  where smc.StoryID == s.StoryID
+                                  select c.CategoryName).ToList(),
+                    LastestChapter = _context.Chapters
+                        .Where(c => c.StoryID == s.StoryID)
+                        .OrderByDescending(c => c.CreatedAt)
+                        .Select(c => c.ChapterNumber)
+                        .FirstOrDefault()
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            var orderedResult = pagedStoryIds
+                .Join(stories,
+                      id => id,
+                      s => s.StoryID,
+                      (id, story) => story)
+                .ToList();
+
+            var randomizedItems = orderedResult.OrderBy(x => Guid.NewGuid()).ToList();
+            return new PagedResult<AdvanceStoryDto>
+            {
+                Items = randomizedItems,
+                TotalCount = totalCount
+            };
         }
+
+
         #endregion
 
-        #region Get novel
+        #region Get novel - Done
         public async Task<PagedResult<StoryDto>> GetNovelStories(int pageIndex, int pageSize)
         {
             var skip = (pageIndex - 1) * pageSize;
-
             var query = _context.Stories
                 .AsNoTracking()
                 .Where(s => s.Type == "Novel");
-
             var totalCount = await query.CountAsync();
-
             var items = await query
                 .OrderByDescending(s => s.Views)
                 .Skip(skip)
