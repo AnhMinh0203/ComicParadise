@@ -1004,32 +1004,46 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Get favorite stories
+        #region Get favorite stories - Done
         public async Task<List<dynamic>> GetFavoriteStoriesAsync(int userID)
         {
-            var stories = await (from f in _context.Favorites
-                                 join s in _context.Stories
-                                 on f.StoryID equals s.StoryID
-                                 where f.UserID == userID
-                                 select new
-                                 {
-                                     StoryID = s.StoryID,
-                                     Title = s.Title,
-                                     CoverImage = s.CoverImage,
-                                     CreatedAt = s.CreatedAt,
-                                     Views = s.Views,
-                                     Likes = s.Likes,
-                                     IsLiked = true,
-                                     Categories = (from sc in _context.StoryCategoriesMapping
-                                                   join c in _context.Categories on sc.CategoryID equals c.CategoryID
-                                                   where sc.StoryID == s.StoryID
-                                                   select c).ToList(),
-                                 }).ToListAsync<dynamic>();
-            return stories;
+            var query = from f in _context.Favorites
+                        where f.UserID == userID
+                        join s in _context.Stories on f.StoryID equals s.StoryID
+                        select new
+                        {
+                            s.StoryID,
+                            s.Title,
+                            s.CoverImage,
+                            s.CreatedAt,
+                            s.Views,
+                            s.Likes,
+                            Categories = (from sc in _context.StoryCategoriesMapping
+                                          where sc.StoryID == s.StoryID
+                                          join c in _context.Categories on sc.CategoryID equals c.CategoryID
+                                          select c)
+                        };
+
+            var result = await query
+                .Select(x => new
+                {
+                    x.StoryID,
+                    x.Title,
+                    x.CoverImage,
+                    x.CreatedAt,
+                    x.Views,
+                    x.Likes,
+                    IsLiked = true,
+                    Categories = x.Categories.ToList()
+                })
+                .ToListAsync<dynamic>();
+
+            return result;
         }
+
         #endregion
 
-        #region Rating story
+        #region Rating story - Done
         public async Task<bool> RatingStoryAsync(RatingStoryDto ratingStoryDto)
         {
             try
@@ -1064,7 +1078,7 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Get user rating 
+        #region Get user rating - Done 
         public async Task<int?> GetUserRating(int storyID, int userID)
         {
             var isExistRating = await _context.Ratings
@@ -1078,7 +1092,7 @@ namespace ComicParadise.Repository
         }
         #endregion
 
-        #region Get story rating 
+        #region Get story rating - Done 
         public async Task<int?> GetStoryRatingAsync(int storyID)
         {
             var ratings = await _context.Ratings
@@ -1096,144 +1110,188 @@ namespace ComicParadise.Repository
 
         #endregion
 
-        #region Filter story by conditions
+        #region Filter story by conditions - Done
         public async Task<List<dynamic>> FilterStoryByConditionsAsync(StoryFilterConditionsRequest filter)
         {
             try
             {
-                var query = from s in _context.Stories
-                            join u in _context.Users on s.PublisherID equals u.UserID
-                            let latestChapter = _context.Chapters
-                                .Where(c => c.StoryID == s.StoryID)
-                                .OrderByDescending(c => c.CreatedAt)
-                                .FirstOrDefault()
-                            let chapterCount = _context.Chapters
-                                .Count(c => c.StoryID == s.StoryID)
-                            let averageRating = _context.Ratings
-                                .Where(r => r.StoryID == s.StoryID)
-                                .Select(r => (double?)r.RatingValue)
-                                .Average() ?? 0
-                            select new
-                            {
-                                StoryID = s.StoryID,
-                                Title = s.Title,
-                                CoverImage = s.CoverImage,
-                                CompletionStatus = s.IsComplete ? "completed" : "updating",
-                                PublisherName = u.Username,
-                                Views = s.Views,
-                                Likes = s.Likes,
-                                Type = s.Type,
-                                LastestChapter = latestChapter != null ? latestChapter.ChapterNumber : 0,
-                                ChapterCount = chapterCount,
-                                AverageRating = averageRating
-                            };
+                // B1: Lọc danh sách Story ban đầu
+                var baseQuery = _context.Stories.AsQueryable();
 
+                if (filter.IsManga == true && filter.IsNovel != true)
+                    baseQuery = baseQuery.Where(s => s.Type == "Manga");
+                else if (filter.IsNovel == true && filter.IsManga != true)
+                    baseQuery = baseQuery.Where(s => s.Type == "Novel");
 
-                if (filter.IsManga.HasValue || filter.IsNovel.HasValue)
+                if (filter.CompletionStatus == "completed")
+                    baseQuery = baseQuery.Where(s => s.IsComplete);
+                else if (filter.CompletionStatus == "updating")
+                    baseQuery = baseQuery.Where(s => !s.IsComplete);
+
+                var storyIds = await baseQuery.Select(s => s.StoryID).ToListAsync();
+
+                if (!storyIds.Any())
+                    return new List<dynamic>();
+
+                var chapterCounts = await _context.Chapters
+                    .Where(c => storyIds.Contains(c.StoryID))
+                    .GroupBy(c => c.StoryID)
+                    .Select(g => new { g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.Key, x => x.Count);
+
+                var latestChapters = await _context.Chapters
+                    .Where(c => storyIds.Contains(c.StoryID))
+                    .GroupBy(c => c.StoryID)
+                    .Select(g => new
+                    {
+                        g.Key,
+                        Latest = g.OrderByDescending(c => c.CreatedAt).FirstOrDefault().ChapterNumber
+                    })
+                    .ToDictionaryAsync(x => x.Key, x => x.Latest);
+
+                var ratings = await _context.Ratings
+                    .Where(r => storyIds.Contains(r.StoryID))
+                    .GroupBy(r => r.StoryID)
+                    .Select(g => new { g.Key, Avg = g.Average(x => (double?)x.RatingValue) ?? 0 })
+                    .ToDictionaryAsync(x => x.Key, x => x.Avg);
+
+                var users = await _context.Users
+                    .ToDictionaryAsync(u => u.UserID, u => u.Username);
+
+                var storyInfoList = await _context.Stories
+                    .Where(s => storyIds.Contains(s.StoryID))
+                    .Select(s => new
+                    {
+                        s.StoryID,
+                        s.Title,
+                        s.CoverImage,
+                        s.IsComplete,
+                        PublisherName = users.ContainsKey(s.PublisherID) ? users[s.PublisherID] : "Unknown",
+                        s.Views,
+                        s.Likes,
+                        s.Type
+                    })
+                    .ToListAsync();
+
+                var result = storyInfoList
+                    .Select(s => new
+                    {
+                        s.StoryID,
+                        s.Title,
+                        s.CoverImage,
+                        CompletionStatus = s.IsComplete ? "completed" : "updating",
+                        s.PublisherName,
+                        s.Views,
+                        s.Likes,
+                        s.Type,
+                        ChapterCount = chapterCounts.TryGetValue(s.StoryID, out var count) ? count : 0,
+                        LastestChapter = latestChapters.TryGetValue(s.StoryID, out var latest) ? latest : 0,
+                        AverageRating = ratings.TryGetValue(s.StoryID, out var avg) ? avg : 0
+                    })
+                    .ToList<dynamic>();
+
+                if (filter.HighestViews == true)
                 {
-                    var typeFilters = new List<string>();
-                    if (filter.IsManga == true)
-                    {
-                        typeFilters.Add("Manga");
-                    }
-                    if (filter.IsNovel == true)
-                    {
-                        typeFilters.Add("Novel");
-                    }
-
-                    if (typeFilters.Any())
-                    {
-                        query = query.Where(s => typeFilters.Contains(s.Type));
-                    }
-
+                    result = result.OrderByDescending(x => x.Views).ToList<dynamic>();
                 }
-
-                if (!string.IsNullOrEmpty(filter.CompletionStatus) && filter.CompletionStatus != "all")
+                else if (filter.HighestRates == true)
                 {
-                    if (filter.CompletionStatus == "completed")
-                    {
-                        query = query.Where(s => s.CompletionStatus == "completed"); // IsComplete == true
-                    }
-                    else if (filter.CompletionStatus == "updating")
-                    {
-                        query = query.Where(s => s.CompletionStatus == "updating"); // IsComplete == false
-                    }
+                    result = result.OrderByDescending(x => x.AverageRating).ToList<dynamic>();
                 }
 
                 if (filter.MinChapters.HasValue)
                 {
-                    query = query.Where(s => s.ChapterCount >= filter.MinChapters.Value);
+                    result = result.Where(x => x.ChapterCount >= filter.MinChapters.Value).ToList<dynamic>();
                 }
 
                 if (filter.MaxChapters.HasValue)
                 {
-                    query = query.Where(s => s.ChapterCount <= filter.MaxChapters.Value);
+                    result = result.Where(x => x.ChapterCount <= filter.MaxChapters.Value).ToList<dynamic>();
                 }
 
-                // Sắp xếp theo lượt xem hoặc đánh giá
-                if (filter.HighestViews == true)
-                {
-                    query = query.OrderByDescending(s => s.Views);
-                }
-                if (filter.HighestRates == true)
-                {
-                    query = query.OrderByDescending(s => s.AverageRating);
-                }
-
-
-                // Thực thi truy vấn và trả về kết quả
-                var listStories = await query.ToListAsync<dynamic>();
-                return listStories;
+                return result;
             }
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi lọc truyện: " + ex.Message);
             }
         }
+
         #endregion
 
-        #region Filter story by categories
+        #region Filter story by categories - Done
         public async Task<List<dynamic>> FilterStoriesByCategoryIdsAsync(List<int> categoryIds)
         {
             try
             {
-                // Lấy danh sách các StoryID có ít nhất 1 CategoryID nằm trong list
+                if (categoryIds == null || !categoryIds.Any())
+                    return new List<dynamic>();
+
                 var filteredStoryIds = await _context.StoryCategoriesMapping
                     .Where(sc => categoryIds.Contains(sc.CategoryID))
                     .Select(sc => sc.StoryID)
                     .Distinct()
                     .ToListAsync();
 
-                // Tiếp tục truy vấn chi tiết truyện như cũ
-                var query = from s in _context.Stories
-                            join u in _context.Users on s.PublisherID equals u.UserID
-                            where filteredStoryIds.Contains(s.StoryID)
-                            let latestChapter = _context.Chapters
-                                .Where(c => c.StoryID == s.StoryID)
-                                .OrderByDescending(c => c.CreatedAt)
-                                .FirstOrDefault()
-                            let chapterCount = _context.Chapters
-                                .Count(c => c.StoryID == s.StoryID)
-                            let averageRating = _context.Ratings
-                                .Where(r => r.StoryID == s.StoryID)
-                                .Select(r => (double?)r.RatingValue)
-                                .Average() ?? 0
-                            select new
-                            {
-                                StoryID = s.StoryID,
-                                Title = s.Title,
-                                CoverImage = s.CoverImage,
-                                CompletionStatus = s.IsComplete ? "completed" : "updating",
-                                PublisherName = u.Username,
-                                Views = s.Views,
-                                Likes = s.Likes,
-                                Type = s.Type,
-                                LastestChapter = latestChapter != null ? latestChapter.ChapterNumber : 0,
-                                ChapterCount = chapterCount,
-                                AverageRating = averageRating
-                            };
+                if (!filteredStoryIds.Any())
+                    return new List<dynamic>();
 
-                return await query.ToListAsync<dynamic>();
+                var users = await _context.Users
+                    .ToDictionaryAsync(u => u.UserID, u => u.Username);
+
+                var chapterCounts = await _context.Chapters
+                    .Where(c => filteredStoryIds.Contains(c.StoryID))
+                    .GroupBy(c => c.StoryID)
+                    .Select(g => new { g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.Key, x => x.Count);
+
+                var latestChapters = await _context.Chapters
+                    .Where(c => filteredStoryIds.Contains(c.StoryID))
+                    .GroupBy(c => c.StoryID)
+                    .Select(g => new
+                    {
+                        g.Key,
+                        Latest = g.OrderByDescending(c => c.CreatedAt).FirstOrDefault().ChapterNumber
+                    })
+                    .ToDictionaryAsync(x => x.Key, x => x.Latest);
+
+                var ratings = await _context.Ratings
+                    .Where(r => filteredStoryIds.Contains(r.StoryID))
+                    .GroupBy(r => r.StoryID)
+                    .Select(g => new { g.Key, Avg = g.Average(r => (double?)r.RatingValue) ?? 0 })
+                    .ToDictionaryAsync(x => x.Key, x => x.Avg);
+
+                var stories = await _context.Stories
+                    .Where(s => filteredStoryIds.Contains(s.StoryID))
+                    .Select(s => new
+                    {
+                        s.StoryID,
+                        s.Title,
+                        s.CoverImage,
+                        s.IsComplete,
+                        s.PublisherID,
+                        s.Views,
+                        s.Likes,
+                        s.Type
+                    })
+                    .ToListAsync();
+
+                var result = stories.Select(s => new
+                {
+                    s.StoryID,
+                    s.Title,
+                    s.CoverImage,
+                    CompletionStatus = s.IsComplete ? "completed" : "updating",
+                    PublisherName = users.ContainsKey(s.PublisherID) ? users[s.PublisherID] : "Unknown",
+                    s.Views,
+                    s.Likes,
+                    s.Type,
+                    ChapterCount = chapterCounts.TryGetValue(s.StoryID, out var count) ? count : 0,
+                    LastestChapter = latestChapters.TryGetValue(s.StoryID, out var latest) ? latest : 0,
+                    AverageRating = ratings.TryGetValue(s.StoryID, out var avg) ? avg : 0
+                }).ToList<dynamic>();
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -1241,67 +1299,97 @@ namespace ComicParadise.Repository
             }
         }
 
+
         #endregion
 
-        #region Filter story by category name
+        #region Filter story by category name - Done
         public async Task<List<dynamic>> FilterStoriesByCategoryNameAsync(string categoryName)
         {
             try
             {
-                // Tìm CategoryID từ categoryName
+                if (string.IsNullOrWhiteSpace(categoryName))
+                    return new List<dynamic>();
+
                 var category = await _context.Categories
                     .FirstOrDefaultAsync(c => c.CategoryName == categoryName);
 
                 if (category == null)
-                {
-                    return new List<dynamic>(); // Không tìm thấy thể loại
-                }
+                    return new List<dynamic>(); 
 
                 int? categoryId = category.CategoryID;
 
-                // Lấy danh sách các StoryID có CategoryID tương ứng
-                var filteredStoryIds = await _context.StoryCategoriesMapping
+                var storyIds = await _context.StoryCategoriesMapping
                     .Where(sc => sc.CategoryID == categoryId)
                     .Select(sc => sc.StoryID)
                     .Distinct()
                     .ToListAsync();
 
-                // Truy vấn thông tin chi tiết truyện
-                var query = from s in _context.Stories
-                            join u in _context.Users on s.PublisherID equals u.UserID
-                            where filteredStoryIds.Contains(s.StoryID)
-                            let latestChapter = _context.Chapters
-                                .Where(c => c.StoryID == s.StoryID)
-                                .OrderByDescending(c => c.CreatedAt)
-                                .FirstOrDefault()
-                            let chapterCount = _context.Chapters
-                                .Count(c => c.StoryID == s.StoryID)
-                            let averageRating = _context.Ratings
-                                .Where(r => r.StoryID == s.StoryID)
-                                .Select(r => (double?)r.RatingValue)
-                                .Average() ?? 0
-                            select new
-                            {
-                                StoryID = s.StoryID,
-                                Title = s.Title,
-                                CoverImage = s.CoverImage,
-                                CompletionStatus = s.IsComplete ? "completed" : "updating",
-                                PublisherName = u.Username,
-                                Views = s.Views,
-                                Likes = s.Likes,
-                                Type = s.Type,
-                                LastestChapter = latestChapter != null ? latestChapter.ChapterNumber : 0,
-                                ChapterCount = chapterCount,
-                                AverageRating = averageRating
-                            };
+                if (!storyIds.Any())
+                    return new List<dynamic>();
 
-                return await query.ToListAsync<dynamic>();
+                var users = await _context.Users
+                    .ToDictionaryAsync(u => u.UserID, u => u.Username);
+
+                var chapterCounts = await _context.Chapters
+                    .Where(c => storyIds.Contains(c.StoryID))
+                    .GroupBy(c => c.StoryID)
+                    .Select(g => new { g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.Key, x => x.Count);
+
+                var latestChapters = await _context.Chapters
+                    .Where(c => storyIds.Contains(c.StoryID))
+                    .GroupBy(c => c.StoryID)
+                    .Select(g => new
+                    {
+                        g.Key,
+                        Latest = g.OrderByDescending(c => c.CreatedAt).FirstOrDefault().ChapterNumber
+                    })
+                    .ToDictionaryAsync(x => x.Key, x => x.Latest);
+
+                var ratings = await _context.Ratings
+                    .Where(r => storyIds.Contains(r.StoryID))
+                    .GroupBy(r => r.StoryID)
+                    .Select(g => new { g.Key, Avg = g.Average(r => (double?)r.RatingValue) ?? 0 })
+                    .ToDictionaryAsync(x => x.Key, x => x.Avg);
+
+                var stories = await _context.Stories
+                    .Where(s => storyIds.Contains(s.StoryID))
+                    .Select(s => new
+                    {
+                        s.StoryID,
+                        s.Title,
+                        s.CoverImage,
+                        s.IsComplete,
+                        s.PublisherID,
+                        s.Views,
+                        s.Likes,
+                        s.Type
+                    })
+                    .ToListAsync();
+
+                var result = stories.Select(s => new
+                {
+                    s.StoryID,
+                    s.Title,
+                    s.CoverImage,
+                    CompletionStatus = s.IsComplete ? "completed" : "updating",
+                    PublisherName = users.ContainsKey(s.PublisherID) ? users[s.PublisherID] : "Unknown",
+                    s.Views,
+                    s.Likes,
+                    s.Type,
+                    ChapterCount = chapterCounts.TryGetValue(s.StoryID, out var count) ? count : 0,
+                    LastestChapter = latestChapters.TryGetValue(s.StoryID, out var latest) ? latest : 0,
+                    AverageRating = ratings.TryGetValue(s.StoryID, out var avg) ? avg : 0
+                }).ToList<dynamic>();
+
+                return result;
             }
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi lọc truyện theo tên thể loại: " + ex.Message);
             }
         }
+
 
         #endregion
     }
