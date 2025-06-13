@@ -179,8 +179,19 @@
             </div>
           </div>
         </div>
+
+        <div class="text-center my-4" *ngIf="hasMoreCurrentUpdateStories">
+          <div class="d-flex align-items-center justify-content-center">
+            <div class="flex-grow-1 border-top"></div>
+            <button class="btn btn-primary px-4 py-2 mx-3 rounded-pill shadow-sm"
+              (click)="loadMoreCurrentUpdateStories()">Xem thêm</button>
+            <div class="flex-grow-1 border-top"></div>
+          </div>
+        </div>
+
       </div>
 
+      <!-- Truyện TOP -->
       <div class="row">
         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
           <p-tabs [(value)]="selectedTab" (valueChange)="onTabChange($event)">
@@ -193,41 +204,29 @@
               <!-- Tab Top tháng -->
               <p-tabpanel value="0">
                 <!-- Skeleton Top tháng -->
-                <div class="row p-3" *ngIf="!topStories || topStories.length === 0">
+                <div class="row p-3" *ngIf="!topStoriesMonth || topStoriesMonth.length === 0">
                   <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3"
                     *ngFor="let item of [1, 2, 3, 4]">
 
-                    <!-- Hình ảnh -->
                     <div class="top-item-img me-2">
                       <p-skeleton height="150px" width="120px">
                       </p-skeleton>
                     </div>
 
-                    <!-- Thông tin item -->
                     <div class="top-item-infor d-flex flex-column flex-grow-8">
-                      <!-- Tên -->
                       <div class="mb-2 top-infor-name">
                         <p-skeleton width="80%" class="mb-2"></p-skeleton>
                       </div>
 
-                      <!-- Danh mục -->
-                      <!-- <div class="mb-2 top-infor-category mb-1 ">
-                        <p-skeleton width="30%" class="mb-2" *ngFor="let category of [1, 2]"></p-skeleton>
-                        <p-skeleton width="100%" class="mb-2"></p-skeleton>
-                      </div> -->
-
-                      <!-- Mô tả -->
                       <div class="mb-2 top-infor-description ">
                         <p-skeleton width="90%" class="mb-2" height="50px"></p-skeleton>
                       </div>
 
-                      <!-- Phản ứng -->
                       <div class="mb-2 top-infor-reaction d-flex justify-content-between align-items-center">
                         <p-skeleton width="35px" height="16px" [style]="{'border-radius': '10px'}"></p-skeleton>
                         <p-skeleton width="35px" height="16px" [style]="{'border-radius': '10px'}"></p-skeleton>
                       </div>
 
-                      <!-- Đọc ngay -->
                       <div class="mb-2 top-infor-read-now text-center d-flex justify-content-end">
                         <p-skeleton width="70px" height="30px" [style]="{'border-radius': '5px'}"></p-skeleton>
                       </div>
@@ -237,7 +236,7 @@
 
                 <div class="row p-3">
                   <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3"
-                    *ngFor="let story of topStories | slice:0:displayLimit">
+                    *ngFor="let story of topStoriesMonth | slice:0:displayLimitMonth">
                     <div class="top-item-img flex-grow-2 me-2">
                       <img [src]="story.coverImage" alt="Slide Image" class="w-100">
                     </div>
@@ -247,7 +246,7 @@
                       </div>
                       <div class="top-infor-category mb-1 d-flex flex-wrap">
                         <div class="d-flex" *ngFor="let category of story.categories">
-                          <p-tag severity="secondary" value="{{category}}" [rounded]="true"
+                          <p-tag severity="secondary" [value]="category" [rounded]="true"
                             class="me-1 mt-1 custom-tag" />
                         </div>
                       </div>
@@ -269,20 +268,13 @@
                     </div>
                   </div>
                 </div>
-                <!-- <div class="d-flex my-2 top-next align-items-center justify-content-center"
-                  *ngIf="topStories && displayLimit < topStories.length">
-                  <div class="top-next-icon me-1">
-                    <i class="pi pi-angle-down"></i>
-                  </div>
-                  <div class="top-next-text" (click)="showMore()">
-                    Xem thêm
-                  </div>
-                </div> -->
-                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3">
-                  <div *ngIf="topStories && displayLimit < topStories.length" (click)="showMore()">
+
+                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3"
+                  *ngIf="topStoriesMonth.length > 4">
+                  <div *ngIf="displayLimitMonth < topStoriesMonth.length" (click)="showMoreTopStories('month')">
                     <i class="pi pi-angle-down"></i> Xem thêm
                   </div>
-                  <div *ngIf="displayLimit > 4" (click)="showLess()">
+                  <div *ngIf="displayLimitMonth > 4" (click)="showLessTopStories('month')">
                     <i class="pi pi-angle-up"></i> Thu gọn
                   </div>
                 </div>
@@ -291,41 +283,29 @@
               <!-- Tab Top tuần -->
               <p-tabpanel value="1">
                 <!-- Skeleton Top tuần -->
-                <div class="row p-3" *ngIf="!topStories || topStories.length === 0">
+                <div class="row p-3" *ngIf="!topStoriesWeek || topStoriesWeek.length === 0">
                   <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3"
                     *ngFor="let item of [1, 2, 3, 4]">
 
-                    <!-- Hình ảnh -->
                     <div class="top-item-img me-2">
                       <p-skeleton height="150px" width="120px">
                       </p-skeleton>
                     </div>
 
-                    <!-- Thông tin item -->
                     <div class="top-item-infor d-flex flex-column flex-grow-8">
-                      <!-- Tên -->
                       <div class="mb-2 top-infor-name">
                         <p-skeleton width="80%" class="mb-2"></p-skeleton>
                       </div>
 
-                      <!-- Danh mục -->
-                      <!-- <div class="mb-2 top-infor-category mb-1 ">
-                                        <p-skeleton width="30%" class="mb-2" *ngFor="let category of [1, 2]"></p-skeleton>
-                                        <p-skeleton width="100%" class="mb-2"></p-skeleton>
-                                      </div> -->
-
-                      <!-- Mô tả -->
                       <div class="mb-2 top-infor-description ">
                         <p-skeleton width="90%" class="mb-2" height="50px"></p-skeleton>
                       </div>
 
-                      <!-- Phản ứng -->
                       <div class="mb-2 top-infor-reaction d-flex justify-content-between align-items-center">
                         <p-skeleton width="35px" height="16px" [style]="{'border-radius': '10px'}"></p-skeleton>
                         <p-skeleton width="35px" height="16px" [style]="{'border-radius': '10px'}"></p-skeleton>
                       </div>
 
-                      <!-- Đọc ngay -->
                       <div class="mb-2 top-infor-read-now text-center d-flex justify-content-end">
                         <p-skeleton width="70px" height="30px" [style]="{'border-radius': '5px'}"></p-skeleton>
                       </div>
@@ -335,7 +315,7 @@
 
                 <div class="row p-3">
                   <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3"
-                    *ngFor="let story of topStories | slice:0:displayLimit">
+                    *ngFor="let story of topStoriesWeek | slice:0:displayLimitWeek">
                     <div class="top-item-img flex-grow-2 me-2">
                       <img [src]="story.coverImage" alt="Slide Image" class="w-100">
                     </div>
@@ -367,20 +347,13 @@
                     </div>
                   </div>
                 </div>
-                <!-- <div class="d-flex my-2 top-next align-items-center justify-content-center"
-                  *ngIf="topStories && displayLimit < topStories.length">
-                  <div class="top-next-icon me-1">
-                    <i class="pi pi-angle-down"></i>
-                  </div>
-                  <div class="top-next-text" (click)="showMore()">
-                    Xem thêm
-                  </div>
-                </div> -->
-                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3">
-                  <div *ngIf="topStories && displayLimit < topStories.length" (click)="showMore()">
+
+                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3"
+                  *ngIf="topStoriesWeek.length > 4">
+                  <div *ngIf="displayLimitWeek < topStoriesWeek.length" (click)="showMoreTopStories('week')">
                     <i class="pi pi-angle-down"></i> Xem thêm
                   </div>
-                  <div *ngIf="displayLimit > 4" (click)="showLess()">
+                  <div *ngIf="displayLimitWeek > 4" (click)="showLessTopStories('week')">
                     <i class="pi pi-angle-up"></i> Thu gọn
                   </div>
                 </div>
@@ -389,41 +362,29 @@
               <!-- Tab Top ngày -->
               <p-tabpanel value="2">
                 <!-- Skeleton Top ngày -->
-                <div class="row p-3" *ngIf="!topStories || topStories.length === 0">
+                <div class="row p-3" *ngIf="!topStoriesDay || topStoriesDay.length === 0">
                   <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3"
                     *ngFor="let item of [1, 2, 3, 4]">
 
-                    <!-- Hình ảnh -->
                     <div class="top-item-img me-2">
                       <p-skeleton height="150px" width="120px">
                       </p-skeleton>
                     </div>
 
-                    <!-- Thông tin item -->
                     <div class="top-item-infor d-flex flex-column flex-grow-8">
-                      <!-- Tên -->
                       <div class="mb-2 top-infor-name">
                         <p-skeleton width="80%" class="mb-2"></p-skeleton>
                       </div>
 
-                      <!-- Danh mục -->
-                      <!-- <div class="mb-2 top-infor-category mb-1 ">
-                                        <p-skeleton width="30%" class="mb-2" *ngFor="let category of [1, 2]"></p-skeleton>
-                                        <p-skeleton width="100%" class="mb-2"></p-skeleton>
-                                      </div> -->
-
-                      <!-- Mô tả -->
                       <div class="mb-2 top-infor-description ">
                         <p-skeleton width="90%" class="mb-2" height="50px"></p-skeleton>
                       </div>
 
-                      <!-- Phản ứng -->
                       <div class="mb-2 top-infor-reaction d-flex justify-content-between align-items-center">
                         <p-skeleton width="35px" height="16px" [style]="{'border-radius': '10px'}"></p-skeleton>
                         <p-skeleton width="35px" height="16px" [style]="{'border-radius': '10px'}"></p-skeleton>
                       </div>
 
-                      <!-- Đọc ngay -->
                       <div class="mb-2 top-infor-read-now text-center d-flex justify-content-end">
                         <p-skeleton width="70px" height="30px" [style]="{'border-radius': '5px'}"></p-skeleton>
                       </div>
@@ -433,7 +394,7 @@
 
                 <div class="row p-3">
                   <div class="top-item col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 px-3"
-                    *ngFor="let story of topStories | slice:0:displayLimit">
+                    *ngFor="let story of topStoriesDay | slice:0:displayLimitDay">
                     <div class="top-item-img flex-grow-2 me-2">
                       <img [src]="story.coverImage" alt="Slide Image" class="w-100">
                     </div>
@@ -465,11 +426,13 @@
                     </div>
                   </div>
                 </div>
-                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3">
-                  <div *ngIf="topStories && displayLimit < topStories.length" (click)="showMore()">
+
+                <div class="d-flex my-2 top-next align-items-center justify-content-center py-1 mx-3"
+                  *ngIf="topStoriesDay.length > 4">
+                  <div *ngIf="displayLimitDay < topStoriesDay.length" (click)="showMoreTopStories('day')">
                     <i class="pi pi-angle-down"></i> Xem thêm
                   </div>
-                  <div *ngIf="displayLimit > 4" (click)="showLess()">
+                  <div *ngIf="displayLimitDay > 4" (click)="showLessTopStories('day')">
                     <i class="pi pi-angle-up"></i> Thu gọn
                   </div>
                 </div>
@@ -549,6 +512,16 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Nút Xem thêm -->
+        <div class="text-center my-4" *ngIf="hasMoreAdvanceStories">
+          <div class="d-flex align-items-center justify-content-center">
+            <div class="flex-grow-1 border-top"></div>
+            <button class="btn btn-primary px-4 py-2 mx-3 rounded-pill shadow-sm"
+              (click)="loadMoreAdvanceStories()">Xem thêm</button>
+            <div class="flex-grow-1 border-top"></div>
           </div>
         </div>
       </div>
@@ -632,4 +605,3 @@
 
 <!-- Chatbot -->
 <app-chatbot></app-chatbot>
-

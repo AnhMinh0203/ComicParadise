@@ -19,8 +19,8 @@ export class storyService {
     this.serviceUri = `${environment.apiUrl}/Story`;
   }
 
-  getCurrentUpdateStories(days: number) {
-    var apiUrl = `${this.serviceUri}/Get-current-update-story?days=${days}`;
+  getCurrentUpdateStories(days: number, pageIndex: number , pageSize: number ) {
+    var apiUrl = `${this.serviceUri}/Get-current-update-story?days=${days}&pageIndex=${pageIndex}&pageSize=${pageSize}`;
     return this.http.get(apiUrl)
       .pipe(
         catchError((error: any) => {
@@ -29,8 +29,8 @@ export class storyService {
       );
   }
 
-  getTopStories(topType: any) {
-    var apiUrl = `${this.serviceUri}/Get-top-story?topType=${topType}`;
+  getTopStories(topType: any, pageIndex: number, pageSize: number) {
+    var apiUrl = `${this.serviceUri}/Get-top-story?topType=${topType}&pageIndex=${pageIndex}&pageSize=${pageSize}`;
     return this.http.get(apiUrl)
       .pipe(
         catchError((error: any) => {
@@ -39,8 +39,8 @@ export class storyService {
       );
   }
 
-  getAdvanceStories(userID: any) {
-    var apiUrl = `${this.serviceUri}/Get-advance-story?userID=${userID}`;
+  getAdvanceStories(userID: any , pageIndex: number, pageSize: number) {
+    var apiUrl = `${this.serviceUri}/Get-advance-story?userID=${userID}&pageIndex=${pageIndex}&pageSize=${pageSize}`;
     return this.http.get(apiUrl)
       .pipe(
         catchError((error: any) => {

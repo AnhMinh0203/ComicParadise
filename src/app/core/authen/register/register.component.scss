@@ -38,23 +38,23 @@ input {
 }
 
 .register-form {
-  background: rgba(255, 255, 255, 0.1); /* màu trắng mờ */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* viền nhẹ */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 15px;
   padding: 25px;
-  backdrop-filter: blur(10px); /* hiệu ứng mờ */
-  -webkit-backdrop-filter: blur(10px); /* hỗ trợ Safari */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  color: #fff; /* nếu chữ bị chìm thì cho trắng */
+  color: #fff;
 }
 
 .register-container {
   // background-color: #1a1a1a;
   background-image: url('../../../../assets/images/background-login2.png');
-  background-size: cover;         /* Cho ảnh phủ kín vùng hiển thị */
-  background-repeat: no-repeat;   /* Không lặp ảnh */
-  background-position: center;    /* Căn giữa ảnh */
-  min-height: 100vh;              /* Đảm bảo chiếm toàn bộ chiều cao màn hình */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
   width: 100%;
   padding: 30px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);

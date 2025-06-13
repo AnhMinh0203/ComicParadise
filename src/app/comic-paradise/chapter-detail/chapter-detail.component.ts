@@ -5,6 +5,7 @@ import { chapterService } from '../service/chapter.service';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
 import { SpeedDialModule } from 'primeng/speeddial';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-chapter-detail',
@@ -21,7 +22,7 @@ export class ChapterDetailComponent {
   chapterContent: any;
   storyID: any;
   chapterNumber: any;
-  currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
+  currentUserId: any;
   chapterList: any[] = []; // lấy từ server
   selectedChapter: any;
 
@@ -47,11 +48,20 @@ export class ChapterDetailComponent {
   ) { }
 
   ngOnInit(): void {
+
+
     this.activatedRoute.paramMap.subscribe(params => {
       this.storyID = +params.get('storyID')!;
       this.chapterNumber = +params.get('chapterNumber')!;
       this.loadChapterList();
       this.loadChapterContent();
+
+      const token = localStorage.getItem('accessToken');;
+      if (!token) {
+        return;
+      }
+      const decoded: any = jwtDecode(token);
+      this.currentUserId = decoded.userID;
 
       if (this.currentUserId) {
         this.checkBookmarkStatus();

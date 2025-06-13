@@ -4,9 +4,9 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
 import { SharedModule } from '../../share/shared.module';
 import { AuthenService } from '../service/authen.service';
+import { ResponseHandler } from '../../helpers/response-handler';
 
 @Component({
   selector: 'app-reset-password',
@@ -18,7 +18,6 @@ import { AuthenService } from '../service/authen.service';
     ToastModule,
     SharedModule
   ],
-  providers: [MessageService],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss'
 })
@@ -28,16 +27,16 @@ export class ResetPasswordComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private messageService: MessageService,
     private route: ActivatedRoute,
     private _authenService: AuthenService,
+    private _responseHandle: ResponseHandler
   ) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      this.token = params['token'];
-      console.log('Token:', this.token); // Kiểm tra trong console
+      this.token = params['token'] || '';
     });
+
 
     this.resetForm = this.fb.group({
       newPassword: ['', [Validators.required]],
@@ -53,12 +52,10 @@ export class ResetPasswordComponent {
 
   onSubmit() {
     if (this.resetForm.invalid) {
-      if (this.resetForm.errors?.['mismatch']) {
-        this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Mật khẩu không khớp!' });
-      } else {
-        this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng điền đầy đủ thông tin!' });
-      }
-      return;
+      const msg = this.resetForm.errors?.['mismatch']
+        ? 'Mật khẩu không khớp!'
+        : 'Vui lòng điền đầy đủ thông tin';
+      return this._responseHandle.showWarning(msg);
     }
 
     const resetPayload = {
@@ -68,15 +65,14 @@ export class ResetPasswordComponent {
 
     this._authenService.resetPassword(resetPayload).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: res.data});
+        this._responseHandle.showwSuccess(res.message);
         setTimeout(() => {
           this.router.navigate(['/login']);
-        }, 1500);
+        }, 1000);
       }
       else {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Đặt lại mật khẩu thất bại!' });
+        this._responseHandle.showError(res.message);
       }
-
     });
   }
 }

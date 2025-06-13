@@ -1,0 +1,6 @@
+.angular/cache
+node_modules
+.git
+*.log
+Dockerfile
+docker-compose.yml

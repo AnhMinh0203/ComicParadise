@@ -6,7 +6,7 @@ import { catchError } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthenService {
-  private apiUrl = `${environment.apiUrl}/Authen`;
+  apiUrl = `${environment.apiUrl}/Authen`;
   constructor(private http: HttpClient) { }
 
   login(model: any) {

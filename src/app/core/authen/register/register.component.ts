@@ -10,9 +10,10 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SharedModule } from '../../share/shared.module';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ResponseHandler } from '../../helpers/response-handler';
 @Component({
   selector: 'app-register',
-  standalone: true,  // Standalone component
+  standalone: true,
   imports: [
     SharedModule,
     CommonModule,
@@ -36,7 +37,7 @@ export class RegisterComponent {
     private fb: FormBuilder,
     private router: Router,
     private _authenService: AuthenService,
-    private messageService: MessageService
+    private _responseHandler: ResponseHandler
 
   ) {
     this.registerForm = this.fb.group({
@@ -44,8 +45,8 @@ export class RegisterComponent {
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{9,11}$')]],
       email: ['', [Validators.required, Validators.email]],
       passwordHash: ['', [Validators.required]],
-      passwordHashConfirm: ['', [Validators.required]], // Thêm xác nhận mật khẩu
-      role: [false] // Thêm isPublisher vào form
+      passwordHashConfirm: ['', [Validators.required]],
+      role: [false]
     });
   }
 
@@ -55,38 +56,22 @@ export class RegisterComponent {
 
   onRegister() {
     if (this.registerForm.controls['email'].errors?.['email']) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Email không hợp lệ!'
-      });
+      this._responseHandler.showWarning('Email không hợp lệ!');
       return;
     }
 
     if (this.registerForm.controls['phone'].errors?.['pattern']) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Số điện thoại không hợp lệ!'
-      });
+      this._responseHandler.showWarning('Số điện thoại không hợp lệ!');
       return;
     }
 
     if (this.registerForm.invalid) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Vui lòng nhập đầy đủ thông tin!'
-      });
+      this._responseHandler.showWarning('Vui lòng điền đầy đủ thông tin!');
       return;
     }
 
     if (this.registerForm.value.passwordHash !== this.registerForm.value.passwordHashConfirm) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Mật khẩu xác nhận không khớp!'
-      });
+      this._responseHandler.showWarning('Mật khẩu không khớp!');
       return;
     }
 
@@ -99,13 +84,12 @@ export class RegisterComponent {
     }
     this._authenService.register(model).subscribe((res: any) => {
       if (res && res.isSuccess) {
-
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: 'Đăng ký thành công' });
+        this._responseHandler.showwSuccess(res.message);
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 1000);
-
       }
+      this._responseHandler.showWarning(res.message);
     })
   }
 

@@ -6,6 +6,7 @@ import { ChapterDetailComponent } from './comic-paradise/chapter-detail/chapter-
 import { AboutUsComponent } from './comic-paradise/about-us/about-us.component';
 import { RegisterComponent } from './core/authen/register/register.component';
 import { ResetPasswordComponent } from './core/authen/reset-password/reset-password.component';
+import { GoogleCallbackComponent } from './core/authen/login/login-with-google/google-callback.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -16,5 +17,9 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
+  {
+    path: 'login-google-success', component: GoogleCallbackComponent
+  },
+
   { path: '**', redirectTo: 'home' },
 ];

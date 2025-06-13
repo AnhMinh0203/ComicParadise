@@ -11,6 +11,7 @@ import { FooterComponent } from "./layouts/footer/footer.component";
 import { SidebarComponent } from "./layouts/sidebar/sidebar.component";
 import { filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { ToastModule } from 'primeng/toast';
 @Component({
   selector: 'app-root',
   imports: [
@@ -21,7 +22,10 @@ import { CommonModule } from '@angular/common';
     RouterOutlet,
     NavbarComponent,
     FooterComponent,
-    SidebarComponent],
+    SidebarComponent,
+    ToastModule
+  ],
+  providers: [],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None  // Tắt encapsulation

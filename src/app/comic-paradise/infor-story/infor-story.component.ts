@@ -18,6 +18,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { SignalRService } from '../../layouts/service/signalR.service';
 import { ReportService } from '../service/report.service';
 import { RatingModule } from 'primeng/rating';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-infor-story',
@@ -60,7 +61,8 @@ export class InforStoryComponent {
   isLiked: boolean = false;
   isReportCommentForm: boolean = false;
   isReportStoryForm: boolean = false;
-  currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
+
+  currentUserId: any;
   favoriteStories: any[] = [];
   replyingCommentId: any;
   linkToMarkChapter: any;
@@ -119,6 +121,8 @@ export class InforStoryComponent {
   ) { }
 
   ngOnInit() {
+
+
     this.activatedRoute.paramMap.subscribe(async params => {
       const id = params.get('storyID');
       if (id) {
@@ -130,7 +134,14 @@ export class InforStoryComponent {
         this.getStoryDetail(this.storyID);
         this.getStoryRating(this.storyID);
 
-        if(this.currentUserId) {
+        const token = localStorage.getItem('accessToken');;
+        if (!token) {
+          return;
+        }
+        const decoded: any = jwtDecode(token);
+        this.currentUserId = decoded.userID;
+
+        if (this.currentUserId) {
           this.checkIsLikeStory();
           this.getMarkChapter();
           this.getUserRating(this.storyID, this.currentUserId);
@@ -206,7 +217,6 @@ export class InforStoryComponent {
   }
 
   async getStoryDetail(storyID: number) {
-    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
     const res: any = await firstValueFrom(this._storyService.getStoryById(storyID));
 
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
@@ -221,7 +231,7 @@ export class InforStoryComponent {
 
       this.comments = this.comments.map((comment: any) => {
         // Tìm reaction của user hiện tại trong danh sách reactions
-        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === currentUserId);
+        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
         return {
           commentID: comment.commentID.toString(),
           label: comment.username || 'Người dùng',
@@ -264,7 +274,7 @@ export class InforStoryComponent {
 
   // --- Comment ---//
   postComment() {
-    if(!this.currentUserId) {
+    if (!this.currentUserId) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để bình luận" });
       return;
     }
@@ -277,7 +287,7 @@ export class InforStoryComponent {
 
     const comment = {
       StoryID: this.storyID,
-      UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserID: this.currentUserId,
       Content: this.commentInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",
@@ -288,7 +298,7 @@ export class InforStoryComponent {
       if (res && res.isSuccess == true) {
         var userName = JSON.parse(localStorage.getItem('user') || '{}').username
         const newComment = {
-          userID: JSON.parse(localStorage.getItem('user') || '{}').userID,
+          userID: this.currentUserId,
           commentID: res.data.commentID,
           label: userName,
           avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
@@ -313,7 +323,7 @@ export class InforStoryComponent {
   }
 
   replyComment(comment: any) {
-    if(!this.currentUserId) {
+    if (!this.currentUserId) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để bình luận" });
       return;
     }
@@ -324,7 +334,7 @@ export class InforStoryComponent {
     }
     const responseComment = {
       StoryID: this.storyID,
-      UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserID: this.currentUserId,
       Content: this.commenReplytInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",
@@ -372,7 +382,7 @@ export class InforStoryComponent {
   }
 
   onLike(comment: any) {
-    if(!this.currentUserId) {
+    if (!this.currentUserId) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập" });
       return;
     }
@@ -394,7 +404,7 @@ export class InforStoryComponent {
     }
     const reaction = {
       CommentId: comment.commentID,
-      UserId: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserId: this.currentUserId,
       IsLike: true,
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
@@ -408,7 +418,7 @@ export class InforStoryComponent {
   }
 
   onDislike(comment: any) {
-    if(!this.currentUserId) {
+    if (!this.currentUserId) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập" });
       return;
     }
@@ -428,7 +438,7 @@ export class InforStoryComponent {
     }
     const reaction = {
       CommentId: comment.commentID,
-      UserId: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserId: this.currentUserId,
       IsLike: false,
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
@@ -443,7 +453,7 @@ export class InforStoryComponent {
 
 
   onLikeStory() {
-    if(!this.currentUserId) {
+    if (!this.currentUserId) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để thích truyện" });
       return;
     }
@@ -465,9 +475,6 @@ export class InforStoryComponent {
         }
       }
     })
-
-    // const userId = JSON.parse(localStorage.getItem('user') || '{}').userID;
-    // this.signalRService.followStory(userId, this.storyID);
   }
 
   reportCommentForm() {
@@ -512,7 +519,7 @@ export class InforStoryComponent {
 
   onReportComment() {
     const report = {
-      CreatedBy: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      CreatedBy: this.currentUserId,
       TargetType: "ReportComment",
       Reason: this.selectedCommentReason,
       TargetID: this.currentComment.commentID,
@@ -531,7 +538,7 @@ export class InforStoryComponent {
 
   onReportStory() {
     const report = {
-      CreatedBy: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      CreatedBy: this.currentUserId,
       TargetType: "ReportStory",
       Reason: this.selectedStoryReason,
       TargetID: this.storyID,
@@ -565,7 +572,7 @@ export class InforStoryComponent {
   }
 
   ratingStory() {
-    if(!this.currentUserId){
+    if (!this.currentUserId) {
       this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để đánh giá" });
       return;
     }

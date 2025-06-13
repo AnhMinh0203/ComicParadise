@@ -8,6 +8,7 @@ import { AuthenService } from '../service/authen.service';
 import { MessageService } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SharedModule } from '../../share/shared.module';
+import { ResponseHandler } from '../../helpers/response-handler';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -24,30 +25,32 @@ import { SharedModule } from '../../share/shared.module';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
+
 export class LoginComponent {
   loginForm: any;
   isForgotPassword: boolean = false;
-  test: any
   email: string = '';
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private _authenService: AuthenService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private _responseHandle: ResponseHandler,
 
   ) { }
 
   ngOnInit() {
-    // Khởi tạo form khi component được khởi tạo
     this.loginForm = this.fb.group({
-      identifier: ['', [Validators.required]],  // Email hoặc số điện thoại
+      identifier: ['', [Validators.required]],
       passwordHash: ['', [Validators.required]],
     });
   }
 
   onLogin() {
     if (this.loginForm.invalid) {
-      return;  // Dừng lại nếu form không hợp lệ
+      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng điền đủ thông tin!' });
+      return;
     }
 
     const model = {
@@ -58,9 +61,8 @@ export class LoginComponent {
     this._authenService.login(model).subscribe((res: any) => {
       if (res && res.status === 200) {
 
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user)); // user có thể là object, nên vẫn giữ JSON.stringify
-        localStorage.setItem('refreshToken', res.refreshToken);
+        localStorage.setItem('accessToken', res.data.accessToken);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
 
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Đăng nhập thành công!' });
         setTimeout(() => {
@@ -78,12 +80,13 @@ export class LoginComponent {
     this.isForgotPassword = !this.isForgotPassword;
   }
 
-  // onRegister() {
-  //   console.log('Chuyển hướng đến trang đăng ký');
-  // }
+  loginWithGoogle() {
+    // window.location.href = `${this._authenService.apiUrl}/google-login`;
+    alert('Chức năng đang cập nhật');
+  }
 
-  loginWith(provider: string) {
-    console.log(`Đăng nhập với ${provider}`);
+  loginWithFacebook() {
+    alert('Chức năng đang cập nhật');
   }
 
   navigateToRegister() {
@@ -94,9 +97,9 @@ export class LoginComponent {
     const email = encodeURIComponent(this.email); // Mã hóa email để sử dụng trong URL
     this._authenService.requestPasswordReset(email).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: res.data });
+        this._responseHandle.showwSuccess(res.message);
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message });
+        this._responseHandle.showError(res.message);
       }
     });
   }

@@ -3,7 +3,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SharedModule } from '../../core/share/shared.module';
 import { ThemeService } from '../../core/share/theme.service';
 import { MegaMenuModule } from 'primeng/megamenu';
-import { ConfirmationService, MegaMenuItem, MenuItem, MessageService } from 'primeng/api';
+import { ConfirmationService, MegaMenuItem, MenuItem } from 'primeng/api';
 import { SidebarService } from '../service/sidebar.service';
 import { categoryService } from '../service/category.service';
 import { HttpClient } from '@angular/common/http';
@@ -25,6 +25,8 @@ import { ListboxModule } from 'primeng/listbox';
 import { SharedService } from '../service/share.service';
 import { DropdownModule } from 'primeng/dropdown';
 import { AuthenService } from '../../core/authen/service/authen.service';
+import { jwtDecode } from 'jwt-decode';
+import { ResponseHandler } from '../../core/helpers/response-handler';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -40,16 +42,16 @@ import { AuthenService } from '../../core/authen/service/authen.service';
     PasswordModule,
     RadioButtonModule,
     ListboxModule,
-    DropdownModule
+    DropdownModule,
+
   ],
-  providers: [ConfirmationService, MessageService, SignalRService,
+  providers: [ConfirmationService, SignalRService,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
   isDarkMode: boolean = false;
-  // categoryItems: MegaMenuItem[] | undefined;
   categoryItems: any;
   visibleNotify: any;
   searchKey: any;
@@ -58,7 +60,7 @@ export class NavbarComponent {
   filterStoryByCategoriesResults: any;
   userID: any;
   userInitial: string = '';
-userAvatarUrl?: string;
+  userAvatarUrl?: string;
 
   // Actions personal
   visibleUpdateForm: boolean = false;
@@ -88,10 +90,6 @@ userAvatarUrl?: string;
         {
           label: 'Ẩn thông báo', icon: 'pi pi-eye-slash', command: () => this.turnOffNotification(this.currentNotify)
         },
-        // {
-        //   label: 'tắt thông bao',
-        //   icon: 'pi pi-upload'
-        // }
       ]
     }
   ];
@@ -142,9 +140,9 @@ userAvatarUrl?: string;
     private _authenService: AuthenService,
     private http: HttpClient,
     private router: Router,
-    private messageService: MessageService,
     private signalRService: SignalRService,
     private _memberService: memberService,
+    private _responseHandle: ResponseHandler,
     private cdr: ChangeDetectorRef
   ) {
 
@@ -166,16 +164,14 @@ userAvatarUrl?: string;
   }
 
   ngOnInit() {
-
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.userID = user.userID;
-
-    if (!this.userID) {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
       return;
     }
-
-    this.userInitial = this.getUserInitial(user.username || '');
-    this.userAvatarUrl = user.avatar || null;
+    const decoded: any = jwtDecode(token);
+    this.userID = decoded.userID;
+    this.userInitial = this.getUserInitial(decoded.username || '');
+    this.userAvatarUrl = decoded.avatar || null;
     this.getCategories();
     this.initializeSignalR();
 
@@ -269,24 +265,6 @@ userAvatarUrl?: string;
     this.themeService.setDarkMode(this.isDarkMode);
   }
 
-  // getCategories() {
-  //   this._categoryService.getCategories().subscribe((res: any) => {
-  //     if (res && res.isSuccess === true) {
-  //       const itemsPerColumn = 2; // Số danh mục mỗi cột
-  //       const columns = [];
-  //       for (let i = 0; i < res.data.length; i += itemsPerColumn) {
-  //         columns.push(res.data.slice(i, i + itemsPerColumn));
-  //       }
-  //       this.categoryItems = [
-  //         {
-  //           label: 'Thể loại',
-  //           items: columns
-  //         }
-  //       ];
-  //     }
-  //   });
-  // }
-
   getCategories() {
     this._categoryService.getCategories().subscribe((res: any) => {
       if (res?.isSuccess) {
@@ -295,17 +273,14 @@ userAvatarUrl?: string;
     });
   }
 
-
-
-
   navigateToContact() {
     this.router.navigate(['/about-us']);
   }
 
   showDialogNotify() {
 
-    this.unreadNotification = 0; // Đặt về 0 ngay lập tức
-    this.cdr.detectChanges(); // Cập nhật giao diện ngay lập tức
+    this.unreadNotification = 0;
+    this.cdr.detectChanges();
     this.loadNotifications();
     this.visibleNotify = true;
   }
@@ -382,12 +357,9 @@ userAvatarUrl?: string;
   onUpload(event: any) {
     const file = event.files[0];
     const maxSizeKB = 1000;
+
     if (file.size / 1024 > maxSizeKB) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Kích thước ảnh không được lớn hơn 1MB'
-      });
+      this._responseHandle.showWarning(`Kích thước ảnh không được lớn hơn 1MB`);
       return;
     }
 
@@ -411,7 +383,7 @@ userAvatarUrl?: string;
 
     this.userInitial = this.getUserInitial(this.inforMember.username || '');
     if (this.newPassword && this.newPassword != this.comfirmPassword) {
-      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Mật khẩu không khớp' });
+      this._responseHandle.showWarning('Mật khẩu không khớp');
       return;
     }
     else {
@@ -424,22 +396,22 @@ userAvatarUrl?: string;
 
     this._memberService.updateMember(formData).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandle.showwSuccess(res.data);
       }
       else {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+        this._responseHandle.showError(res.data);
       }
     });
   }
 
   changePassword() {
     if (!this.oldPassword || !this.newPassword || !this.comfirmPassword) {
-      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Vui lòng nhập đầy đủ thông tin' });
+      this._responseHandle.showWarning('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
     if (this.newPassword !== this.comfirmPassword) {
-      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Mật khẩu không khớp' });
+      this._responseHandle.showWarning('Mật khẩu không khớp');
       return;
     }
     const formData = new FormData();
@@ -452,14 +424,11 @@ userAvatarUrl?: string;
       newPassword: this.newPassword
     };
 
-    this._authenService.changePassword(changePasswordData).subscribe((res: any) => {
-      if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
-      }
-      else {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
-      }
+    this._authenService.changePassword(changePasswordData).subscribe({
+      next: (res:any) => this._responseHandle.handleResponse(res),
+      error: () => this._responseHandle.showError('Lỗi hệ thống, vui lòng thử lại sau.')
     });
+
   }
 
   showFormUpdateMemberInfor() {
@@ -488,7 +457,7 @@ userAvatarUrl?: string;
       this.historyStories = res.data;
       this.cdr.detectChanges();  // Cập nhật giao diện ngay lập tức
     } else {
-      this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+      this._responseHandle.showError(res.data);
     }
   }
 
@@ -555,9 +524,7 @@ userAvatarUrl?: string;
     }
     else {
       this.onDeleteHistory(null)
-
     }
-
   }
 
   onLikeStory(storyID?: any) {
@@ -567,11 +534,11 @@ userAvatarUrl?: string;
   onDeleteHistory(storyID?: any) {
     this._memberService.deleteReadingHistory(this.userID, storyID).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandle.showwSuccess(res.data);
         this.getReadingHistoriesByRange(this.selectedHistoryFilter);
       }
       else {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+        this._responseHandle.showError(res.data);
       }
     })
   }
@@ -587,7 +554,7 @@ userAvatarUrl?: string;
   turnOffNotification(currentNotify: any) {
     this._notificationService.turnOffNotifications(currentNotify.notificationID).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandle.showwSuccess(res.data);
         this.newNotifications = this.newNotifications.filter(noti => noti.notificationID !== currentNotify.notificationID);
         this.oldNotifications = this.oldNotifications.filter(noti => noti.notificationID !== currentNotify.notificationID);
       }
@@ -601,15 +568,4 @@ userAvatarUrl?: string;
       this.cdr.detectChanges();
     })
   }
-
-  // navigateToLink(link: string): void {
-  //   console.log(link);
-  //   const url = new URL(link, window.location.origin); // Parse URL
-  //   const basePath = url.pathname; // Lấy path: /stories/4025
-  //   const queryParams = Object.fromEntries(url.searchParams); // Lấy query params: { commentID: "1063" }
-  //   alert(basePath);
-  //   this.router.navigate([basePath], { queryParams });
-  // }
-
-
 }

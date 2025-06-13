@@ -31,7 +31,7 @@ import { importProvidersFrom } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthInterceptor } from './app/core/authen/auth.interceptor';
-
+import { MessageService } from 'primeng/api';
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [
@@ -47,7 +47,8 @@ bootstrapApplication(AppComponent, {
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       })
-    ), provideAnimationsAsync('noop')
+    ), provideAnimationsAsync('noop'),
+    MessageService
   ]
 })
 .catch((err) => console.error(err));
