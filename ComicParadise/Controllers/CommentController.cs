@@ -53,9 +53,9 @@ namespace ComicParadise.Api.Controllers
         }
 
         [HttpGet("Get-comments-by-storyID")]
-        public async Task<ActionResult> GetChaptersByStoryID(int storyID)
+        public async Task<ActionResult> GetChaptersByStoryID(int storyID, int pageIndex, int pageSize)
         {
-            var result = await _commentRepository.GetCommentsByStoryIDAsync(storyID);
+            var result = await _commentRepository.GetCommentsByStoryIDAsync(storyID, pageIndex, pageSize);
             return Ok(new BaseResponse<List<CommentDto>>(true, result));
         }
     }

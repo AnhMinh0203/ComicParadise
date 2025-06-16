@@ -147,111 +147,71 @@ namespace ComicParadise.Repository
         #endregion
 
         #region Get comment by storyID
-        /*public async Task<List<CommentDto>> GetCommentsByStoryIDAsync(int storyID)
+        public async Task<List<CommentDto>> GetCommentsByStoryIDAsync(int storyID, int pageIndex, int pageSize )
         {
-            var comments = await (from cm in _context.Comments
-                                  join u2 in _context.Users on cm.UserID equals u2.UserID into users
-                                  from u2 in users.DefaultIfEmpty()
-                                  where cm.StoryID == storyID && cm.Reply == null
-                                  select new CommentDto
-                                  {
-                                      CommentID = cm.CommentID,
-                                      StoryID = cm.StoryID,
-                                      UserID = cm.UserID,
-                                      Username = u2 != null ? u2.Username : "Người dùng ẩn danh",
-                                      Content = cm.Content,
-                                      CreatedAt = cm.CreatedAt,
-                                      CompletionStatus = cm.CompletionStatus,
-                                      Reply = cm.Reply,
-                                      Likes = cm.Likes,
-                                      DisLikes = cm.DisLikes,
-                                      ChildComments = (from cc in _context.Comments
-                                                       where cc.Reply == cm.CommentID
-                                                       select new CommentDto
-                                                       {
-                                                           CommentID = cc.CommentID,
-                                                           StoryID = cc.StoryID,
-                                                           UserID = cc.UserID,
-                                                           Username = u2 != null ? u2.Username : "Người dùng ẩn danh",
-                                                           Content = cc.Content,
-                                                           CreatedAt = cc.CreatedAt,
-                                                           CompletionStatus = cc.CompletionStatus,
-                                                           Reply = cc.Reply,
-                                                           Likes = cc.Likes,
-                                                           DisLikes = cc.DisLikes,
-                                                           Reactions = (from r in _context.Reactions
-                                                                        join u in _context.Users on r.UserID equals u.UserID
-                                                                        where r.CommentID == cc.CommentID
-                                                                        select r).ToList()
-                                                       }).ToList(),
-                                      Reactions = (from r in _context.Reactions
-                                                   join u in _context.Users on r.UserID equals u.UserID
-                                                   where r.CommentID == cm.CommentID
-                                                   select r).ToList()
-                                  }).ToListAsync();
-            return comments;
-        }*/
+            var parentCommentsQuery = _context.Comments
+                .Where(c => c.StoryID == storyID && c.Reply == null)
+                .OrderByDescending(c => c.CreatedAt);
 
-        public async Task<List<CommentDto>> GetCommentsByStoryIDAsync(int storyID)
-        {
-            // Lấy tất cả comment liên quan đến storyID một lần
-            var allComments = await _context.Comments
-                .Where(c => c.StoryID == storyID)
+            var parentComments = await parentCommentsQuery
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            // Lấy tất cả user liên quan đến các comment
-            var userIds = allComments.Select(c => c.UserID).Distinct().ToList();
+            var parentCommentIds = parentComments.Select(c => c.CommentID).ToList();
+
+            var childComments = await _context.Comments
+                .Where(c => c.Reply != null && parentCommentIds.Contains(c.Reply.Value))
+                .ToListAsync();
+
+            var userIds = parentComments.Select(c => c.UserID)
+                            .Concat(childComments.Select(c => c.UserID))
+                            .Distinct()
+                            .ToList();
+
             var users = await _context.Users
                 .Where(u => userIds.Contains(u.UserID))
                 .ToDictionaryAsync(u => u.UserID, u => u.Username);
 
-            // Lấy tất cả reaction liên quan đến các comment
-            var commentIds = allComments.Select(c => c.CommentID).ToList();
+            var allCommentIds = parentCommentIds.Concat(childComments.Select(c => c.CommentID)).ToList();
             var reactions = await _context.Reactions
-                .Where(r => commentIds.Contains(r.CommentID))
-                .Join(_context.Users,
-                    r => r.UserID,
-                    u => u.UserID,
-                    (r, u) => r)
+                .Where(r => allCommentIds.Contains(r.CommentID))
                 .ToListAsync();
 
-            // Xử lý trong bộ nhớ: phân loại comment cha và con
-            var commentDict = allComments.ToDictionary(c => c.CommentID);
-            var parentComments = allComments
-                .Where(c => c.Reply == null)
-                .Select(c => new CommentDto
-                {
-                    CommentID = c.CommentID,
-                    StoryID = c.StoryID,
-                    UserID = c.UserID,
-                    Username = users.ContainsKey(c.UserID) ? users[c.UserID] : "Người dùng ẩn danh",
-                    Content = c.Content,
-                    CreatedAt = c.CreatedAt,
-                    Status = c.Status,
-                    Reply = c.Reply,
-                    Likes = c.Likes,
-                    DisLikes = c.DisLikes,
-                    ChildComments = allComments
-                        .Where(cc => cc.Reply == c.CommentID)
-                        .Select(cc => new CommentDto
-                        {
-                            CommentID = cc.CommentID,
-                            StoryID = cc.StoryID,
-                            UserID = cc.UserID,
-                            Username = users.ContainsKey(cc.UserID) ? users[cc.UserID] : "Người dùng ẩn danh",
-                            Content = cc.Content,
-                            CreatedAt = cc.CreatedAt,
-                            Status = cc.Status,
-                            Reply = cc.Reply,
-                            Likes = cc.Likes,
-                            DisLikes = cc.DisLikes,
-                            Reactions = reactions.Where(r => r.CommentID == cc.CommentID).ToList()
-                        }).ToList(),
-                    Reactions = reactions.Where(r => r.CommentID == c.CommentID).ToList()
-                }).ToList();
+            var result = parentComments.Select(parent => new CommentDto
+            {
+                CommentID = parent.CommentID,
+                StoryID = parent.StoryID,
+                UserID = parent.UserID,
+                Username = users.GetValueOrDefault(parent.UserID, "Người dùng ẩn danh"),
+                Content = parent.Content,
+                CreatedAt = parent.CreatedAt,
+                Status = parent.Status,
+                Reply = parent.Reply,
+                Likes = parent.Likes,
+                DisLikes = parent.DisLikes,
+                Reactions = reactions.Where(r => r.CommentID == parent.CommentID).ToList(),
+                ChildComments = childComments
+                    .Where(c => c.Reply == parent.CommentID)
+                    .Select(cc => new CommentDto
+                    {
+                        CommentID = cc.CommentID,
+                        StoryID = cc.StoryID,
+                        UserID = cc.UserID,
+                        Username = users.GetValueOrDefault(cc.UserID, "Người dùng ẩn danh"),
+                        Content = cc.Content,
+                        CreatedAt = cc.CreatedAt,
+                        Status = cc.Status,
+                        Reply = cc.Reply,
+                        Likes = cc.Likes,
+                        DisLikes = cc.DisLikes,
+                        Reactions = reactions.Where(r => r.CommentID == cc.CommentID).ToList()
+                    }).ToList()
+            }).ToList();
 
-            return parentComments;
+            return result;
         }
+
         #endregion
 
     }

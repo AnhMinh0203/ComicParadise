@@ -14,6 +14,6 @@ namespace ComicParadise.Repository.Common
         Task<string> UpdateReaction(Reaction reaction);
         Task<string> UpdateStatusCommentAsync(UpdateStatusRequest updateStatusRequest);
         Task<string> DeleteCommentAsync(int commentID);
-        Task<List<CommentDto>> GetCommentsByStoryIDAsync(int storyID);
+        Task<List<CommentDto>> GetCommentsByStoryIDAsync(int storyID, int pageIndex, int pageSize);
     }
 }
