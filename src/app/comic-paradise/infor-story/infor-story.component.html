@@ -233,6 +233,9 @@
           </div>
         </div>
       </div>
+      <div class="text-center my-3" *ngIf="isLoadingComments">
+        <p-progressSpinner styleClass="custom-spinner" />
+      </div>
     </div>
   </p-card>
 </div>

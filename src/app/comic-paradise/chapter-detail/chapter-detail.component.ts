@@ -48,8 +48,6 @@ export class ChapterDetailComponent {
   ) { }
 
   ngOnInit(): void {
-
-
     this.activatedRoute.paramMap.subscribe(params => {
       this.storyID = +params.get('storyID')!;
       this.chapterNumber = +params.get('chapterNumber')!;
@@ -152,19 +150,6 @@ export class ChapterDetailComponent {
 
     this.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
   }
-
-  // mockChapterList() {
-  //   this.chapterList = [
-  //     { title: 'Chương 1: Khởi đầu', number: 1 },
-  //     { title: 'Chương 2: Gặp gỡ định mệnh', number: 2 },
-  //     { title: 'Chương 3: Bí mật được hé lộ', number: 3 },
-  //     { title: 'Chương 4: Đối đầu kẻ thù', number: 4 },
-  //     { title: 'Chương 5: Sự thật cay đắng', number: 5 }
-  //   ];
-
-  //   // chọn chương hiện tại nếu muốn
-  //   this.selectedChapter = this.chapterList[0];
-  // }
 
   markChapterNumber() {
     if (this.currentUserId == null) {

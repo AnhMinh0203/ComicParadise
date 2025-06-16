@@ -14,16 +14,14 @@
     <!-- Home -->
     <div class="navbar-left">
       <a class="me-2" (click)="resetHome()">Trang chủ</a>
-
-
-      <!-- <p-megamenu [model]="categoryItems" /> -->
       <a class="me-2" (click)="showDialogCategory()">Thể loại</a>
-      <!-- <a class="me-2" (click)="showDialogFilter()">Lọc</a> -->
       <a class="me-2" (click)="navigateToContact()">Giới thiệu</a>
 
       <!-- Search -->
       <div class="search-box">
-        <input type="text" placeholder="Tìm kiếm..." [(ngModel)]="searchKey" (ngModelChange)="onSearchKeyChange()">
+        <input type="text" placeholder="Tìm kiếm..."
+        [(ngModel)]="searchKey" (ngModelChange)="onSearchKeyChange()"
+        (keydown.enter)="searchStory()">
         <i class="pi pi-search" (click)="searchStory()"></i>
       </div>
 
@@ -82,8 +80,6 @@
       <div class="avatar" *ngIf="userID">
         <p-avatar *ngIf="userID" [label]="!userAvatarUrl ? userInitial : undefined" [image]="userAvatarUrl || undefined"
           shape="circle" (click)="userMenu.toggle($event)" styleClass="custom-avatar"></p-avatar>
-
-
         <p-menu #userMenu [model]="userMenuItems" [popup]="true" appendTo="body" />
       </div>
 
@@ -93,8 +89,6 @@
       </div>
     </div>
   </div>
-
-
 </nav>
 
 <!-- Notify Dialog -->

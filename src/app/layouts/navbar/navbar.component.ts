@@ -172,7 +172,6 @@ export class NavbarComponent {
     this.userID = decoded.userID;
     this.userInitial = this.getUserInitial(decoded.username || '');
     this.userAvatarUrl = decoded.avatar || null;
-    this.getCategories();
     this.initializeSignalR();
 
 
@@ -286,6 +285,7 @@ export class NavbarComponent {
   }
 
   showDialogCategory() {
+    this.getCategories();
     this.displayCategoryDialog = true;
   }
 
@@ -425,7 +425,7 @@ export class NavbarComponent {
     };
 
     this._authenService.changePassword(changePasswordData).subscribe({
-      next: (res:any) => this._responseHandle.handleResponse(res),
+      next: (res: any) => this._responseHandle.handleResponse(res),
       error: () => this._responseHandle.showError('Lỗi hệ thống, vui lòng thử lại sau.')
     });
 

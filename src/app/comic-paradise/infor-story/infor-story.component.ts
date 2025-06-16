@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ConfirmationService, MenuItem, MessageService, TreeNode } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import { SharedModule } from '../../core/share/shared.module';
 import { Menu, MenuModule } from 'primeng/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +19,8 @@ import { SignalRService } from '../../layouts/service/signalR.service';
 import { ReportService } from '../service/report.service';
 import { RatingModule } from 'primeng/rating';
 import { jwtDecode } from 'jwt-decode';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ResponseHandler } from '../../core/helpers/response-handler';
 
 @Component({
   selector: 'app-infor-story',
@@ -34,8 +36,9 @@ import { jwtDecode } from 'jwt-decode';
     CommonModule,
     RadioButtonModule,
     RatingModule,
+    ProgressSpinnerModule
   ],
-  providers: [MessageService, ConfirmationService, SignalRService],
+  providers: [ SignalRService],
   templateUrl: './infor-story.component.html',
   styleUrl: './infor-story.component.scss'
 })
@@ -68,6 +71,14 @@ export class InforStoryComponent {
   linkToMarkChapter: any;
   storyRating: number = 4;
   userRating: any;
+  pageIndex = 1;
+  pageSize = 2;
+  loadingMoreComments = false;
+  hasMoreComments = true;
+
+  isLoadingComments = false;
+  scrollTimeout: any = null;
+
   reportCommentReasons: string[] = [
     'Nội dung khiêu dâm',
     'Nội dung bạo lực hoặc phản cảm',
@@ -102,7 +113,7 @@ export class InforStoryComponent {
       label: 'Báo cáo vi phạm',
       icon: 'pi pi-flag',
       command: () => {
-        this.reportCommentForm(); // gọi hàm xử lý báo cáo
+        this.reportCommentForm();
       }
     }
   ];
@@ -113,16 +124,14 @@ export class InforStoryComponent {
     private activatedRoute: ActivatedRoute,
     private _chapterService: chapterService,
     private _storyService: storyService,
-    private messageService: MessageService,
     private _commentService: CommentService,
     private _reportService: ReportService,
-    private confirmationService: ConfirmationService,
     private signalRService: SignalRService,
+    private _responseHandle: ResponseHandler,
   ) { }
 
   ngOnInit() {
-
-
+    window.addEventListener('scroll', this.onWindowScroll, true);
     this.activatedRoute.paramMap.subscribe(async params => {
       const id = params.get('storyID');
       if (id) {
@@ -147,21 +156,20 @@ export class InforStoryComponent {
           this.getUserRating(this.storyID, this.currentUserId);
         }
 
-
-
         this.activatedRoute.queryParams.subscribe(queryParams => {
           const commentID = queryParams['commentID'];
           if (commentID) {
-            // Đợi một chút để đảm bảo DOM đã render sau khi lấy bình luận
             setTimeout(() => {
               this.scrollToComment(commentID);
-            }, 500); // Có thể điều chỉnh thời gian chờ nếu cần
+            }, 500);
           }
         });
-
       }
-
     });
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('scroll', this.onWindowScroll, true);
   }
 
   checkIsLikeStory() {
@@ -275,15 +283,14 @@ export class InforStoryComponent {
   // --- Comment ---//
   postComment() {
     if (!this.currentUserId) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để bình luận" });
+      this._responseHandle.showWarning("Vui lòng đăng nhập để bình luận");
       return;
     }
 
     if (!this.commentInput) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung bình luận" });
+      this._responseHandle.showWarning("Vui lòng nhập nội dung bình luận");
       return;
     }
-
 
     const comment = {
       StoryID: this.storyID,
@@ -308,15 +315,15 @@ export class InforStoryComponent {
 
         this.comments.unshift(newComment);
         this.commentInput = "";
-        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
+        this._responseHandle.showwSuccess("Đăng bình luận thành công");
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
 
   async getCommentsByStoryID(storyID: number) {
-    return this._commentService.getCommentsByStoryID(storyID).subscribe((res: any) => {
+    return this._commentService.getCommentsByStoryID(storyID, this.pageIndex, this.pageSize).subscribe((res: any) => {
       this.comments = res.data;
       this.totalComments = this.countTotalComments(this.comments);
     });
@@ -324,12 +331,12 @@ export class InforStoryComponent {
 
   replyComment(comment: any) {
     if (!this.currentUserId) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để bình luận" });
+      this._responseHandle.showWarning("Vui lòng đăng nhập để bình luận");
       return;
     }
 
     if (!this.commenReplytInput) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung phản hồi" });
+      this._responseHandle.showWarning("Vui lòng nhập nội dung phản hồi");
       return;
     }
     const responseComment = {
@@ -359,13 +366,12 @@ export class InforStoryComponent {
           comment.children = [];
         }
 
-        // Thêm newResComment vào children của comment cha
         comment.children.push(newResComment);
         this.toggleReply(comment);
         this.commenReplytInput = "";
-        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
+        this._responseHandle.showwSuccess("Đăng bình luận thành công");
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -383,17 +389,14 @@ export class InforStoryComponent {
 
   onLike(comment: any) {
     if (!this.currentUserId) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập" });
+      this._responseHandle.showWarning("Vui lòng đăng nhập");
       return;
     }
     if (comment.isLiked) {
-      // Hủy like
       comment.likes = (comment.likes || 0) - 1;
     } else {
-      // Thêm like
       comment.likes = (comment.likes || 0) + 1;
       if (comment.isDisliked) {
-        // Nếu trước đó đã dislike thì giảm dislike
         comment.disLikes = (comment.disLikes || 0) - 1;
       }
     }
@@ -412,14 +415,14 @@ export class InforStoryComponent {
       if (res && res.isSuccess == true) {
 
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
 
   onDislike(comment: any) {
     if (!this.currentUserId) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập" });
+      this._responseHandle.showWarning("Vui lòng đăng nhập");
       return;
     }
 
@@ -446,7 +449,7 @@ export class InforStoryComponent {
       if (res && res.isSuccess == true) {
 
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showwSuccess("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -454,21 +457,17 @@ export class InforStoryComponent {
 
   onLikeStory() {
     if (!this.currentUserId) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để thích truyện" });
+      this._responseHandle.showWarning("Vui lòng đăng nhập để thích truyện");
       return;
     }
 
     this.isLiked = !this.isLiked;
     this._storyService.likeStory(this.currentUserId, this.storyID).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Thông báo',
-          detail: 'Thích truyện thành công'
-        })
+        this._responseHandle.showwSuccess("Thích truyện thành công");
+
         if (this.isLiked) {
           this.likes += 1;
-
         }
         else {
           this.likes -= 1;
@@ -494,17 +493,14 @@ export class InforStoryComponent {
 
   scrollToComment(commentID: string): void {
     setTimeout(() => {
-      // Tìm bình luận cha chứa bình luận con (nếu có)
       const parentComment = this.comments.find(comment =>
         comment.children?.some((child: any) => child.commentID == commentID)
       );
 
-      // Nếu là bình luận con, mở rộng bình luận cha
       if (parentComment) {
         parentComment.expanded = true;
       }
 
-      // Đợi DOM render (nếu cần mở rộng) và cuộn
       setTimeout(() => {
         const targetCommentElement = document.getElementById(`comment-${commentID}`);
         if (targetCommentElement) {
@@ -513,7 +509,7 @@ export class InforStoryComponent {
         } else {
           console.log(`Không tìm thấy bình luận với ID ${commentID}`);
         }
-      }, parentComment ? 300 : 0); // Chỉ đợi nếu có bình luận cha cần mở rộng
+      }, parentComment ? 300 : 0);
     }, 500);
   }
 
@@ -527,11 +523,11 @@ export class InforStoryComponent {
 
     this._reportService.createReport(report).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Báo cáo thành công" });
+        this._responseHandle.showwSuccess("Báo cáo thành công");
         this.isReportCommentForm = false;
         this.selectedCommentReason = '';
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -546,23 +542,22 @@ export class InforStoryComponent {
 
     this._reportService.createReport(report).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Báo cáo thành công" });
+        this._responseHandle.showwSuccess("Báo cáo thành công");
         this.isReportStoryForm = false;
         this.selectedStoryReason = '';
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
 
   getMarkChapter() {
     this._chapterService.getMarkChapter(this.currentUserId, this.storyID).subscribe((res: any) => {
-      console.log(res)
       if (res && res.isSuccess) {
         this.linkToMarkChapter = res.data.link;
         this.markChapterNumber = res.data.chapterNumber;
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -573,7 +568,7 @@ export class InforStoryComponent {
 
   ratingStory() {
     if (!this.currentUserId) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng đăng nhập để đánh giá" });
+      this._responseHandle.showWarning("Vui lòng đăng nhập để đánh giá");
       return;
     }
 
@@ -585,9 +580,9 @@ export class InforStoryComponent {
 
     this._storyService.ratingStory(model).subscribe((res: any) => {
       if (res && res.isSuccess && res.data) {
-        this.messageService.add({ severity: "success", summary: "Thông báo", detail: "Đánh giá thành công" });
+        this._responseHandle.showwSuccess("Đánh giá thành công");
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -596,10 +591,8 @@ export class InforStoryComponent {
     this._storyService.getUserRating(storyID, userID).subscribe((res: any) => {
       if (res && res.isSuccess) {
         this.userRating = res.data;
-        console.log("--- user rating value ---")
-        console.log(this.userRating)
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -608,39 +601,82 @@ export class InforStoryComponent {
     this._storyService.getStoryRating(storyID).subscribe((res: any) => {
       if (res && res.isSuccess) {
         this.storyRating = res.data;
-        console.log("--- story rating value ---")
-        console.log(this.storyRating)
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandle.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
 
   countTotalComments(comments: any[]): number {
-    let total = comments.length; // Đếm comment cha
-    console.log("Total comments: ", total)
-    console.log(" comments: ", comments)
+    let total = comments.length;
     for (const comment of comments) {
       if (comment.childComments && comment.childComments.length > 0) {
-        total += this.countTotalComments(comment.childComments); // Đếm đệ quy comment con
+        total += this.countTotalComments(comment.childComments);
       }
     }
     return total;
   }
 
-  test(categoryName: any) {
-    alert(categoryName)
-  }
-
-  // getStoriesByCategoryName(categoryName: any) {
-  //   this._storyService.filterStoryByCategoryName(categoryName).subscribe((res: any) => {
-  //     this.filterStoryByCategoriesResults = res.data;
-  //     this._storyService.setFilterStoryByCategories(res.data);
-  //   });
-  // }
-
   navigateToHomeWithCategory(categoryName: string) {
     this.router.navigate(['/home'], { queryParams: { category: categoryName } });
   }
 
+  async loadMoreComments() {
+    if (this.isLoadingComments || !this.hasMoreComments) return;
+    this.isLoadingComments = true;
+    setTimeout(async () => {
+      try {
+        const res: any = await firstValueFrom(
+          this._commentService.getCommentsByStoryID(this.storyID, this.pageIndex + 1, this.pageSize)
+        );
+
+        const data = res.data || [];
+
+        if (data.length < this.pageSize) {
+          this.hasMoreComments = false;
+        }
+
+        const newComments = data.map((comment: any) => {
+          const userReaction = comment.reactions.find((r: any) => r.userID === this.currentUserId);
+
+          return {
+            commentID: comment.commentID.toString(),
+            label: comment.username || 'Người dùng',
+            avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
+            content: comment.content,
+            time: this.getTimeAgo(comment.createdAt),
+            status: comment.status,
+            likes: comment.likes,
+            disLikes: comment.disLikes,
+            children: this.mapChildComments(comment.childComments || []),
+            reactions: comment.reactions,
+            isLiked: userReaction ? userReaction.isLike : false,
+            isDisliked: userReaction ? !userReaction.isLike : false,
+            expanded: true
+          };
+        });
+
+        this.comments.push(...newComments);
+        this.pageIndex++;
+
+      } catch (err) {
+        console.error("Load comments failed:", err);
+      } finally {
+        this.isLoadingComments = false;
+      }
+    }, 300);
+  }
+
+  onWindowScroll = (): void => {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const pageHeight = document.documentElement.scrollHeight;
+
+      if (scrollPosition >= pageHeight - 100 && !this.isLoadingComments && this.hasMoreComments) {
+        this.loadMoreComments();
+      }
+    }, 200);
+  };
 }

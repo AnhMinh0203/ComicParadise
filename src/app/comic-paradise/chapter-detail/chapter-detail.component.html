@@ -30,7 +30,7 @@
       <!-- Nội dung truyện dạng ảnh -->
       <div *ngIf="chapterContent && chapterContent.storyType === 'Manga'" class="mt-3">
         <div *ngFor="let imageUrl of chapterContent.imageUrls">
-          <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
+          <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;" loading="lazy">
         </div>
       </div>
 
