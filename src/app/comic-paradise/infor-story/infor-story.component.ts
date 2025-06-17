@@ -3,7 +3,6 @@ import { MenuItem } from 'primeng/api';
 import { SharedModule } from '../../core/share/shared.module';
 import { Menu, MenuModule } from 'primeng/menu';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
@@ -15,12 +14,11 @@ import { storyService } from '../service/story.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { CommentService } from '../service/comment.service';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { SignalRService } from '../../layouts/service/signalR.service';
 import { ReportService } from '../service/report.service';
 import { RatingModule } from 'primeng/rating';
-import { jwtDecode } from 'jwt-decode';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ResponseHandler } from '../../core/helpers/response-handler';
+import { getUserIdFromToken, getUsernameFromToken } from '../../core/helpers/token-helper';
 
 @Component({
   selector: 'app-infor-story',
@@ -38,7 +36,7 @@ import { ResponseHandler } from '../../core/helpers/response-handler';
     RatingModule,
     ProgressSpinnerModule
   ],
-  providers: [ SignalRService],
+
   templateUrl: './infor-story.component.html',
   styleUrl: './infor-story.component.scss'
 })
@@ -66,6 +64,7 @@ export class InforStoryComponent {
   isReportStoryForm: boolean = false;
 
   currentUserId: any;
+  currentUserName: any;
   favoriteStories: any[] = [];
   replyingCommentId: any;
   linkToMarkChapter: any;
@@ -104,7 +103,6 @@ export class InforStoryComponent {
     'Truyện có nội dung gây hiểu lầm cho người đọc'
   ];
 
-
   selectedCommentReason: string = '';
   selectedStoryReason: string = '';
   totalComments: number = 0;
@@ -119,57 +117,62 @@ export class InforStoryComponent {
   ];
 
   constructor(
-    private http: HttpClient,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private _chapterService: chapterService,
     private _storyService: storyService,
     private _commentService: CommentService,
     private _reportService: ReportService,
-    private signalRService: SignalRService,
     private _responseHandle: ResponseHandler,
   ) { }
 
   ngOnInit() {
     window.addEventListener('scroll', this.onWindowScroll, true);
-    this.activatedRoute.paramMap.subscribe(async params => {
-      const id = params.get('storyID');
-      if (id) {
-        this.storyID = +id;
-        this.getChaptersByStoryID(this.storyID);
-
-        await this.getCommentsByStoryID(this.storyID);
-
-        this.getStoryDetail(this.storyID);
-        this.getStoryRating(this.storyID);
-
-        const token = localStorage.getItem('accessToken');;
-        if (!token) {
-          return;
-        }
-        const decoded: any = jwtDecode(token);
-        this.currentUserId = decoded.userID;
-
-        if (this.currentUserId) {
-          this.checkIsLikeStory();
-          this.getMarkChapter();
-          this.getUserRating(this.storyID, this.currentUserId);
-        }
-
-        this.activatedRoute.queryParams.subscribe(queryParams => {
-          const commentID = queryParams['commentID'];
-          if (commentID) {
-            setTimeout(() => {
-              this.scrollToComment(commentID);
-            }, 500);
-          }
-        });
-      }
-    });
+    this.handleRouteParams();
+    this.handleQueryParams();
   }
 
   ngOnDestroy() {
     window.removeEventListener('scroll', this.onWindowScroll, true);
+  }
+
+  private handleRouteParams() {
+    this.activatedRoute.paramMap.subscribe(async params => {
+      const id = params.get('storyID');
+      if (!id) return;
+
+      this.storyID = +id;
+      await this.loadStoryInfo(this.storyID);
+      this.loadUserInfo();
+    });
+  }
+
+  private handleQueryParams() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      const commentID = params['commentID'];
+      if (commentID) {
+        setTimeout(() => this.scrollToComment(commentID), 500);
+      }
+    });
+  }
+
+
+  private async loadStoryInfo(storyID: number) {
+    this.getChaptersByStoryID(storyID);
+    await this.getCommentsByStoryID(storyID);
+    this.getStoryDetail(storyID);
+    this.getStoryRating(storyID);
+  }
+
+  private loadUserInfo() {
+    this.currentUserId = getUserIdFromToken();
+    this.currentUserName = getUsernameFromToken();
+
+    if (this.currentUserId) {
+      this.checkIsLikeStory();
+      this.getMarkChapter();
+      this.getUserRating(this.storyID, this.currentUserId);
+    }
   }
 
   checkIsLikeStory() {
@@ -183,7 +186,6 @@ export class InforStoryComponent {
       this.chapters = res.data;
     });
   }
-
 
   navigateToChapterContent(storyID: number, chapterNumber: number) {
     this.router.navigate(['/chapter-content', storyID, chapterNumber]);
@@ -201,7 +203,6 @@ export class InforStoryComponent {
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInMinutes / 1440);
 
-    // Tính chính xác số tháng và năm
     let diffInMonths = (now.getFullYear() - commentTime.getFullYear()) * 12 + (now.getMonth() - commentTime.getMonth());
     const diffInYears = now.getFullYear() - commentTime.getFullYear();
 
@@ -238,7 +239,6 @@ export class InforStoryComponent {
       this.likes = res.data.likes;
 
       this.comments = this.comments.map((comment: any) => {
-        // Tìm reaction của user hiện tại trong danh sách reactions
         const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
         return {
           commentID: comment.commentID.toString(),
@@ -252,7 +252,7 @@ export class InforStoryComponent {
           children: this.mapChildComments(comment.childComments),
           reactions: comment.reactions,
           isLiked: userReaction ? userReaction.isLike : false,
-          isDisliked: userReaction ? !userReaction.isLike : false, // Nếu userReaction tồn tại nhưng `isLike` là false -> là dislike
+          isDisliked: userReaction ? !userReaction.isLike : false,
         };
       });
     });
@@ -260,7 +260,6 @@ export class InforStoryComponent {
 
   mapChildComments(childComments: any[]): any[] {
     return childComments.map((child: any) => {
-      // Tìm reaction của user hiện tại trong danh sách reactions của comment con
       const userReaction = child.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
 
       return {
@@ -303,12 +302,11 @@ export class InforStoryComponent {
 
     this._commentService.postComment(comment).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        var userName = JSON.parse(localStorage.getItem('user') || '{}').username
         const newComment = {
           userID: this.currentUserId,
           commentID: res.data.commentID,
-          label: userName,
-          avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
+          label: this.currentUserName,
+          avatar: this.currentUserName ? this.currentUserName.charAt(0).toUpperCase() : 'U',
           content: res.data.content,
           time: this.getTimeAgo(res.data.createdAt),
         };
@@ -350,11 +348,10 @@ export class InforStoryComponent {
 
     this._commentService.postComment(responseComment).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        var userName = JSON.parse(localStorage.getItem('user') || '{}').username
         const newResComment = {
           commentID: res.data.commentID,
-          label: userName,
-          avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
+          label: this.currentUserName,
+          avatar: this.currentUserName ? this.currentUserName.charAt(0).toUpperCase() : 'U',
           content: res.data.content,
           time: this.getTimeAgo(res.data.createdAt),
           likes: 0,
@@ -454,7 +451,6 @@ export class InforStoryComponent {
     });
   }
 
-
   onLikeStory() {
     if (!this.currentUserId) {
       this._responseHandle.showWarning("Vui lòng đăng nhập để thích truyện");
@@ -488,8 +484,6 @@ export class InforStoryComponent {
     this.selectedCommentReason = '';
     this.selectedStoryReason = '';
   }
-
-
 
   scrollToComment(commentID: string): void {
     setTimeout(() => {

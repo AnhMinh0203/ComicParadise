@@ -37,26 +37,6 @@ export class SignalRService {
     }
   }
 
-  // Đăng ký theo dõi truyện
-  // async followStory(userId: string, storyId: number): Promise<void> {
-  //   try {
-  //     await this.hubConnection.invoke('FollowStory', userId, storyId);
-  //     console.log(`User ${userId} followed story ${storyId}`);
-  //   } catch (err) {
-  //     console.error('Error following story:', err);
-  //   }
-  // }
-
-  // Hủy theo dõi truyện
-  // async unfollowStory(userId: string, storyId: number): Promise<void> {
-  //   try {
-  //     await this.hubConnection.invoke('UnfollowStory', userId, storyId);
-  //     console.log(`User ${userId} unfollowed story ${storyId}`);
-  //   } catch (err) {
-  //     console.error('Error unfollowing story:', err);
-  //   }
-  // }
-
   stopConnection() {
     if (this.hubConnection) {
       this.hubConnection.stop();

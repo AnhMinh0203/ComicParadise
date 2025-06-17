@@ -27,6 +27,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { AuthenService } from '../../core/authen/service/authen.service';
 import { jwtDecode } from 'jwt-decode';
 import { ResponseHandler } from '../../core/helpers/response-handler';
+import { getAvatarFromToken, getUserIdFromToken, getUsernameFromToken } from '../../core/helpers/token-helper';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -164,16 +165,10 @@ export class NavbarComponent {
   }
 
   ngOnInit() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      return;
-    }
-    const decoded: any = jwtDecode(token);
-    this.userID = decoded.userID;
-    this.userInitial = this.getUserInitial(decoded.username || '');
-    this.userAvatarUrl = decoded.avatar || null;
+    this.userID = getUserIdFromToken();
+    this.userInitial = getUsernameFromToken() || '';
+    this.userAvatarUrl = getAvatarFromToken() ?? undefined;
     this.initializeSignalR();
-
 
     this._sharedService.notificationFormSubject$.subscribe(() => {
       this.showDialogNotify();

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, catchError, Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
@@ -48,16 +48,6 @@ export class storyService {
         })
       );
   }
-
-  // getStories() {
-  //   var apiUrl = `${this.serviceUri}/Get-all-stories`;
-  //   return this.http.get(apiUrl)
-  //     .pipe(
-  //       catchError((error: any) => {
-  //         throw error;
-  //       })
-  //     );
-  // }
 
   getStoryById(storyID: number) {
     const apiUrl = `${this.serviceUri}/Get-story-by-id?storyID=${storyID}`;

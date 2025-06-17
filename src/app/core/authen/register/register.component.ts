@@ -93,13 +93,6 @@ export class RegisterComponent {
     })
   }
 
-  onForgotPassword() {
-    console.log('Chuyển hướng đến trang quên mật khẩu');
-  }
-  registerWith(provider: string) {
-    console.log(`Đăng nhập với ${provider}`);
-  }
-
   navigateToLogin() {
     this.router.navigate(['/login']);
   }

@@ -20,20 +20,6 @@ export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private accessToken$ = new BehaviorSubject<string | null>(null);
 
-  // intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-  //   const token = localStorage.getItem('accessToken');;
-  //   const authReq = token ? this.addToken(req, token) : req;
-
-  //   return next.handle(authReq).pipe(
-  //     catchError((error: HttpErrorResponse) => {
-  //       if (error.status === 401) {
-  //         return this.handle401Error(req, next);
-  //       }
-  //       return throwError(() => error);
-  //     })
-  //   );
-  // }
-
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const ignoredUrls = ['/login', '/refresh-token'];
     const isApiRequest = req.url.startsWith(environment.apiUrl);
@@ -69,7 +55,6 @@ export class AuthInterceptor implements HttpInterceptor {
       this.isRefreshing = true;
       this.accessToken$.next(null);
 
-      // Gọi API với accessToken truyền qua query string
       return this.http.post<any>(
         `${this.apiUrl}/Refresh-token?accessToken=${accessToken}`,
         null // body null vì accessToken nằm trên URL

@@ -87,55 +87,39 @@
   width: 100%;
   height: 280px;
   object-fit: cover;
-  /* Cắt ảnh vừa khung, không méo */
   border-top-left-radius: 8px;
-  /* Bo góc trái trên */
   border-top-right-radius: 8px;
-  /* Bo góc phải trên */
 }
 
 .story-item-infor {
   padding: 12px;
   background: #333;
-  /* Nền xám đậm */
   color: #fff;
-  /* Chữ trắng */
 }
 
 .story-infor-name {
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  /* Giới hạn tối đa 2 dòng */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
-
   line-height: 1.5em;
-  /* Chiều cao của mỗi dòng */
   height: 3em;
-  /* Cố định chiều cao luôn bằng 2 dòng */
 }
 
 .top-infor-description p {
   display: -webkit-box;
   -webkit-line-clamp: 3;
-  /* Giới hạn tối đa 3 dòng */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Hiển thị dấu "..." nếu nội dung bị cắt */
   max-height: 4.5em;
-  /* Đảm bảo không vượt quá 3 dòng */
 }
-
-
-
 
 .story-infor-chapter {
   font-size: 0.9rem;
   color: #bbb;
-  /* Chữ xám nhạt hơn một chút */
   margin: 5px 0;
 }
 
@@ -179,51 +163,39 @@ p-tab {
 
 .custom-tag {
   font-size: 11px;
-  /* Giảm kích thước chữ */
   padding: 2px 6px;
-  /* Giảm padding của tag */
   height: 20px;
-  /* Điều chỉnh chiều cao */
   line-height: 16px;
-  /* Căn giữa chữ */
 }
 
 
 .top-infor-reaction {
   font-size: 12px;
-  /* Kích thước nhỏ hơn cho lượt thích & lượt xem */
 }
 
 .custom-tag {
   font-size: 11px !important;
-  /* Giảm kích thước tag */
   padding: 2px 6px !important;
 }
 
 .top-infor-description p {
   font-size: 12px;
-  /* Kích thước nhỏ hơn cho phần mô tả */
   line-height: 1.4;
 }
 
 .top-item {
   display: flex;
   align-items: stretch;
-  /* Giãn chiều cao đồng đều */
 }
 
-
 .top-item-img {
-
   display: flex;
-  /* Để ảnh giãn theo div */
 }
 
 .top-item-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Giữ tỉ lệ, không méo */
 }
 
 .read-now-btn {
@@ -248,8 +220,9 @@ p-tab {
 }
 .top-item-infor {
     position: relative;
-    padding-bottom: 50px; /* Tạo khoảng trống để nút không che nội dung */
+    padding-bottom: 50px;
 }
+
 .top-next {
   display: flex;
   align-items: center;
@@ -292,14 +265,11 @@ p-tab {
   margin-top: 100px;
 }
 
-
-// Search are
-// home.component.scss
 .searchAndFilterStoryArea {
   opacity: 0;
-  max-height: 0; // Ẩn hoàn toàn khi không có nội dung
+  max-height: 0;
   overflow: hidden;
-  transition: opacity 0.5s ease, max-height 0.5s ease; // Hiệu ứng mượt mà
+  transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 
 .searchAndFilterStoryArea.visible {
@@ -309,8 +279,6 @@ p-tab {
 
 .container.my-3 {
   opacity: 1;
-  // max-height: 2000px; // Đặt giá trị lớn đủ để chứa nội dung
-  // overflow: hidden;
   transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 

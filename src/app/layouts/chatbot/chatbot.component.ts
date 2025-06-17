@@ -29,11 +29,9 @@ export class ChatbotComponent {
     const prompt = this.inputText.trim();
     if (!prompt) return;
 
-    // 👤 Add user message
     this.messages.push({ text: prompt, sender: 'user' });
     this.inputText = '';
 
-    // 🤖 Call backend
     this.chatService.sendMessage({ prompt }).subscribe({
       next: res => {
         const answer = (res?.data || 'Không có phản hồi').replace(/\n/g, '<br>');

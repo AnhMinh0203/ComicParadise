@@ -108,7 +108,6 @@ export class SidebarComponent {
     this._categoryService.getCategories().subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.categoryItems = res.data
-        console.log(res.data)
       }
     })
   }

@@ -2,19 +2,20 @@ import { ChangeDetectorRef, Component, HostListener } from '@angular/core';
 import { SharedModule } from '../../core/share/shared.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { chapterService } from '../service/chapter.service';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { jwtDecode } from 'jwt-decode';
-
+import { ResponseHandler } from '../../core/helpers/response-handler';
+import { getUserIdFromToken } from '../../core/helpers/token-helper';
 @Component({
   selector: 'app-chapter-detail',
   imports: [
     SharedModule,
     DropdownModule,
-    SpeedDialModule
+    SpeedDialModule,
+
   ],
-  providers: [ConfirmationService, MessageService],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss'
 })
@@ -23,17 +24,14 @@ export class ChapterDetailComponent {
   storyID: any;
   chapterNumber: any;
   currentUserId: any;
-  chapterList: any[] = []; // lấy từ server
+  chapterList: any[] = [];
   selectedChapter: any;
-
-  hasPreviousChapter = true; // xử lý logic theo vị trí chương
+  hasPreviousChapter = true;
   hasNextChapter = true;
   showTopNavigator = false;
-  private lastScrollTop = 0;
-  // chapterActions: MenuItem[] = [];
-  isBookmarked: any; // trạng thái đánh dấu chương
+  lastScrollTop = 0;
+  isBookmarked: any;
 
-  // Text to speech
   speechSynthesis: SpeechSynthesis = window.speechSynthesis;
   utterance: SpeechSynthesisUtterance | null = null;
   voices: SpeechSynthesisVoice[] = [];
@@ -42,8 +40,7 @@ export class ChapterDetailComponent {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private _chapterService: chapterService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
+    private responseHandler: ResponseHandler,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -53,13 +50,7 @@ export class ChapterDetailComponent {
       this.chapterNumber = +params.get('chapterNumber')!;
       this.loadChapterList();
       this.loadChapterContent();
-
-      const token = localStorage.getItem('accessToken');;
-      if (!token) {
-        return;
-      }
-      const decoded: any = jwtDecode(token);
-      this.currentUserId = decoded.userID;
+      this.currentUserId = getUserIdFromToken();
 
       if (this.currentUserId) {
         this.checkBookmarkStatus();
@@ -103,25 +94,21 @@ export class ChapterDetailComponent {
     ];
   }
 
-
   loadChapterContent(showToast: boolean = false): void {
     const userID = this.currentUserId != null ? this.currentUserId : undefined;
-
     this._chapterService.getChapterContent(this.storyID, this.chapterNumber, userID)
       .subscribe(res => {
         this.chapterContent = res.data;
         if (showToast) {
-          this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: 'Chương đã được tải lại' });
+          this.responseHandler.showwSuccess('Chương đã được tải lại');
         }
         this.cdr.detectChanges();
       }, err => {
         if (showToast) {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải lại chương' });
+          this.responseHandler.showError('Không thể tải chương này');
         }
       });
   }
-
-
 
   goToPreviousChapter() {
     this.router.navigate(['/chapter-content', this.storyID, this.chapterNumber - 1]);
@@ -153,7 +140,7 @@ export class ChapterDetailComponent {
 
   markChapterNumber() {
     if (this.currentUserId == null) {
-      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng đăng nhập' });
+      this.responseHandler.showWarning('Vui lòng đăng nhập');
       return;
     }
 
@@ -166,9 +153,9 @@ export class ChapterDetailComponent {
     this._chapterService.markChapter(model).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.isBookmarked = !this.isBookmarked;
-        this.messageService.add({ severity: 'success', summary: "Thông báo", detail: res.data });
+        this.responseHandler.showwSuccess(res.data);
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Thất bại', detail: res.data });
+        this.responseHandler.showError(res.data);
       }
     });
   }
@@ -183,7 +170,7 @@ export class ChapterDetailComponent {
       if (res && res.isSuccess == true) {
         this.isBookmarked = res.data;
       } else {
-        this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: res.data });
+        this.responseHandler.showWarning(res.data);
       }
     });
   }
@@ -199,7 +186,7 @@ export class ChapterDetailComponent {
       this.checkHasPrevNext();
       this.cdr.detectChanges();
     }, (err) => {
-      this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải danh sách chương' });
+      this.responseHandler.showError('Không thể tải danh sách chương');
     });
   }
 
@@ -209,15 +196,10 @@ export class ChapterDetailComponent {
     this.hasNextChapter = chapterNumbers.includes(this.chapterNumber + 1);
   }
 
-  // --- Text to speech ---
   readAloud() {
     if (this.chapterContent && this.chapterContent.storyType === 'Novel') {
       const rawText = this.stripHtmlTags(this.chapterContent.content);
       const voices = window.speechSynthesis.getVoices();
-      console.log("--- voices");
-      console.log(this.voices);
-      console.log("--- voices");
-
       // Tìm voice tiếng Việt
       const vietnameseVoice = this.voices.find(voice =>
         voice.lang === 'vi-VN' || voice.name.toLowerCase().includes('vietnam')
@@ -233,8 +215,6 @@ export class ChapterDetailComponent {
     }
   }
 
-
-  // Hàm dừng đọc
   stopReading() {
     this.speechSynthesis.cancel();
   }

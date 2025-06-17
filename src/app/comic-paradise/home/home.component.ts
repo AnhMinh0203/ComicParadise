@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ConfirmationService, MegaMenuItem, MenuItem, MessageService } from 'primeng/api';
+import { MegaMenuItem, MenuItem } from 'primeng/api';
 import { Menubar } from 'primeng/menubar';
 import { InputTextModule } from 'primeng/inputtext';
 import { CarouselModule } from 'primeng/carousel';
@@ -14,7 +14,8 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ChatbotComponent } from "../../layouts/chatbot/chatbot.component";
 import { ActivatedRoute } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
-
+import { ResponseHandler } from '../../core/helpers/response-handler';
+import { getUserIdFromToken } from '../../core/helpers/token-helper';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -29,7 +30,6 @@ import { jwtDecode } from 'jwt-decode';
     SkeletonModule,
     ChatbotComponent
   ],
-  providers: [ConfirmationService, MessageService],
 })
 export class HomeComponent {
 
@@ -68,17 +68,13 @@ export class HomeComponent {
 
   pageIndexNovelStory: number = 1;
   pageSizeNovelStory: number = 5;
-
   pageIndexCurrentUpdateStory: number = 1;
   pageSizeCurrentUpdateStory: number = 5;
-
   pageIndexAdvanceStory: number = 1;
   pageSizeAdvanceStory: number = 5;
-
   pageIndexDay = 1;
   pageIndexWeek = 1;
   pageIndexMonth = 1;
-
   pageSizeTopStory: number = 4;
 
   hasMoreCurrentUpdateStories = true;
@@ -93,15 +89,12 @@ export class HomeComponent {
   displayLimitWeek = 4;
   displayLimitDay = 4;
 
-
-
   constructor(
     private router: Router,
     private _storyService: storyService,
-    private messageService: MessageService,
+    private responseHandler: ResponseHandler,
     private route: ActivatedRoute
   ) { }
-
 
   responsiveOptions: any[] | undefined;
   isDarkMode = false;
@@ -122,43 +115,38 @@ export class HomeComponent {
       this.isSearch = stories.length > 0;
     });
 
+    let hasFilteredByConditions = false;
     this._storyService.filterStoryByConditions$.subscribe((stories: any[]) => {
       this.filterStoryByConditions = stories;
-      this.isFilterByConditions = stories.length > 0;
+      const isNowFiltered = stories.length > 0;
 
-      if (!this.isFilterByConditions) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Thông báo',
-          detail: 'Không có truyện nào phù hợp với bộ lọc của bạn!'
-        });
+      // Chỉ show warning nếu trước đó đã thực hiện filter
+      if (hasFilteredByConditions && !isNowFiltered) {
+        this.responseHandler.showWarning('Không có truyện nào phù hợp với bộ lọc của bạn!');
       }
+
+      this.isFilterByConditions = isNowFiltered;
+      hasFilteredByConditions = true;
     });
 
+    let hasFilteredByCategories = false;
     this._storyService.filterStoryByCategories$.subscribe((stories: any[]) => {
       this.filterStoryByCategories = stories;
-      this.isFilterByCategories = stories.length > 0;
+      const isNowFiltered = stories.length > 0;
 
-      if (!this.isFilterByCategories) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Thông báo',
-          detail: 'Không có truyện nào phù hợp với bộ lọc của bạn!'
-        });
+      if (hasFilteredByCategories && !isNowFiltered) {
+        this.responseHandler.showWarning('Không có truyện nào phù hợp với bộ lọc của bạn!');
       }
+
+      this.isFilterByCategories = isNowFiltered;
+      hasFilteredByCategories = true;
     });
 
     this.getCurrentUpdateStories()
     this.onTabChange(this.selectedTab);
     this.getAdvanceStories();
     this.getNovelStories();
-
-    const token = localStorage.getItem('accessToken');;
-    if (!token) {
-      return;
-    }
-    const decoded: any = jwtDecode(token);
-    this.currentUserId = decoded.userID;
+    this.currentUserId = getUserIdFromToken();
   }
 
   navigateToInforStory(storyID: number) {
@@ -203,7 +191,7 @@ export class HomeComponent {
           }
         }
       })
-    }, 1000);
+    }, 300);
   }
 
   onTabChange(tabIndex: any) {
@@ -254,7 +242,6 @@ export class HomeComponent {
     }
   }
 
-
   getAdvanceStories() {
     setTimeout(() => {
       this._storyService.getAdvanceStories(1, this.pageIndexAdvanceStory, this.pageSizeAdvanceStory).subscribe((res: any) => {
@@ -267,8 +254,9 @@ export class HomeComponent {
         }
       })
       this.isLoadingStories = false;
-    }, 1000);
+    }, 300);
   }
+
   loadMoreAdvanceStories() {
     this.pageIndexAdvanceStory++;
     this.getAdvanceStories();
@@ -289,5 +277,4 @@ export class HomeComponent {
       this._storyService.setFilterStoryByCategories(res.data);
     });
   }
-
 }

@@ -35,7 +35,6 @@ export class LoginComponent {
     private fb: FormBuilder,
     private router: Router,
     private _authenService: AuthenService,
-    private messageService: MessageService,
     private _responseHandle: ResponseHandler,
 
   ) { }
@@ -49,7 +48,7 @@ export class LoginComponent {
 
   onLogin() {
     if (this.loginForm.invalid) {
-      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng điền đủ thông tin!' });
+      this._responseHandle.showWarning('Vui lòng điền đầy đủ thông tin !');
       return;
     }
 
@@ -62,16 +61,15 @@ export class LoginComponent {
       if (res && res.status === 200) {
 
         localStorage.setItem('accessToken', res.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        // localStorage.setItem('user', JSON.stringify(res.data.user));
 
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Đăng nhập thành công!' });
+        this._responseHandle.showwSuccess("Đăng nhập thành công!");
         setTimeout(() => {
           this.router.navigate(['/home']);
-
         }, 1000);
       }
       else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message });
+        this._responseHandle.showError(res.message);
       }
     });
   }
@@ -94,7 +92,7 @@ export class LoginComponent {
   }
 
   requestPasswordReset() {
-    const email = encodeURIComponent(this.email); // Mã hóa email để sử dụng trong URL
+    const email = encodeURIComponent(this.email);
     this._authenService.requestPasswordReset(email).subscribe((res: any) => {
       if (res && res.isSuccess) {
         this._responseHandle.showwSuccess(res.message);

@@ -17,9 +17,6 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
-  {
-    path: 'login-google-success', component: GoogleCallbackComponent
-  },
-
+  { path: 'login-google-success', component: GoogleCallbackComponent},
   { path: '**', redirectTo: 'home' },
 ];
