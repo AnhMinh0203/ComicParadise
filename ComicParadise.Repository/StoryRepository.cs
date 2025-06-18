@@ -16,6 +16,7 @@ using System.Collections;
 using Amazon.S3;
 using Amazon.S3.Model;
 using ComicParadise.DataContext.Utils;
+using Newtonsoft.Json;
 
 namespace ComicParadise.Repository
 {
@@ -28,11 +29,13 @@ namespace ComicParadise.Repository
         private readonly IAmazonS3 _s3Client;
         private readonly string? _bucketName;
         private readonly string _containerCoverImg;
+        private readonly IChapterRepository _chapterRepository;
         public StoryRepository(
             AppDbContext context,
             IConfiguration config,
             /*            BlobServiceClient blobServiceClient,*/
-            IAmazonS3 s3Client)
+            IAmazonS3 s3Client,
+            IChapterRepository chapterRepository)
         {
             _context = context;
             _config = config;
@@ -40,6 +43,7 @@ namespace ComicParadise.Repository
             _s3Client = s3Client;
             _bucketName = _config["BucketName"];
             _containerCoverImg = _config["ContainerCoverImg"];
+            _chapterRepository = chapterRepository;
         }
 
         #region Add story (azure)
@@ -136,6 +140,15 @@ namespace ComicParadise.Repository
                 }).ToList();
 
                 _context.StoryCategoriesMapping.AddRange(storyCategories);
+
+                if (createStoryDto.Chapters != null && createStoryDto.Chapters.Any())
+                {
+                    foreach (var chapter in createStoryDto.Chapters)
+                    {
+                        chapter.StoryID = newStory.StoryID;
+                        await _chapterRepository.PostChapterAsync(chapter); 
+                    }
+                }
                 await _context.SaveChangesAsync();
 
                 return "Thêm truyện thành công !";
@@ -725,7 +738,7 @@ namespace ComicParadise.Repository
 
                 int totalCount = await baseQuery.CountAsync();
 
-                if (totalCount == 0)
+                if (totalCount == 0 || totalCount < pageSize)
                 {
                     baseQuery = _context.Stories
                         .Where(s => s.Type == "Manga")
@@ -1314,7 +1327,7 @@ namespace ComicParadise.Repository
                     .FirstOrDefaultAsync(c => c.CategoryName == categoryName);
 
                 if (category == null)
-                    return new List<dynamic>(); 
+                    return new List<dynamic>();
 
                 int? categoryId = category.CategoryID;
 

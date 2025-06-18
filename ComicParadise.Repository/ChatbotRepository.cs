@@ -1,5 +1,6 @@
 ﻿using ComicParadise.DataContext.Dto;
 using ComicParadise.Repository.Common;
+using ComicParadise.Repository.Constants;
 using ComicParadise.Repository.Interface;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ namespace ComicParadise.Repository
         private readonly IStoryRepository _storyRepository;
 
         private readonly Dictionary<string, Func<string, Task<string>>> _handlers;
+        private readonly Dictionary<string, Func<string, Task<string>>> _storyActionHandlers;
 
         public ChatbotRepository(
             IConfiguration config,
@@ -39,7 +41,14 @@ namespace ComicParadise.Repository
             {
                 { "thể loại", HandleCategoryAsync },
                 { "truyện", HandleStoryAsync },
+            };
 
+            _storyActionHandlers = new Dictionary<string, Func<string, Task<string>>>
+            {
+                [StoryActions.Popular] = HandlePopularAsync,
+/*                [StoryActions.MostViewed] = HandleMostViewedAsync,*/
+                [StoryActions.Search] = HandleSearchAsync,
+                [StoryActions.List] = HandleListAsync,
             };
         }
 
@@ -138,7 +147,83 @@ namespace ComicParadise.Repository
 
 
         /* --- Handle topic function (Story)  --- */
+
+        private async Task<string> DetectStoryActionAsync(string question)
+        {
+            var prompt = $"""
+                Câu hỏi: "{question}"
+
+                Các hành động:
+                - {StoryActions.Count}: người dùng muốn biết số lượng truyện.
+                - {StoryActions.Detail}: hỏi chi tiết về truyện cụ thể.
+                - {StoryActions.Search}: tìm truyện theo tên.
+                - {StoryActions.Popular}: hỏi truyện nổi bật, theo thời gian.
+                - {StoryActions.MostViewed}: hỏi truyện có lượt xem cao nhất.
+                - {StoryActions.List}: hỏi danh sách truyện tổng quát.
+                - {StoryActions.Unknown}: không xác định.
+
+                → Hãy trả về **một từ khóa duy nhất** là tên action phù hợp.
+            """;
+
+            var action = (await CallGeminiAsync(prompt)).Trim().ToLower();
+            return _storyActionHandlers.ContainsKey(action) ? action : StoryActions.Unknown;
+        }
+
         private async Task<string> HandleStoryAsync(string userQuestion)
+        {
+            var action = await DetectStoryActionAsync(userQuestion);
+
+            if (_storyActionHandlers.TryGetValue(action, out var handler))
+            {
+                return await handler(userQuestion);
+            }
+
+            return "Xin lỗi, chưa hỗ trợ loại câu hỏi này.";
+        }
+
+        private async Task<string> HandlePopularAsync(string userQuestion)
+        {
+            var topStories = await _storyRepository.GetTopStoriesAsync("week", 1, 10);
+            if (topStories == null || !topStories.Items.Any())
+                return "Hiện không có truyện nổi bật nào.";
+
+            var result = string.Join("\n", topStories.Items.Select(s => $"- {s.Title}"));
+            return $"Các truyện nổi bật hiện nay:\n{result}";
+        }
+
+        private async Task<string> HandleSearchAsync(string userQuestion)
+        {
+            string extractPrompt = $"""
+            Câu hỏi: "{userQuestion}"
+
+            Hãy trích xuất từ khóa tên truyện mà người dùng muốn tìm.
+            Trả về duy nhất 1 từ khóa hoặc cụm từ.
+        """;
+
+            string keyword = (await CallGeminiAsync(extractPrompt)).Trim();
+            var stories = await _storyRepository.SearchStoryAsync(keyword);
+
+            if (stories == null || !stories.Any())
+                return $"Không tìm thấy truyện nào có liên quan đến \"{keyword}\".";
+
+            var display = stories.Take(5).Select(s =>
+                $"- {s.Title} (Tác giả: {s.PublisherName}, Lượt xem: {s.Views}, Chương mới nhất: {s.LastestChapter})");
+
+            return $"Kết quả tìm kiếm cho \"{keyword}\":\n{string.Join("\n", display)}";
+        }
+
+        private async Task<string> HandleListAsync(string userQuestion)
+        {
+            var stories = await _storyRepository.GetStoriesAsync(null, null);
+            if (!stories.Any())
+                return "Hiện chưa có truyện nào trong hệ thống.";
+
+            var result = stories.Take(10).Select(s => $"- {s.Title}");
+            return $"Một vài truyện có trong hệ thống:\n{string.Join("\n", result)}";
+        }
+
+
+        /*private async Task<string> HandleStoryAsync(string userQuestion)
         {
             string classifyPrompt = $"""
                 Bạn là một hệ thống phân loại câu hỏi liên quan đến truyện trên website.
@@ -160,12 +245,12 @@ namespace ComicParadise.Repository
 
             switch (action)
             {
-/*                case "count":
-                    int count = await _storyRepository.CountStoryAsync();
-                    return $"Hiện tại website có tổng cộng {count} truyện.";*/
+                *//*                case "count":
+                                    int count = await _storyRepository.CountStoryAsync();
+                                    return $"Hiện tại website có tổng cộng {count} truyện.";*//*
 
                 case "popular":
-                    var topStories = await _storyRepository.GetTopStoriesAsync("week",1,15); 
+                    var topStories = await _storyRepository.GetTopStoriesAsync("week", 1, 15);
                     string topList = string.Join("\n", topStories.Items.Select(s => $"- {s.Title}"));
                     return $"Các truyện nổi bật hiện nay:\n{topList}";
 
@@ -194,11 +279,11 @@ namespace ComicParadise.Repository
 
                 case "list":
                 default:
-                    var stories = await _storyRepository.GetStoriesAsync(null,null);
+                    var stories = await _storyRepository.GetStoriesAsync(null, null);
                     var shortList = stories.Take(10).Select(s => $"- {s.Title}").ToList();
                     return $"Danh sách một vài truyện trên website:\n{string.Join("\n", shortList)}";
             }
-        }
+        }*/
 
 
     }

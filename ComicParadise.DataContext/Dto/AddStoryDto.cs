@@ -16,6 +16,7 @@ namespace ComicParadise.DataContext.Dto
         public IFormFile CoverImage { get; set; }
         public string Description { get; set; }
         public List<int> CategoryIDs { get; set; }
+        public List<PostChapterDto> Chapters { get; set; }
     }
 
     public class UpdateStoryDto
