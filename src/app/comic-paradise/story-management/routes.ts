@@ -1,4 +1,3 @@
-// story-management/routes.ts
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [

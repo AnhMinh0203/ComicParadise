@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
 
 import {
   ContainerComponent,
+  INavData,
   ShadowOnScrollDirective,
   SidebarBrandComponent,
   SidebarComponent,
@@ -15,44 +16,51 @@ import {
 } from '@coreui/angular';
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
-import { navItems } from './_nav';
+import { getNavItems } from './_nav';  // ⚠ sửa từ navItems thành getNavItems
 import { ImageModule } from 'primeng/image';
 
-function isOverflown(element: HTMLElement) {
-  return (
-    element.scrollHeight > element.clientHeight ||
-    element.scrollWidth > element.clientWidth
-  );
-}
-
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './default-layout.component.html',
-    styleUrls: ['./default-layout.component.scss'],
-    imports: [
-        SidebarComponent,
-        SidebarHeaderComponent,
-        SidebarBrandComponent,
-        RouterLink,
-        NgScrollbar,
-        SidebarNavComponent,
-        SidebarFooterComponent,
-        SidebarToggleDirective,
-        SidebarTogglerDirective,
-        DefaultHeaderComponent,
-        ShadowOnScrollDirective,
-        ContainerComponent,
-        RouterOutlet,
-        DefaultFooterComponent,
-        ImageModule
-    ]
+  selector: 'app-dashboard',
+  templateUrl: './default-layout.component.html',
+  styleUrls: ['./default-layout.component.scss'],
+  imports: [
+    SidebarComponent,
+    SidebarHeaderComponent,
+    SidebarBrandComponent,
+    RouterLink,
+    NgScrollbar,
+    SidebarNavComponent,
+    SidebarFooterComponent,
+    SidebarToggleDirective,
+    SidebarTogglerDirective,
+    DefaultHeaderComponent,
+    ShadowOnScrollDirective,
+    ContainerComponent,
+    RouterOutlet,
+    DefaultFooterComponent,
+    ImageModule
+  ]
 })
-export class DefaultLayoutComponent {
-  public navItems = navItems;
+export class DefaultLayoutComponent implements OnInit {
+   public navItems: INavData[] = [];
 
-  onScrollbarUpdate($event: any) {
-    // if ($event.verticalUsed) {
-    // console.log('verticalUsed', $event.verticalUsed);
-    // }
+  constructor(private router: Router) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.url === '/logout') {
+        this.handleLogout();
+      }
+    });
   }
+
+  ngOnInit() {
+    this.navItems = getNavItems(); // 🔥 lấy menu theo token hiện tại
+  }
+
+  handleLogout(): void {
+    localStorage.clear();
+    this.navItems = []; // clear luôn menu
+    this.router.navigate(['/login']);
+  }
+
+  onScrollbarUpdate($event: any) {}
 }

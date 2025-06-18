@@ -17,6 +17,7 @@ import { chapterService } from '../../service/chapter.service';
 import { Menu, MenuModule } from 'primeng/menu';
 import { SharedModule } from '../../../core/share/shared.module';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { jwtDecode } from 'jwt-decode';
 @Component({
   selector: 'app-infor-story',
   imports: [
@@ -54,6 +55,8 @@ export class InforStoryComponent {
   showAllChapters: boolean = false;
   maxChaptersToShow: number = 12;
   commenReplytInput: any;
+currentUserId: any;
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -89,6 +92,12 @@ export class InforStoryComponent {
         { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDeleteComment(this.selectedComment) }
       ];
     });
+            const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+    const decoded: any = jwtDecode(token);
+    this.currentUserId = decoded.userID;
   }
 
   scrollToComment(commentID: string) {
@@ -116,7 +125,7 @@ export class InforStoryComponent {
   }
 
   async getStoryDetail(storyID: number) {
-    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
+
     const res: any = await firstValueFrom(this._storyService.getStoryById(storyID));
 
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
@@ -130,7 +139,7 @@ export class InforStoryComponent {
 
       this.comments = this.comments.map((comment: any) => {
         // Tìm reaction của user hiện tại trong danh sách reactions
-        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === currentUserId);
+        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
         return {
           commentID: comment.commentID.toString(),
           label: comment.username || 'Người dùng',
@@ -182,7 +191,7 @@ export class InforStoryComponent {
   }
 
   mapChildComments(childComments: any[]): any[] {
-    const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userId;
+    const currentUserId = this.currentUserId;
     return childComments.map((child: any) => {
       // Tìm reaction của user hiện tại trong danh sách reactions của comment con
       const userReaction = child.reactions.find((reaction: any) => reaction.userID === currentUserId);
@@ -208,7 +217,7 @@ export class InforStoryComponent {
   postComment() {
     const comment = {
       StoryID: this.storyID,
-      UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserID: this.currentUserId,
       Content: this.commentInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",
@@ -221,7 +230,7 @@ export class InforStoryComponent {
       if (res && res.isSuccess == true) {
         var userName = JSON.parse(localStorage.getItem('user') || '{}').username
         const newComment = {
-          userID: JSON.parse(localStorage.getItem('user') || '{}').userID,
+          userID: this.currentUserId,
           commentID: res.data.commentID,
           label: userName,
           avatar: userName ? userName.charAt(0).toUpperCase() : 'U',
@@ -258,7 +267,7 @@ export class InforStoryComponent {
     }
     const reaction = {
       CommentId: comment.commentID,
-      UserId: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserId: this.currentUserId,
       IsLike: true,
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
@@ -287,7 +296,7 @@ export class InforStoryComponent {
     }
     const reaction = {
       CommentId: comment.commentID,
-      UserId: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserId: this.currentUserId,
       IsLike: false,
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
@@ -312,7 +321,7 @@ export class InforStoryComponent {
     }
     const responseComment = {
       StoryID: this.storyID,
-      UserID: JSON.parse(localStorage.getItem('user') || '{}').userID,
+      UserID: this.currentUserId,
       Content: this.commenReplytInput,
       CreatedAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
       Status: "Visible",

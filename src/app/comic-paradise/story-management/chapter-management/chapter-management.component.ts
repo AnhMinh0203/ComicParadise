@@ -6,6 +6,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { PanelModule } from 'primeng/panel';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { Observable, tap } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-chapter-management',
@@ -41,7 +42,13 @@ export class ChapterManagementComponent {
   ) { }
 
   ngOnInit(): void {
-    this.currentUserId = JSON.parse(localStorage.getItem('user') || '{}').userID;
+        const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+    const decoded: any = jwtDecode(token);
+    this.currentUserId = decoded.userID;
+
     this.storyID = +this.route.snapshot.paramMap.get('storyID')!;
     this.chapterNumber = +this.route.snapshot.paramMap.get('chapterNumber')!;
     this.loadChapterContent();

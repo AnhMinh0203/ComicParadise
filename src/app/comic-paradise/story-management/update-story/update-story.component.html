@@ -103,17 +103,7 @@
             <!-- Content manga -->
             <div class="contentMangaStory" *ngIf="isAddManga">
               <!-- Type of file -->
-              <p-selectbutton [options]="typeMangaOptions" [(ngModel)]="selectMangaType" optionLabel="label"
-                optionValue="value" aria-labelledby="basic" />
-
-
-              <div class="my-3" *ngIf="selectMangaType === 'PDF'">
-                <label cLabel for="formFile">Tải tệp truyện (pdf)</label>
-                <input cFormControl id="formFile" type="file" accept="application/pdf" />
-              </div>
-
-              <div class="my-3" *ngIf="selectMangaType === 'Images'">
-                <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
+              <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
                   [auto]="true" chooseLabel="Tải trang truyện" (onSelect)="onUploadChildrenImg($event)"
                   (onRemove)="onRemoveChildrenImg($event)">
                   <ng-template #empty>
@@ -122,7 +112,6 @@
                   <ng-template #content>
                   </ng-template>
                 </p-fileupload>
-              </div>
             </div>
 
             <!-- Actions novel -->

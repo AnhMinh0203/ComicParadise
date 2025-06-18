@@ -11,42 +11,46 @@ export class chapterService {
     this.serviceUri = `${environment.apiUrl}/Chapter`;
   }
 
-  getNextChapterNumber(storyID:number){
+  getNextChapterNumber(storyID: number) {
     var apiUrl = `${this.serviceUri}/Get-next-chapter-number?storyID=${storyID}`;
     return this.http.get(apiUrl);
   }
 
-  getChapterContent(storyId: number, chapterNumber: number, currentUserId:any): Observable<any> {
+  getChapterContent(storyId: number, chapterNumber: number, currentUserId: any): Observable<any> {
     var apiUrl = `${this.serviceUri}/Get-chapter-content?storyID=${storyId}&chapterNumber=${chapterNumber}&userID=${currentUserId}`;
     return this.http.get(apiUrl);
   }
 
-  getChaptersByStoryID(storyID:number){
+  getChaptersByStoryID(storyID: number) {
     var apiUrl = `${this.serviceUri}/Get-chapters-by-storyID?storyID=${storyID}`;
     return this.http.get(apiUrl);
   }
 
   postChapter(chapter: any): Observable<any> {
-    var apiUrl = `${this.serviceUri}/Post-chapter`;
+    const apiUrl = `${this.serviceUri}/Post-chapter`;
     const formData = new FormData();
+
     formData.append('StoryID', chapter.StoryID.toString());
     formData.append('ChapterNumber', chapter.ChapterNumber.toString());
     formData.append('Title', chapter.Title);
-    formData.append('ChapterType', chapter.ChapterType);
-    formData.append('CreatedBy', chapter.CreatedBy);
+    formData.append('StoryType', chapter.StoryType);
+    formData.append('CreatedBy', chapter.CreatedBy.toString());
 
-    if (chapter.ChapterType === 'PDF' && chapter.PdfFile) {
-      formData.append('PdfFile', chapter.PdfFile); // PdfFile là File object
-    }
-    if (chapter.ChapterType === 'Images' && chapter.ImageFiles) {
+    if (chapter.StoryType === 'Manga' && chapter.ImageFiles?.length > 0) {
       chapter.ImageFiles.forEach((file: File) => {
-        formData.append('ImageFiles', file); // Dùng key 'ImageFiles' cho tất cả file
+        formData.append('ImageFiles', file);
       });
     }
+
+  if (chapter.StoryType === 'Novel') {
+    formData.append('Content', chapter.Content);
+  }
+
     return this.http.post(apiUrl, formData);
   }
 
-  getChapterPageByPageNumber(storyID: number, chapterID: number, pageNumber:number): Observable<any> {
+
+  getChapterPageByPageNumber(storyID: number, chapterID: number, pageNumber: number): Observable<any> {
     var apiUrl = `${this.serviceUri}/Get-chapter-page-by-page-number?storyID==${storyID}&chapterID=${chapterID}&pageNumber=${pageNumber}`;
     return this.http.get(apiUrl);
   }
@@ -55,7 +59,7 @@ export class chapterService {
     return this.http.delete(`${this.serviceUri}/Delete-chapter-page?storyID=${storyId}&chapterNumber=${chapterNumber}&chapterPage=${pageNumber}`);
   }
 
-  replaceChapterPage(model:any): Observable<any> {
+  replaceChapterPage(model: any): Observable<any> {
     const formData = new FormData();
     formData.append('storyID', model.storyID);
     formData.append('chapterNumber', model.chapterNumber);

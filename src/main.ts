@@ -15,13 +15,14 @@ import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { appConfig } from './app/app.config';
 import { provideHttpClient } from '@angular/common/http';
-
+import { MessageService } from 'primeng/api';
 bootstrapApplication(AppComponent, {
   ...appConfig, // giữ lại các cấu hình đã có trong appConfig
   providers: [
     ...appConfig.providers, // kết hợp providers đã có
     provideHttpClient(),
-    importProvidersFrom(RouterModule.forRoot(routes)) // thêm router vào providers
+    importProvidersFrom(RouterModule.forRoot(routes)),
+    MessageService
   ]
 })
-.catch((err) => console.error(err));
+  .catch((err) => console.error(err));

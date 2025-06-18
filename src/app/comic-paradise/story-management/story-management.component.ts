@@ -38,6 +38,9 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { TabViewModule } from 'primeng/tabview';
+import { jwtDecode } from 'jwt-decode';
+import { get } from 'lodash-es';
+import { getUserIdFromToken } from 'src/app/core/helpers/token-helper';
 interface Story {
   StoryID: number;
   Title: string;
@@ -113,7 +116,7 @@ export class StoryManagementComponent {
   items: MenuItem[] | undefined;
   itemApproval: MenuItem[] | undefined;
   activeIndex: number = 0;
-
+  userID: any;
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -133,6 +136,7 @@ export class StoryManagementComponent {
 
 
   ngOnInit() {
+    this.userID = getUserIdFromToken();
     this.onTabChange({ index: 0 });
     this.items = [
       { label: 'Xem nội dung', icon: 'pi pi-file-check', command: () => this.onDetail(this.selectedStory?.storyID) },
@@ -155,6 +159,8 @@ export class StoryManagementComponent {
       { label: 'Phê duyệt', icon: 'pi pi-check', command: () => this.approveStory(this.selectedStory) },
       { label: 'Từ chối', icon: 'pi pi-times', command: () => this.rejectStory(this.selectedStory) }
     ];
+
+
 
   }
   exportExcel() {
@@ -246,8 +252,7 @@ export class StoryManagementComponent {
   }
 
   loadMyStories() {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}').userID;
-    this._storyService.getMyStories(currentUser).subscribe((res: any) => {
+    this._storyService.getMyStories(this.userID).subscribe((res: any) => {
       if (res) {
         this.myStories = res.data;
       }
