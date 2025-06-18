@@ -93,6 +93,11 @@ export class RegisterComponent {
     })
   }
 
+
+  registerWith(provider: string) {
+    console.log(`Đăng nhập với ${provider}`);
+  }
+
   navigateToLogin() {
     this.router.navigate(['/login']);
   }

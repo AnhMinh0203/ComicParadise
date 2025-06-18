@@ -155,7 +155,7 @@ export class NavbarComponent {
   }
 
   logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
     this.userID = null;
     this.router.navigate(['/login']);
   }

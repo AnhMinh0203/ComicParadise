@@ -67,11 +67,11 @@ export class HomeComponent {
   filterStoryByCategoriesResults: any;
 
   pageIndexNovelStory: number = 1;
-  pageSizeNovelStory: number = 5;
+  pageSizeNovelStory: number = 6;
   pageIndexCurrentUpdateStory: number = 1;
-  pageSizeCurrentUpdateStory: number = 5;
+  pageSizeCurrentUpdateStory: number = 6;
   pageIndexAdvanceStory: number = 1;
-  pageSizeAdvanceStory: number = 5;
+  pageSizeAdvanceStory: number = 6;
   pageIndexDay = 1;
   pageIndexWeek = 1;
   pageIndexMonth = 1;

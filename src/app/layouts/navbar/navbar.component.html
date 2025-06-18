@@ -57,13 +57,7 @@
   <div class="navbar-right">
 
     <!-- Notification -->
-    <!-- <div class="notification" (click)="showDialogNotify()">
-      <p-overlaybadge badgeSize="small" [value]="unreadNotification">
-        <i class="pi pi-bell" style="font-size: 1rem"></i>
-      </p-overlaybadge>
-    </div> -->
-
-    <div class="notification" (click)="showDialogNotify()">
+    <div class="notification" *ngIf="userID" (click)="showDialogNotify()">
       <p-overlaybadge *ngIf="unreadNotification > 0" badgeSize="small" [value]="unreadNotification">
         <i class="pi pi-bell" style="font-size: 1rem"></i>
       </p-overlaybadge>
