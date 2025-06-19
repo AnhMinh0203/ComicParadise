@@ -28,13 +28,11 @@
             <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1" />
           </ng-container>
         </div>
-
         <p class="story-status"><strong>Trạng thái:</strong> Đang tiến hành</p>
         <p class="story-description">{{this.description}}</p>
       </div>
     </div>
   </div>
-
 </p-card>
 
 
@@ -48,7 +46,6 @@
           <div class="chapter-item-icon me-3">
             <i class="pi pi-circle-fill text-danger chapter-icon"></i>
           </div>
-
           <div class="chapter-item-infor flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
               <span class="chapter-number fw-bold">#{{chapter.chapterNumber}}</span>
@@ -66,7 +63,6 @@
           [style]="{ 'width': '100%' }" (click)="toggleChapterView()">
         </button>
       </div>
-
     </div>
   </div>
 </p-card>
@@ -78,7 +74,6 @@
   <div class="new-comment-input my-1">
     <textarea pTextarea [(ngModel)]="commentInput" placeholder="Viết phản hồi..." rows="3"
       [style]="{ 'width': '100%' }"></textarea>
-
     <div class="comment-input-actions d-flex justify-content-end">
       <p-tag class="p-tag-hover p-2" value="Phản hồi" label="Primary" (click)="postComment()" />
 
@@ -119,8 +114,6 @@
                 value="Phản hồi" [rounded]="true" (click)="toggleReply(comment)" />
             </div>
 
-
-
             <div class="comment-input my-1" *ngIf="comment.isReplying">
               <textarea pTextarea [(ngModel)]="commenReplytInput" placeholder="Viết phản hồi..." rows="3"
                 [style]="{ 'width': '100%' }"></textarea>
@@ -130,7 +123,6 @@
                   (click)="toggleReply(comment)" />
                 <p-tag class="p-tag-comment p-tag-hover" value="Phản hồi" label="Primary"
                   (click)="replyComment(comment)" />
-
               </div>
             </div>
 
@@ -143,8 +135,6 @@
                 {{ comment.expanded ? 'Ẩn phản hồi' : comment.children.length + ' phản hồi' }}
               </p-tag>
             </div>
-
-
           </div>
           <!-- Hiển thị comment con nếu expanded = true -->
           <div class="comment-item-content-down ms-n5"
@@ -152,7 +142,6 @@
             <p-tree [value]="comment.children" styleClass="w-full md:w-[30rem]"
               [style]="{ padding: '0px', 'margin-left': '-15px' }">
               <ng-template let-childComment pTemplate="default">
-
                 <div class="comment-item d-flex my-3" [id]="'comment-' + childComment.commentID">
                   <div class="comment-item-avatar p-1">
                     <p-avatar [label]="childComment.avatar" styleClass="mr-2"
@@ -170,9 +159,8 @@
                       </div>
 
                       <div class="comment-item-actions d-flex align-items-center p-2">
-                        <i [class.pi-thumbs-up]="!childComment.isLiked"
-                          [class.pi-thumbs-up-fill]="childComment.isLiked" class="pi me-3"
-                          (click)="onLike(childComment)">
+                        <i [class.pi-thumbs-up]="!childComment.isLiked" [class.pi-thumbs-up-fill]="childComment.isLiked"
+                          class="pi me-3" (click)="onLike(childComment)">
                           <span class="mx-1 no-select" *ngIf="childComment.likes > 0">{{ childComment.likes }}</span>
                         </i>
 
@@ -185,19 +173,12 @@
                       </div>
                     </div>
                   </div>
-                  <!-- <div class="comment-item-report p-2">
-                    <p-menu #menu [model]="commentReport" [popup]="true" appendTo="body" />
-                    <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)"
-                      (click)="setCurrentComment(childComment)"></i>
-                  </div> -->
                 </div>
-
               </ng-template>
             </p-tree>
           </div>
         </div>
         <div class="comment-item-report p-2">
-
           <p-menu #menu [model]="commentSelections" [popup]="true" appendTo="body" />
           <i class="pi pi-ellipsis-v round-icon" (click)="menu.toggle($event)" (click)="setCurrentComment(comment)"></i>
         </div>

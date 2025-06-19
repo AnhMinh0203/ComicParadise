@@ -1,42 +1,30 @@
 import { Component } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
-
 import { TabsModule } from 'primeng/tabs';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-
 import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
 import { CardModule as PrimeUiCardModule } from 'primeng/card';
 import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
-
-import { DatePicker } from 'primeng/datepicker';
-
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-
-import { Table } from 'primeng/table';
-
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
-
 import { PanelModule } from 'primeng/panel';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { statisticalReportService } from '../service/statisticalReport.service';
 import { storyService } from '../service/story.service';
-import { initial } from 'lodash-es';
 import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { memberService } from '../service/member.service';
+import { ResponseHandler } from '../../core/helpers/response-handler';
 @Component({
   selector: 'app-statistical-report-management',
   imports: [
@@ -65,7 +53,7 @@ import { memberService } from '../service/member.service';
     ConfirmDialog,
     ToastModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './statistical-report-management.component.html',
   styleUrls: ['./statistical-report-management.component.scss']
 })
@@ -111,17 +99,11 @@ export class StatisticalReportManagementComponent {
 
 
   constructor(
-    private router: Router,
-    private http: HttpClient,
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService,
     private _statisticalReportService: statisticalReportService,
     private _storyService: storyService,
-    private _memberService: memberService
-
-  ) {
-
-  }
+    private _memberService: memberService,
+    private _responseHandler: ResponseHandler,
+  ) {}
 
   reloadStoriesReport() { }
 
@@ -140,10 +122,6 @@ export class StatisticalReportManagementComponent {
 
   ngOnInit() {
     this.initial();
-
-
-
-
   }
 
 
@@ -170,16 +148,12 @@ export class StatisticalReportManagementComponent {
     this._statisticalReportService.exportStoryReportExcel().subscribe((res: Blob) => {
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
-
-      // Tạo link ẩn để tải file
       const a = document.createElement('a');
       a.href = url;
       a.download = `ReportStory-${new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '')}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
-      // Giải phóng bộ nhớ
       window.URL.revokeObjectURL(url);
     }, error => {
       console.error("Lỗi khi tải file Excel", error);
@@ -192,11 +166,7 @@ export class StatisticalReportManagementComponent {
         this.stories = res.data;
       }
       else {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Thông báo',
-          detail: 'Truyện không tồn tại'
-        });
+        this._responseHandler.showWarning("Truyện không tồn tại");
       }
     });
   }
@@ -279,7 +249,7 @@ export class StatisticalReportManagementComponent {
                   text: 'Số lượng truyện'
                 },
                 ticks: {
-                  stepSize: 1,  // Chỉ hiển thị số nguyên
+                  stepSize: 1,
                   beginAtZero: true
                 }
               }
@@ -295,17 +265,12 @@ export class StatisticalReportManagementComponent {
     );
   }
 
-
-
   // Member
-
-
   exportMemberReportExcel() {
     this._statisticalReportService.exportMemberReportExcel().subscribe((res: Blob) => {
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
 
-      // Tạo link ẩn để tải file
       const a = document.createElement('a');
       a.href = url;
       a.download = `ReportMember-${new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '')}.xlsx`;
@@ -313,7 +278,6 @@ export class StatisticalReportManagementComponent {
       a.click();
       document.body.removeChild(a);
 
-      // Giải phóng bộ nhớ
       window.URL.revokeObjectURL(url);
     }, error => {
       console.error("Lỗi khi tải file Excel", error);
@@ -323,7 +287,6 @@ export class StatisticalReportManagementComponent {
   getReportMember() {
     this._memberService.getAllMembers().subscribe((res: any) => {
       this.members = res;
-
     });
   }
   onMemberReportTypeChange() {
@@ -371,7 +334,7 @@ export class StatisticalReportManagementComponent {
                   text: 'Số lượng thành viên'
                 },
                 ticks: {
-                  stepSize: 1,  // Chỉ hiển thị số nguyên
+                  stepSize: 1,
                   beginAtZero: true
                 }
               }

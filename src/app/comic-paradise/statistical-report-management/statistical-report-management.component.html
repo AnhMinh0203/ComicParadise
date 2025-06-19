@@ -1,8 +1,6 @@
 <div class="row my-2">
-
   <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 mb-3">
     <div class="d-flex report-item">
-
       <div class="ml-4">
         <p class="text-gray-600">Tổng đầu truyện</p>
         <p class="text-xl font-semibold">{{totalStories}}</p>
@@ -39,21 +37,17 @@
   <p-tablist>
     <p-tab value="0">Truyện</p-tab>
     <p-tab value="1">Thành viên</p-tab>
-
   </p-tablist>
 
   <p-tabpanels>
     <p-tabpanel value="0">
-
       <div class="p-3 mb-5 ">
         <!-- Actions -->
         <div class="d-flex justify-content-between">
           <div class="d-flex ">
             <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help"
               (click)="exportStoryReportExcel()" />
-            <!-- <p-button icon="pi pi-refresh" (click)="reloadStoriesReport()" /> -->
           </div>
-
           <div>
             <c-input-group class="mb-3">
               <input aria-describedby="button-addon2" aria-label="Nhập tên chuyên mục" cFormControl
@@ -78,7 +72,6 @@
               <th pSortableColumn="likes">Lượt thích <p-sortIcon field="likes" /></th>
               <th pSortableColumn="createdAt">Ngày tạo <p-sortIcon field="createdAt" /></th>
               <th>Hành động </th>
-
             </tr>
           </ng-template>
           <ng-template #body let-story>
@@ -89,7 +82,6 @@
               <td>{{ story.views }}</td>
               <td>{{ story.likes }}</td>
               <td>{{ story.createdAt | date:'dd/MM/yyyy' }}</td>
-
               <td>
                 <i class="pi pi-pen-to-square" (click)="getStoryDetail(story.storyID)"></i>
               </td>
@@ -115,7 +107,7 @@
           <p-toast />
           <p-confirmdialog />
           <p-button class="me-3" icon="pi pi-print" label="Xuất Excel" [outlined]="true" severity="help"
-          (click)="exportMemberReportExcel()" />
+            (click)="exportMemberReportExcel()" />
         </div>
 
         <p-table #dt2 [value]="members" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" [paginator]="true"
@@ -128,7 +120,6 @@
               <th style="width: 20%;">Số điện thoại</th>
               <th style="width: 10%;">Quyền</th>
               <th style="width: 25%;">Ngày tạo</th>
-
             </tr>
             <tr>
               <th style="width: 10%;">
@@ -166,7 +157,6 @@
               <td>
                 <div class="ms-2">{{ member.userID }}</div>
               </td>
-
               <td>
                 <div class="flex gap-2">
                   <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
@@ -211,7 +201,6 @@
       <div class="card">
         <p-chart type="bar" [data]="reportMemberData" [options]="reportMemberOption" />
       </div>
-
     </p-tabpanel>
   </p-tabpanels>
 </p-tabs>
@@ -245,7 +234,6 @@
             <p-tag severity="info" value="{{cate.categoryName}}" [rounded]="true" class="m-1" />
           </ng-container>
         </div>
-
         <p class="story-status"><strong>Trạng thái:</strong> Đang tiến hành</p>
         <p class="story-description">{{this.description}}</p>
       </div>

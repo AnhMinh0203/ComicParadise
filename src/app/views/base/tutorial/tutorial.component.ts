@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { PanelModule } from 'primeng/panel';
 import { SharedModule } from '../../../core/share/shared.module';
 import { SpeedDialModule } from 'primeng/speeddial';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import Quill from 'quill';
 import { tutorialService } from '../service/tutorial.service';
 import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ResponseHandler } from 'src/app/core/helpers/response-handler';
 
 @Component({
   selector: 'app-tutorial',
@@ -17,7 +18,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     SelectModule,
     ProgressSpinnerModule
   ],
-  providers: [MessageService],
+
   templateUrl: './tutorial.component.html',
   styleUrl: './tutorial.component.scss'
 })
@@ -52,8 +53,8 @@ export class TutorialComponent {
   contentTutorial: any;
 
   constructor(
-    private messageService: MessageService,
     private _tutorialService: tutorialService,
+    private _responseHandler: ResponseHandler
   ) { }
 
   ngOnInit() {
@@ -86,8 +87,8 @@ export class TutorialComponent {
     setTimeout(() => {
       this.getAllTutorial();
       this.isLoading = false;
-      this.messageService.add({ severity: 'success', summary: 'Đã làm mới', detail: 'Tải dữ liệu thành công' });
-    }, 1000); // chờ 1 giây để nhìn thấy spinner
+      this._responseHandler.showwSuccess('Tải dữ liệu thành công');
+    }, 1000);
   }
 
   initializeAddQuill() {
@@ -135,11 +136,11 @@ export class TutorialComponent {
           this.tutorialTitles = res.data;
           this.selectedTitleTutorial = null;
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+          this._responseHandler.showError('Có lỗi xảy ra!');
         }
       },
       (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+        this._responseHandler.showError('Có lỗi xảy ra!');
       }
     );
   }
@@ -154,15 +155,15 @@ export class TutorialComponent {
     this._tutorialService.addTutorial(model).subscribe(
       (res: any) => {
         if (res && res.isSuccess) {
-          this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Thêm thành công!' });
+          this._responseHandler.showwSuccess('Thêm thành công!');
           this.getAllTutorial();
           this.closeDialogs();
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+          this._responseHandler.showError("Có lỗi xảy ra!");
         }
       },
       (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+       this._responseHandler.showError("Có lỗi xảy ra!");
       }
     );
   }
@@ -184,16 +185,16 @@ export class TutorialComponent {
     this._tutorialService.updateTutorial(model).subscribe(
       (res: any) => {
         if (res && res) {
-          this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Thêm thành công!' });
+          this._responseHandler.showwSuccess('Cập nhật thành công!');
           this.getAllTutorial();
           this.closeDialogs();
 
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+          this._responseHandler.showError('Có lỗi xảy ra!');
         }
       },
       (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+         this._responseHandler.showError('Có lỗi xảy ra!');
       }
     );
   }
@@ -210,7 +211,6 @@ export class TutorialComponent {
       this.editorUpdateInstance.setContents([]);
   }
   }
-
 
   resetEditor(containerId: string, instance: any): any {
     const container = document.getElementById(containerId);
@@ -240,11 +240,11 @@ export class TutorialComponent {
         if (res && res.isSuccess) {
           this.tutorials = res.data;
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+          this._responseHandler.showError('Có lỗi xảy ra!');
         }
       },
       (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+         this._responseHandler.showError('Có lỗi xảy ra!');
       }
     );
   }
@@ -253,19 +253,17 @@ export class TutorialComponent {
     this._tutorialService.deleteTutorial(this.selectedTutorialID).subscribe(
       (res: any) => {
         if (res && res.isSuccess) {
-          this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Xóa thành công!' });
+          this._responseHandler.showwSuccess('Xóa thành công!');
           this.getTuttorialTitles();
           this.getAllTutorial();
           this.closeDialogs();
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+          this._responseHandler.showError('Có lỗi xảy ra!');
         }
       },
       (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra!' });
+        this._responseHandler.showError('Có lỗi xảy ra!');
       }
     );
   }
-
-
 }

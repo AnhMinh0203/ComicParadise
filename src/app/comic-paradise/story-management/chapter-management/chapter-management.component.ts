@@ -1,12 +1,13 @@
-import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { chapterService } from '../../service/chapter.service';
 import { ActivatedRoute } from '@angular/router';
 import { SharedModule } from '../../../core/share/shared.module';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { PanelModule } from 'primeng/panel';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { Observable, tap } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
+import { getUserIdFromToken } from '../../../core/helpers/token-helper';
+import { ResponseHandler } from '../../../core/helpers/response-handler';
 
 @Component({
   selector: 'app-chapter-management',
@@ -15,7 +16,7 @@ import { jwtDecode } from 'jwt-decode';
     PanelModule,
     ScrollPanelModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './chapter-management.component.html',
   styleUrl: './chapter-management.component.scss'
 })
@@ -36,18 +37,13 @@ export class ChapterManagementComponent {
   constructor(
     private route: ActivatedRoute,
     private _chapterService: chapterService,
-    private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private _responseHandler: ResponseHandler
   ) { }
 
   ngOnInit(): void {
-        const token = localStorage.getItem('token');
-    if (!token) {
-      return;
-    }
-    const decoded: any = jwtDecode(token);
-    this.currentUserId = decoded.userID;
+    this.currentUserId = getUserIdFromToken();
 
     this.storyID = +this.route.snapshot.paramMap.get('storyID')!;
     this.chapterNumber = +this.route.snapshot.paramMap.get('chapterNumber')!;
@@ -64,15 +60,10 @@ export class ChapterManagementComponent {
   }
   scrollToPage() {
     if (!this.pageNumber || this.pageNumber < 1 || this.pageNumber > this.pageImages.length) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Lỗi',
-        detail: 'Số trang không hợp lệ'
-      });
+      this._responseHandler.showWarning('Số trang không hợp lệ');
       return;
     }
-
-    const index = this.pageNumber - 1; // Chỉ số mảng bắt đầu từ 0
+    const index = this.pageNumber - 1;
     const element = this.pageImages.toArray()[index].nativeElement;
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -96,21 +87,13 @@ export class ChapterManagementComponent {
 
       accept: () => {
         if (!this.deletePageNumber || this.deletePageNumber < 1 || this.deletePageNumber > this.pageImages.length) {
-          this.messageService.add({
-            severity: 'warn',
-            summary: 'Lỗi',
-            detail: 'Số trang không hợp lệ'
-          });
+          this._responseHandler.showWarning('Số trang không hợp lệ');
           return;
         }
 
         this._chapterService.deleteChapterPage(this.storyID, this.chapterNumber, this.deletePageNumber).subscribe(res => {
           if (res && res.isSuccess == true) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Thành công',
-              detail: 'Xóa trang thành công'
-            });
+            this._responseHandler.showwSuccess('Xóa trang thành công');
             this.loadChapterContent();
           }
           this.chapterContent = res.data;
@@ -131,13 +114,8 @@ export class ChapterManagementComponent {
     };
     this._chapterService.replaceChapterPage(model).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Thành công',
-          detail: 'Thay thế trang thành công'
-        });
+        this._responseHandler.showwSuccess('Thay thế trang thành công');
         this.loadChapterContentWhenReplace().subscribe(() => {
-          // Thêm timestamp để phá cache
           const index = this.pageNumberReplace - 1;
           this.chapterContent.imageUrls[index] = `${this.chapterContent.imageUrls[index]}?t=${Date.now()}`;
           this.cdr.detectChanges();
@@ -164,16 +142,12 @@ export class ChapterManagementComponent {
     const model = {
       storyID: this.storyID,
       chapterNumber: this.chapterNumber,
-      chapterPage: this.pageNumberAdd || null, // Null nếu không chỉ định vị trí
+      chapterPage: this.pageNumberAdd || null,
       file: this.newPageAdd
     };
     this._chapterService.addChapterPage(model).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Thành công',
-          detail: 'Thêm trang mới thành công'
-        });
+        this._responseHandler.showwSuccess('Thêm trang thành công');
         this.loadChapterContent();
         this.pageNumberAdd = null;
         this.newPageAdd = null;

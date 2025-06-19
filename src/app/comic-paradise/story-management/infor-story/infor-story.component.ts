@@ -5,19 +5,18 @@ import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { PanelModule } from 'primeng/panel';
 import { TreeModule } from 'primeng/tree';
-import { ConfirmationService, MenuItem, MessageService, TreeNode } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { AvatarModule } from 'primeng/avatar';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { commentService } from '../../service/comment.service';
-import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { storyService } from '../../service/story.service';
-import { categoryService } from '../../service/category.service';
 import { chapterService } from '../../service/chapter.service';
 import { Menu, MenuModule } from 'primeng/menu';
 import { SharedModule } from '../../../core/share/shared.module';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
-import { jwtDecode } from 'jwt-decode';
+import { getUserIdFromToken } from '../../../core/helpers/token-helper';
+import { ResponseHandler } from '../../../core/helpers/response-handler';
 @Component({
   selector: 'app-infor-story',
   imports: [
@@ -33,7 +32,7 @@ import { jwtDecode } from 'jwt-decode';
     MenuModule,
     Menu
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ ConfirmationService],
   templateUrl: './infor-story.component.html',
   styleUrl: './infor-story.component.scss'
 })
@@ -55,22 +54,19 @@ export class InforStoryComponent {
   showAllChapters: boolean = false;
   maxChaptersToShow: number = 12;
   commenReplytInput: any;
-currentUserId: any;
+  currentUserId: any;
 
   constructor(
-    private http: HttpClient,
     private router: Router,
     private _storyService: storyService,
-    private _categoryService: categoryService,
     private _commentService: commentService,
     private _chapterService: chapterService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
     private activatedRoute: ActivatedRoute,
-
+    private _responseHandler: ResponseHandler,
   ) { }
 
   ngOnInit() {
+    this.currentUserId = getUserIdFromToken();
     this.activatedRoute.paramMap.subscribe(async params => {
       const id = params.get('id');
       if (id) {
@@ -92,12 +88,6 @@ currentUserId: any;
         { label: 'Xóa', icon: 'pi pi-trash', command: () => this.onDeleteComment(this.selectedComment) }
       ];
     });
-            const token = localStorage.getItem('token');
-    if (!token) {
-      return;
-    }
-    const decoded: any = jwtDecode(token);
-    this.currentUserId = decoded.userID;
   }
 
   scrollToComment(commentID: string) {
@@ -105,10 +95,6 @@ currentUserId: any;
     if (commentElement) {
       commentElement.classList.add('highlight-comment');
       commentElement.scrollIntoView({ behavior: 'smooth' });
-
-      // setTimeout(() => {
-      //   commentElement.classList.remove('highlight-comment');
-      // }, 3000);
     }
   }
 
@@ -125,7 +111,6 @@ currentUserId: any;
   }
 
   async getStoryDetail(storyID: number) {
-
     const res: any = await firstValueFrom(this._storyService.getStoryById(storyID));
 
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
@@ -138,7 +123,6 @@ currentUserId: any;
       this.description = res.data.description;
 
       this.comments = this.comments.map((comment: any) => {
-        // Tìm reaction của user hiện tại trong danh sách reactions
         const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
         return {
           commentID: comment.commentID.toString(),
@@ -152,7 +136,7 @@ currentUserId: any;
           children: this.mapChildComments(comment.childComments),
           reactions: comment.reactions,
           isLiked: userReaction ? userReaction.isLike : false,
-          isDisliked: userReaction ? !userReaction.isLike : false, // Nếu userReaction tồn tại nhưng `isLike` là false -> là dislike
+          isDisliked: userReaction ? !userReaction.isLike : false,
         };
       });
     });
@@ -161,13 +145,10 @@ currentUserId: any;
   getTimeAgo(createdAt: string): string {
     const now = new Date();
     const commentTime = new Date(createdAt);
-
     const diffInMs = now.getTime() - commentTime.getTime();
     const diffInMinutes = Math.floor(diffInMs / 1000 / 60);
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInMinutes / 1440);
-
-    // Tính chính xác số tháng và năm
     let diffInMonths = (now.getFullYear() - commentTime.getFullYear()) * 12 + (now.getMonth() - commentTime.getMonth());
     const diffInYears = now.getFullYear() - commentTime.getFullYear();
 
@@ -193,9 +174,7 @@ currentUserId: any;
   mapChildComments(childComments: any[]): any[] {
     const currentUserId = this.currentUserId;
     return childComments.map((child: any) => {
-      // Tìm reaction của user hiện tại trong danh sách reactions của comment con
       const userReaction = child.reactions.find((reaction: any) => reaction.userID === currentUserId);
-
       return {
         commentID: child.commentID.toString(),
         label: child.username || 'Người dùng',
@@ -224,8 +203,6 @@ currentUserId: any;
       Reply: this.replyingCommentId,
     };
 
-    console.log(comment);
-
     this._commentService.postComment(comment).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         var userName = JSON.parse(localStorage.getItem('user') || '{}').username
@@ -240,9 +217,9 @@ currentUserId: any;
 
         this.comments.unshift(newComment);
         this.commentInput = "";
-        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
+        this._responseHandler.showwSuccess("Đăng bình luận thành công");
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandler.showWarning("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -250,13 +227,10 @@ currentUserId: any;
   onLike(comment: any) {
     console.log(comment);
     if (comment.isLiked) {
-      // Hủy like
       comment.likes = (comment.likes || 0) - 1;
     } else {
-      // Thêm like
       comment.likes = (comment.likes || 0) + 1;
       if (comment.isDisliked) {
-        // Nếu trước đó đã dislike thì giảm dislike
         comment.disLikes = (comment.disLikes || 0) - 1;
       }
     }
@@ -272,10 +246,8 @@ currentUserId: any;
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
     this._commentService.updateReaction(reaction).subscribe((res: any) => {
-      if (res && res.isSuccess == true) {
-
-      } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      if (res && res.isSuccess !== true) {
+        this._responseHandler.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -301,14 +273,11 @@ currentUserId: any;
       createdAt: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
     };
     this._commentService.updateReaction(reaction).subscribe((res: any) => {
-      if (res && res.isSuccess == true) {
-
-      } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+      if (res && res.isSuccess !== true) {
+        this._responseHandler.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
-
 
   toggleReply(comment: any) {
     comment.isReplying = !comment.isReplying;
@@ -316,7 +285,7 @@ currentUserId: any;
 
   replyComment(comment: any) {
     if (!this.commenReplytInput) {
-      this.messageService.add({ severity: "warn", summary: "Thông báo", detail: "Vui lòng nhập nội dung phản hồi" });
+      this._responseHandler.showWarning("Vui lòng nhập nội dung phản hồi");
       return;
     }
     const responseComment = {
@@ -346,13 +315,12 @@ currentUserId: any;
           comment.children = [];
         }
 
-        // Thêm newResComment vào children của comment cha
         comment.children.push(newResComment);
         this.toggleReply(comment);
         this.commenReplytInput = "";
-        this.messageService.add({ severity: "success", summary: "Thành công", detail: "Đăng bình luận thành công" });
+        this._responseHandler.showwSuccess("Đăng phản hồi thành công");
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandler.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -370,32 +338,23 @@ currentUserId: any;
     this._commentService.updateStatusComment(statusCommentRequest).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         comment.status = newStatus;
-        this.messageService.add({
-          severity: "success",
-          summary: "Thành công",
-          detail: `Bình luận đã được ${newStatus === "Visible" ? "hiển thị" : "ẩn"} thành công.`
-        });
+        this._responseHandler.showwSuccess(`Bình luận đã được ${newStatus === "Visible" ? "hiển thị" : "ẩn"} thành công`);
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandler.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
 
   onLockComment(comment: any) {
-
   }
+
   onDeleteComment(comment: any) {
     this._commentService.deleteComment(comment.commentID).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.comments = this.comments.filter(c => c.commentID !== comment.commentID);
-
-        this.messageService.add({
-          severity: "success",
-          summary: "Thành công",
-          detail: `Xóa bình luận thành công`
-        });
+        this._responseHandler.showwSuccess(`Xóa bình luận thành công`);
       } else {
-        this.messageService.add({ severity: "error", summary: "Lỗi", detail: "Có lỗi xảy ra, vui lòng thử lại" });
+        this._responseHandler.showError("Có lỗi xảy ra, vui lòng thử lại");
       }
     });
   }
@@ -403,7 +362,6 @@ currentUserId: any;
     comment.expanded = !comment.expanded;
   }
 
-  // Navigate to chapter content
   navigateToChapterContent(storyID: number, chapterNumber: number) {
     console.log('Navigating to:', storyID, chapterNumber);
     this.router.navigate(['/story-management/chapter-content', storyID, chapterNumber]);

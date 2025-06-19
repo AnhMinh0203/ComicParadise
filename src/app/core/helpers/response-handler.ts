@@ -3,7 +3,7 @@ import { MessageService } from "primeng/api";
 
 @Injectable({ providedIn: 'root' })
 export class ResponseHandler {
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService) { }
 
   handleResponse<T>(res: { isSuccess: boolean; status: number; message: string; data?: T }) {
     if (res.isSuccess) {
@@ -23,5 +23,9 @@ export class ResponseHandler {
 
   showwSuccess(message: string) {
     this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: message });
+  }
+
+  showInfor(message: string) {
+    this.messageService.add({ severity: 'infor', summary: 'Thông báo', detail: message });
   }
 }

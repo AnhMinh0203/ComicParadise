@@ -1,38 +1,27 @@
-import { Component, AfterViewInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
 import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
-import { PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 import { RatingModule } from 'primeng/rating';
 import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
-import { InputGroup } from 'primeng/inputgroup';
 import { DialogModule } from 'primeng/dialog';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-
-import { FileUploadModule } from 'primeng/fileupload';
-
+import { HttpClientModule } from '@angular/common/http';
+import { FileUploadModule } from 'primeng/fileupload'
 import { ImageModule } from 'primeng/image';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { EditorModule } from 'primeng/editor';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { SelectModule } from 'primeng/select';
 // ---
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
-
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { categoryService } from '../service/category.service';
 import { SpeedDialModule } from 'primeng/speeddial';
-
 import { SharedModule } from '../../core/share/shared.module';
+import { ResponseHandler } from '../../core/helpers/response-handler';
 
 @Component({
   selector: 'app-category-management',
@@ -60,7 +49,7 @@ import { SharedModule } from '../../core/share/shared.module';
     ButtonModule,
     SpeedDialModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './category-management.component.html',
   styleUrl: './category-management.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -76,17 +65,11 @@ export class CategoryManagementComponent {
   categoryDesc: any;
 
   constructor(
-    private router: Router,
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
-    private cdRef: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
-    private _categoryService: categoryService
+    private _categoryService: categoryService,
+    private _responseHandler: ResponseHandler
 
-  ) {
-
-  }
+  ) {}
 
   ngOnInit() {
     this.getCategories();
@@ -171,10 +154,10 @@ export class CategoryManagementComponent {
         this._categoryService.deleteCategory(this.categorySelected.categoryID).subscribe((res: any) => {
           if (res && res.isSuccess == true) {
             this.getCategories();
-            this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+            this._responseHandler.showwSuccess(res.data);
           }
           else {
-            this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: res.data });
+            this._responseHandler.showWarning(res.data);
           }
         });
       }
@@ -183,10 +166,8 @@ export class CategoryManagementComponent {
   }
 
   addCategory() {
-    console.log(this.categoryName);
-    console.log(this.categoryDesc);
     if (!this.categoryName?.trim() || !this.categoryDesc?.trim()) {
-      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng nhập đầy đủ thông tin' });
+      this._responseHandler.showWarning('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
@@ -196,27 +177,22 @@ export class CategoryManagementComponent {
     }
     this._categoryService.addCategory(newCategory).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
         this.getCategories();
-
         this.categoryName = '';
         this.categoryDesc = '';
       }
     });
     this.isVisibleAddOrUpdate = false;
   }
+
   updateCategory() {
     this._categoryService.updateCategory(this.categorySelected).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
         this.getCategories();
       }
     });
     this.isVisibleAddOrUpdate = false;
   }
-
-  Test(){
-    alert("123");
-  }
-
 }

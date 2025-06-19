@@ -13,7 +13,7 @@ import { ViewEncapsulation } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { Router } from '@angular/router';
 
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -32,19 +32,8 @@ import { TextareaModule } from 'primeng/textarea';
 import { categoryService } from '../../service/category.service';
 import { jwtDecode } from 'jwt-decode';
 import { CardModule as PrimeCardModule } from 'primeng/card';
-import { chapterService } from 'src/app/comic-paradise/service/chapter.service';
-import { ResponseHandler } from 'src/app/core/helpers/response-handler';
-import { getUserIdFromToken } from 'src/app/core/helpers/token-helper';
-interface ChapterFormData {
-  chapterNumber: number;
-  title: string;
-  storyType: string;
-  content?: string;
-  createdBy: number;
-  imageFiles: File[];
-}
-
-
+import { ResponseHandler } from '../../../core/helpers/response-handler';
+import { getUserIdFromToken } from '../../../core/helpers/token-helper';
 @Component({
   selector: 'app-add-story',
   imports: [
@@ -73,7 +62,7 @@ interface ChapterFormData {
     TextareaModule,
     PrimeCardModule
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ ConfirmationService],
   templateUrl: './add-story.component.html',
   styleUrls: ['./add-story.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -81,7 +70,6 @@ interface ChapterFormData {
 
 export class AddstoryComponent {
   @ViewChild('uploader') uploader: any;
-
   title: any;
   author: any;
   categories: any;
@@ -90,7 +78,6 @@ export class AddstoryComponent {
   publisher: any;
   coverImage: any;
   coverImageDisplay: any;
-
   userID: any;
   editorInstance: any;
   isAddChapter: boolean = false;
@@ -105,8 +92,6 @@ export class AddstoryComponent {
     private router: Router,
     private _storyService: storyService,
     private _categoryService: categoryService,
-    private messageService: MessageService,
-    private _chapterService: chapterService,
     private _responseHandler: ResponseHandler
   ) { }
 
@@ -149,7 +134,6 @@ export class AddstoryComponent {
 
   getCategories() {
     this._categoryService.getCategories().subscribe((res: any) => {
-      // console.log(res);
       if (res && res.isSuccess == true) {
         this.categories = res.data;
       }
@@ -159,13 +143,9 @@ export class AddstoryComponent {
   onUploadCoverImage(event: any) {
     const file = event.files[0];
     const maxSizeKB = 1000;
-    console.log(file.size);
-    if (file.size / 1024 > maxSizeKB) { // 1mb
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Kích thước ảnh không được lớn hơn 1MB'
-      });
+
+    if (file.size / 1024 > maxSizeKB) {
+      this._responseHandler.showWarning('Kích thước ảnh không được lớn hơn 1MB');
       return;
     }
 
@@ -181,73 +161,21 @@ export class AddstoryComponent {
     this.router.navigate(['/story-management']);
   }
 
-  showWarning(message: string) {
-    this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: message });
-  }
-
-  // addStory() {
-  //   if (!this.title || this.title.trim() === "") {
-  //     this.showWarning("Tên truyện không được để trống!");
-  //     return;
-  //   }
-  //   if (!this.author || this.author.trim() === "") {
-  //     this.showWarning("Tên tác giả không được để trống!");
-  //     return;
-  //   }
-  //   if (!this.selectType) {
-  //     this.showWarning("Vui lòng chọn danh mục!");
-  //     return;
-  //   }
-  //   if (!this.coverImage) {
-  //     this.showWarning("Vui lòng chọn ảnh bìa cho truyện!");
-  //     return;
-  //   }
-
-  //   const formData = new FormData();
-  //   const publishID = this.userID;
-
-  //   formData.append("Title", this.title);
-  //   formData.append("Author", this.author);
-  //   formData.append("PublisherID", publishID);
-  //   formData.append("Type", this.selectType);
-  //   // formData.append("CategoryIDs", this.categoriesSelect.map((c:any) => c.categoryID));
-
-  //   this.categoriesSelect.forEach((c: any) => {
-  //     formData.append("CategoryIDs", c.categoryID);
-  //   });
-
-  //   formData.append("Description", this.description);
-
-  //   // Gửi ảnh chính (primary image)
-  //   if (this.coverImage) {
-  //     formData.append("CoverImage", this.coverImage);
-  //   }
-
-  //   //  Gửi request xuống BE
-  //   this._storyService.addStory(formData).subscribe((res: any) => {
-  //     if (res && res.isSuccess == true) {
-  //       this.messageService.add({ severity: "success", summary: "Success", detail: res.data });
-  //     } else {
-  //       this.messageService.add({ severity: "error", summary: "Error", detail: res.data });
-  //     }
-  //   });
-  // }
-
   addStory() {
     if (!this.title || this.title.trim() === "") {
-      this.showWarning("Tên truyện không được để trống!");
+      this._responseHandler.showWarning("Tên truyện không được để trống!");
       return;
     }
     if (!this.author || this.author.trim() === "") {
-      this.showWarning("Tên tác giả không được để trống!");
+      this._responseHandler.showWarning("Tên tác giả không được để trống!");
       return;
     }
     if (!this.selectType) {
-      this.showWarning("Vui lòng chọn danh mục!");
+      this._responseHandler.showWarning("Vui lòng chọn danh mục!");
       return;
     }
     if (!this.coverImage) {
-      this.showWarning("Vui lòng chọn ảnh bìa cho truyện!");
+      this._responseHandler.showWarning("Vui lòng chọn ảnh bìa cho truyện!");
       return;
     }
 
@@ -286,14 +214,12 @@ export class AddstoryComponent {
 
     this._storyService.addStory(formData).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.messageService.add({ severity: "success", summary: "Success", detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
       } else {
-        this.messageService.add({ severity: "error", summary: "Error", detail: res.data });
+        this._responseHandler.showError(res.data);
       }
     });
   }
-
-
 
   addChapterForm() {
     this.isAddChapter = true;
@@ -328,19 +254,19 @@ export class AddstoryComponent {
 
   async postChapterToList() {
     if (!this.chapterNumber) {
-      this.showWarning("Vui lòng nhập số chương!");
+      this._responseHandler.showWarning("Vui lòng nhập số chương!");
       return;
     }
 
     if (this.selectType === "Manga" && (!this.selectedContentImages || this.selectedContentImages.length === 0)) {
-      this.showWarning("Truyện tranh cần có ít nhất một ảnh!");
+      this._responseHandler.showWarning("Truyện tranh cần có ít nhất một ảnh!");
       return;
     }
 
     if (this.selectType === "Novel") {
       const content = this.editorInstance?.root?.innerHTML?.trim();
       if (!content || content === "<p><br></p>") {
-        this.showWarning("Nội dung chương không được để trống!");
+        this._responseHandler.showWarning("Nội dung chương không được để trống!");
         return;
       }
     }

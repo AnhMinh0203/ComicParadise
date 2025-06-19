@@ -3,7 +3,7 @@ import { SharedModule } from '../../../core/share/shared.module';
 import { storyService } from '../../service/story.service';
 import { categoryService } from '../../service/category.service';
 import { Router } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { DomSanitizer } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
 import { CardModule } from 'primeng/card';
@@ -17,8 +17,8 @@ import { Menu } from 'primeng/menu';
 import { chapterService } from '../../service/chapter.service';
 import { jwtDecode } from 'jwt-decode';
 import { get } from 'lodash-es';
-import { getUserIdFromToken } from 'src/app/core/helpers/token-helper';
-import { ResponseHandler } from 'src/app/core/helpers/response-handler';
+import { ResponseHandler } from '../../../core/helpers/response-handler';
+import { getUserIdFromToken } from '../../../core/helpers/token-helper';
 
 
 @Component({
@@ -30,7 +30,7 @@ import { ResponseHandler } from 'src/app/core/helpers/response-handler';
     MenuModule,
     Menu
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
   templateUrl: './update-story.component.html',
   styleUrl: './update-story.component.scss'
 })

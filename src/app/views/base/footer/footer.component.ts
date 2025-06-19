@@ -3,10 +3,11 @@ import { TableModule } from 'primeng/table';
 import { SharedModule } from '../../../core/share/shared.module';
 import { footerContentService } from '../service/footer-content.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ResponseHandler } from 'src/app/core/helpers/response-handler';
 
 @Component({
   selector: 'app-footer',
@@ -18,7 +19,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     SpeedDialModule,
     ConfirmDialogModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss'
 })
@@ -49,7 +50,7 @@ export class FooterComponent {
   constructor(
     private footerContentService: footerContentService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
+    private _responseHandler: ResponseHandler
   ) { }
 
   ngOnInit() {
@@ -97,7 +98,7 @@ export class FooterComponent {
           this.footerIcons = this.footerContents.filter(x => x.iconName && x.isActive);
         }
 
-        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
       }
     }, (error: any) => {
       console.log(error);
@@ -122,13 +123,13 @@ export class FooterComponent {
 
   addFooterContent() {
     if (!this.newFooter.title?.trim() && !this.newFooter.iconName?.trim()) {
-      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng nhập đầy đủ thông tin' });
+      this._responseHandler.showWarning('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
     this.footerContentService.addFooterContent(this.newFooter).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
         this.getFooterContents();
         this.closeDialog();
       }
@@ -169,13 +170,13 @@ export class FooterComponent {
 
   updateFooterContent() {
     if (!this.selectedFooter.title?.trim() && !this.selectedFooter.iconName?.trim()) {
-      this.messageService.add({ severity: 'warn', summary: 'Thông báo', detail: 'Vui lòng nhập đầy đủ thông tin' });
+      this._responseHandler.showWarning('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
     this.footerContentService.updateFooterContent(this.selectedFooter).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Cập nhật thành công', detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
         this.getFooterContents();
         this.closeDialog();
       }
@@ -187,7 +188,7 @@ export class FooterComponent {
   deleteFooterContent() {
     this.footerContentService.deleteFooterContent(this.selectedFooter.footerContentID).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandler.showwSuccess(res.data);
         this.getFooterContents();
         this.closeDialog();
       }
@@ -195,5 +196,4 @@ export class FooterComponent {
       console.log(error);
     });
   }
-
 }

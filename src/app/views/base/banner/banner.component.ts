@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { SharedModule } from '../../../core/share/shared.module';
 import { bannerContentService } from '../service/banner.service';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import { CarouselModule } from 'primeng/carousel';
 import { SpeedDialModule } from 'primeng/speeddial';
 
@@ -12,7 +12,6 @@ import { SpeedDialModule } from 'primeng/speeddial';
     CarouselModule,
     SpeedDialModule
   ],
-  providers: [ConfirmationService, MessageService],
   templateUrl: './banner.component.html',
   styleUrl: './banner.component.scss'
 })
@@ -21,8 +20,6 @@ export class BannerComponent {
   actions: MenuItem[] | null = null;
   constructor(
     private bannerContentService: bannerContentService,
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService,
   ) {}
 
   ngOnInit() {

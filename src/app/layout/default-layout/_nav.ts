@@ -1,7 +1,8 @@
 // ./_nav.ts
 import { INavData } from '@coreui/angular';
 import { jwtDecode } from 'jwt-decode';
-import { getRoleFromToken } from 'src/app/core/helpers/token-helper';
+import { getRoleFromToken } from '../../core/helpers/token-helper';
+
 
 
 export function getNavItems(): INavData[] {
@@ -71,11 +72,7 @@ export function getNavItems(): INavData[] {
   ];
 
   if (role === 'Admin') return fullNavItems;
-
-  // Lọc bớt menu nếu không phải admin
-
   if (role === 'Publisher') {
-    // Lọc menu nếu là Publisher
     return fullNavItems.filter(item =>
       ![
         'Hệ thống',

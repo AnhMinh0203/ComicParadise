@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CardModule } from '@coreui/angular';
 import { SharedModule } from '../../core/share/shared.module';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { TabViewModule } from 'primeng/tabview';
 import { reportService } from '../service/report.service';
 import { RouterModule } from '@angular/router';
@@ -13,7 +13,7 @@ import { RouterModule } from '@angular/router';
     TabViewModule,
     RouterModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './report-management.component.html',
   styleUrl: './report-management.component.scss'
 })
@@ -21,21 +21,12 @@ export class ReportManagementComponent {
   reportComments: any[] = [];
   reportStories: any[] = [];
 
-
-
   constructor(
     private _reportService: reportService
-  ) {
-
-
-  }
+  ) {}
 
   ngOnInit() {
     this.onTabChange({ index: 0 });
-  }
-
-  exportExcel() {
-    alert("Xuất báo cáo thành công!");
   }
 
   onTabChange(event: any) {
@@ -46,6 +37,7 @@ export class ReportManagementComponent {
       this.loadReportComment();
     }
   }
+
   loadReportComment() {
     this._reportService.getReport("ReportComment").subscribe((res: any) => {
       this.reportComments = res.data;
@@ -53,6 +45,7 @@ export class ReportManagementComponent {
       console.error(error);
     });
   }
+
   loadReportStory() {
     this._reportService.getReport("ReportStory").subscribe((res: any) => {
       this.reportStories = res.data;

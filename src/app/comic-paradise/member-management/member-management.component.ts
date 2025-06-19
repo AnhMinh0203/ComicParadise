@@ -21,8 +21,7 @@ import { EditorModule } from 'primeng/editor';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { SelectModule } from 'primeng/select';
 // ---
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { memberService } from '../service/member.service';
@@ -32,8 +31,9 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { Password, PasswordModule } from 'primeng/password';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, style, transition, animate } from '@angular/animations';
 import { ListboxModule } from 'primeng/listbox';
+import { ResponseHandler } from '../../core/helpers/response-handler';
 
 
 @Component({
@@ -68,7 +68,7 @@ import { ListboxModule } from 'primeng/listbox';
     ToggleSwitchModule,
     ListboxModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './member-management.component.html',
   animations: [
     trigger('togglePassword', [
@@ -118,12 +118,9 @@ export class MemberManagementComponent {
 
   constructor(
     private router: Router,
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
-    private cdRef: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
-    private _memberService: memberService
+    private _memberService: memberService,
+    private _responseHandler: ResponseHandler
   ) {
     this.router.events.subscribe(() => {
       this.isAddMemberPage = this.router.url.includes('/member-management/add-member');
@@ -137,8 +134,6 @@ export class MemberManagementComponent {
     { label: 'Reader', value: 'Reader' },
     { label: 'Publisher', value: 'Publisher' }
   ];
-
-
 
   ngOnInit() {
     this.getAllMembers();
@@ -157,7 +152,7 @@ export class MemberManagementComponent {
       },
       {
         icon: 'pi pi-trash',
-        command: (event:any) => {
+        command: (event: any) => {
           this.deleteMember(event);
         }
       }
@@ -175,16 +170,12 @@ export class MemberManagementComponent {
     this._memberService.exportExcel().subscribe((res: Blob) => {
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
-
-      // Tạo link ẩn để tải file
       const a = document.createElement('a');
       a.href = url;
       a.download = `Users-${new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '')}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
-      // Giải phóng bộ nhớ
       window.URL.revokeObjectURL(url);
     }, error => {
       console.error("Lỗi khi tải file Excel", error);
@@ -216,7 +207,7 @@ export class MemberManagementComponent {
     formData.append("isLock", this.selectedMember.isLock.toString());
 
     if (this.newPassword && this.newPassword != this.comfirmPassword) {
-      this.messageService.add({ severity: 'warn', summary: 'Lỗi', detail: 'Mật khẩu không khớp' });
+      this._responseHandler.showWarning('Mật khẩu không khớp');
       return;
     }
     else {
@@ -229,12 +220,11 @@ export class MemberManagementComponent {
 
     this._memberService.updateMember(formData).subscribe((res: any) => {
       if (res && res.isSuccess) {
-        this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
+        this._responseHandler.showWarning(res.data);
       }
       else {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+        this._responseHandler.showError(res.data);
       }
-
       this.getAllMembers();
     });
   }
@@ -243,14 +233,9 @@ export class MemberManagementComponent {
     const file = event.files[0];
     const maxSizeKB = 1000;
     if (file.size / 1024 > maxSizeKB) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Kích thước ảnh không được lớn hơn 1MB'
-      });
+      this._responseHandler.showWarning('Kích thước ảnh không được lớn hơn 1MB');
       return;
     }
-
     const reader = new FileReader();
     this.primaryImg = file;
     reader.onload = (e: any) => {
@@ -273,7 +258,7 @@ export class MemberManagementComponent {
         this.historyStories = res.data;
       }
       else {
-        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
+        this._responseHandler.showError(res.data);
       }
     });
     this.visibleReadingHistoryForm = true;
@@ -281,36 +266,35 @@ export class MemberManagementComponent {
 
   deleteMember(event: Event) {
     this.confirmationService.confirm({
-        target: event.target as EventTarget,
-        message: 'Xác nhận xóa người dùng này ?',
-        header: 'Cảnh báo',
-        icon: 'pi pi-info-circle',
-        rejectLabel: 'Cancel',
-        rejectButtonProps: {
-            label: 'Hủy',
-            severity: 'secondary',
-            outlined: true,
-        },
-        acceptButtonProps: {
-            label: 'Xác nhận',
-            severity: 'danger',
-        },
+      target: event.target as EventTarget,
+      message: 'Xác nhận xóa người dùng này ?',
+      header: 'Cảnh báo',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Cancel',
+      rejectButtonProps: {
+        label: 'Hủy',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Xác nhận',
+        severity: 'danger',
+      },
 
-        accept: () => {
-            this._memberService.deleteMember(this.selectedMember.userID).subscribe((res: any) => {
-                if (res && res.isSuccess) {
-                    this.messageService.add({ severity: 'success', summary: 'Thông báo', detail: res.data });
-                    this.getAllMembers();
-                }
-                else {
-                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: res.data });
-                }
-            });
-        }
+      accept: () => {
+        this._memberService.deleteMember(this.selectedMember.userID).subscribe((res: any) => {
+          if (res && res.isSuccess) {
+            this._responseHandler.showwSuccess(res.data);
+            this.getAllMembers();
+          }
+          else {
+            this._responseHandler.showError(res.data);
+          }
+        });
+      }
 
     });
-}
-
+  }
 
   // ----
   showDialog() {
@@ -355,12 +339,11 @@ export class MemberManagementComponent {
       },
 
       accept: () => {
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
+        this._responseHandler.showwSuccess('Xóa thành công');
       },
       reject: () => {
-        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+        this._responseHandler.showInfor("Bạn đã từ chối xóa truyện");
       },
     });
   }
-  // ----
 }

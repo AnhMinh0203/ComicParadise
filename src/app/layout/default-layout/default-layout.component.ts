@@ -16,7 +16,7 @@ import {
 } from '@coreui/angular';
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
-import { getNavItems } from './_nav';  // ⚠ sửa từ navItems thành getNavItems
+import { getNavItems } from './_nav';
 import { ImageModule } from 'primeng/image';
 
 @Component({
@@ -53,12 +53,12 @@ export class DefaultLayoutComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.navItems = getNavItems(); // 🔥 lấy menu theo token hiện tại
+    this.navItems = getNavItems();
   }
 
   handleLogout(): void {
     localStorage.clear();
-    this.navItems = []; // clear luôn menu
+    this.navItems = [];
     this.router.navigate(['/login']);
   }
 

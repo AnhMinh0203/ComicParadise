@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import Quill from 'quill';
+import { HttpClientModule } from '@angular/common/http';
 import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
 import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -9,16 +8,14 @@ import { ImageModule } from 'primeng/image';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { EditorModule } from 'primeng/editor';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ViewEncapsulation } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { Router } from '@angular/router';
-import { DatePicker } from 'primeng/datepicker';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { PasswordModule } from 'primeng/password';
 import { memberService } from '../../service/member.service';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ResponseHandler } from '../../../core/helpers/response-handler';
 
 @Component({
   selector: 'app-add-member',
@@ -39,7 +36,7 @@ import { ToastModule } from 'primeng/toast';
     PasswordModule,
     ToastModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './add-member.component.html',
   styleUrl: './add-member.component.scss'
 })
@@ -54,7 +51,6 @@ export class AddMemberComponent {
   username: any;
   phone: any;
   address: any;
-
   searchText: string = '';
   rangeDates: any;
   isDropdownOpen = false;
@@ -67,24 +63,16 @@ export class AddMemberComponent {
   primaryImgDisplay: any;
 
   constructor(
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
     private router: Router,
     private _memberService: memberService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService
-
+    private _responseHandler: ResponseHandler
   ) { }
 
   onUpload(event: any) {
     const file = event.files[0];
     const maxSizeKB = 1000;
-    if (file.size / 1024 > maxSizeKB) { // 1mb
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Kích thước ảnh không được lớn hơn 1MB'
-      });
+    if (file.size / 1024 > maxSizeKB) {
+      this._responseHandler.showWarning('Kích thước ảnh không được lớn hơn 1MB');
       return;
     }
 
@@ -101,25 +89,15 @@ export class AddMemberComponent {
   }
 
   addMember() {
-
     if ((this.password == null || this.password == '') || (this.comfirmPassword == null || this.comfirmPassword == '')) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Lỗi',
-        detail: 'Mật khẩu không được để trống'
-      });
+      this._responseHandler.showWarning('Mật khẩu không được để trống');
       return;
     }
     if (this.password != this.comfirmPassword) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Lỗi',
-        detail: 'Mật khẩu không khớp'
-      });
+      this._responseHandler.showWarning('Mật khẩu không khớp');
       return;
-
-    } else {
-
+    }
+    else {
       const formData = new FormData();
       formData.append("username", this.username);
       formData.append("phone", this.phone);
@@ -127,29 +105,19 @@ export class AddMemberComponent {
       formData.append("passwordHash", this.password);
       formData.append("role", this.typeAccount);
       formData.append("status", "Active");
+
       if (this.primaryImg) {
         formData.append("avatar", this.primaryImg);
       }
-      console.log(formData);
 
       this._memberService.addMember(formData).subscribe((res: any) => {
         if (res && res.isSuccess == true) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Thông báo',
-            detail: 'Tạo tài khoản thành công'
-          });
+          this._responseHandler.showwSuccess("Tạo tài khoản thành công");
           return;
-
         }
         else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Lỗi',
-            detail: res.data
-          });
+          this._responseHandler.showError(res.data);
           return;
-
         }
       });
     }

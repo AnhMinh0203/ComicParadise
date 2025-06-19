@@ -24,13 +24,13 @@
 }
 
 .report-item {
-  background: #fff; /* Màu nền trắng */
-  border-radius: 12px; /* Bo góc mềm mại */
-  padding: 20px; /* Khoảng cách bên trong */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Căn icon và text về 2 bên */
+  justify-content: space-between;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -41,19 +41,19 @@
 }
 
 .report-item p {
-  margin: 0; /* Xóa khoảng cách mặc định của thẻ <p> */
-  font-weight: 600; /* Làm đậm chữ */
+  margin: 0;
+  font-weight: 600;
 }
 
 .report-item .text-gray-600 {
-  font-size: 14px; /* Chữ nhỏ hơn cho phần mô tả */
-  color: #6b7280; /* Màu xám nhạt */
+  font-size: 14px;
+  color: #6b7280;
 }
 
 .report-item .font-semibold {
-  font-size: 22px; /* Chữ số to hơn */
-  font-weight: 700; /* Làm đậm chữ số */
-  color: #1f2937; /* Màu chữ tối */
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 
@@ -74,21 +74,20 @@
 .book-icon, .member-icon, .category-icon {
   width: 80px;
   height: 80px;
-  background-size: contain; /* Giữ tỉ lệ ảnh */
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
 }
 
 .pi-pen-to-square {
-  padding: 10px; /* Thêm padding để tạo không gian xung quanh icon */
-  border-radius: 50%; /* Làm tròn */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Hiệu ứng mượt */
+  padding: 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .pi-pen-to-square:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Màu nền khi hover */
-
-  cursor: pointer; /* Đổi thành con trỏ tay */
+  background-color: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 // member

@@ -1,6 +1,6 @@
-import { Component, AfterViewInit, ChangeDetectorRef, ViewEncapsulation, ViewChild } from '@angular/core';
+import { Component, ViewEncapsulation, ViewChild } from '@angular/core';
 import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -10,27 +10,19 @@ import { PaginatorState } from 'primeng/paginator';
 import { Table, TableModule } from 'primeng/table';
 import { RatingModule } from 'primeng/rating';
 import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
-import { InputGroup } from 'primeng/inputgroup';
 import { DialogModule } from 'primeng/dialog';
-
 import { SplitButtonModule } from 'primeng/splitbutton';
-
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import Quill from 'quill';
-
-import { FileUpload, FileUploadModule } from 'primeng/fileupload';
-
+import { HttpClientModule } from '@angular/common/http';
+import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { EditorModule } from 'primeng/editor';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 // ---
 
-import { ConfirmationService, MessageService } from 'primeng/api';
-
+import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { storyService } from '../service/story.service';
@@ -38,9 +30,8 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { TabViewModule } from 'primeng/tabview';
-import { jwtDecode } from 'jwt-decode';
-import { get } from 'lodash-es';
-import { getUserIdFromToken } from 'src/app/core/helpers/token-helper';
+import { getUserIdFromToken } from '../../core/helpers/token-helper';
+import { ResponseHandler } from '../../core/helpers/response-handler';
 interface Story {
   StoryID: number;
   Title: string;
@@ -81,7 +72,7 @@ interface Story {
     SplitButtonModule
 
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './story-management.component.html',
   styleUrl: './story-management.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -119,12 +110,9 @@ export class StoryManagementComponent {
   userID: any;
   constructor(
     private router: Router,
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
-    private cdRef: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
-    private _storyService: storyService
+    private _storyService: storyService,
+    private _responseHandler: ResponseHandler
   ) {
     this.router.events.subscribe(() => {
       this.isAddstoryPage = this.router.url.includes('/story-management/add-story');
@@ -164,8 +152,7 @@ export class StoryManagementComponent {
 
   }
   exportExcel() {
-    // Logic xuất Excel (có thể thêm sau)
-    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Chức năng xuất Excel đang phát triển' });
+    this._responseHandler.showInfor('Chức năng xuất Excel đang phát triển');
   }
 
   navigateToAddStory() {
@@ -230,17 +217,17 @@ export class StoryManagementComponent {
       },
 
       accept: () => {
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
+        this._responseHandler.showwSuccess('Xóa thành công');
       },
       reject: () => {
-        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+        this._responseHandler.showInfor('Bạn đã từ chối');
       },
     });
   }
 
 
   onTabChange(event: any) {
-    const tabIndex = event.index; // Lấy index của tab được chọn
+    const tabIndex = event.index;
     if (tabIndex == 0) {
 
       this.loadMyStories();
@@ -300,20 +287,12 @@ export class StoryManagementComponent {
       accept: () => {
         this._storyService.deleteStory(storyID).subscribe((res: any) => {
           if (res && res.isSuccess == true) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Thành công',
-              detail: res.data
-            });
+            this._responseHandler.showwSuccess(res.data);
             this.loadStories();
             return;
           }
           else {
-            this.messageService.add({
-              severity: 'warn',
-              summary: 'Thất bại',
-              detail: res.data
-            });
+            this._responseHandler.showWarning(res.data);
             return;
           }
         });
@@ -329,20 +308,12 @@ export class StoryManagementComponent {
     this._storyService.updateStatus(status, storyID).subscribe((res: any) => {
       console.log(res);
       if (res && res.isSuccess == true) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Thành công',
-          detail: res.data
-        });
+        this._responseHandler.showwSuccess(res.data);
         this.loadStories();
         return;
       }
       else {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Thất bại',
-          detail: res.data
-        });
+        this._responseHandler.showWarning(res.data);
         return;
       }
     });
@@ -353,11 +324,7 @@ export class StoryManagementComponent {
         this.stories = res.data;
       }
       else {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Thông báo',
-          detail: 'Truyện không tồn tại'
-        });
+        this._responseHandler.showWarning("Truyện không tồn tại");
       }
     });
   }
@@ -383,5 +350,4 @@ export class StoryManagementComponent {
   rejectStory(story: any) {
     this.updateStatus("Rejected", story.storyID);
   }
-
 }
