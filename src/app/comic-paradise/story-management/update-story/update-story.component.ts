@@ -138,27 +138,8 @@ export class UpdateStoryComponent {
   async getCommentsByStoryID(storyID: number) {
     return this._commentService.getCommentsByStoryID(storyID).subscribe((res: any) => {
       this.comments = res.data;
-    });
-  }
-
-  async getStoryDetail(storyID: number) {
-    const currentUserId = this.userID;
-    this._storyService.getStoryById(storyID).subscribe((res: any) => {
-      console.log(res);
-      this.author = res.data.author;
-      this.title = res.data.title;
-      this.selectStoryType = res.data.type;
-
-      this.categoriesSelect = (this.categories || []).filter((category: any) =>
-        res.data.categories?.some((c: any) => c.categoryID === category.categoryID)
-      );
-
-
-      this.coverImageDisplay = res.data.coverImage;
-      this.description = res.data.description;
-
       this.comments = this.comments.map((comment: any) => {
-        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === currentUserId);
+        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.userID);
         return {
           commentID: comment.commentID.toString(),
           label: comment.username || 'Người dùng',
@@ -174,6 +155,21 @@ export class UpdateStoryComponent {
           isDisliked: userReaction ? !userReaction.isLike : false,
         };
       });
+    });
+  }
+
+  async getStoryDetail(storyID: number) {
+    this._storyService.getStoryById(storyID).subscribe((res: any) => {
+      console.log(res);
+      this.author = res.data.author;
+      this.title = res.data.title;
+      this.selectStoryType = res.data.type;
+
+      this.categoriesSelect = (this.categories || []).filter((category: any) =>
+        res.data.categories?.some((c: any) => c.categoryID === category.categoryID)
+      );
+      this.coverImageDisplay = res.data.coverImage;
+      this.description = res.data.description;
     });
   }
 
