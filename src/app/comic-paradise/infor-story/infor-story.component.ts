@@ -71,7 +71,7 @@ export class InforStoryComponent {
   storyRating: number = 4;
   userRating: any;
   pageIndex = 1;
-  pageSize = 2;
+  pageSize = 5;
   loadingMoreComments = false;
   hasMoreComments = true;
 
@@ -159,7 +159,7 @@ export class InforStoryComponent {
 
   private async loadStoryInfo(storyID: number) {
     this.getChaptersByStoryID(storyID);
-    await this.getCommentsByStoryID(storyID);
+    this.getCommentsByStoryID(storyID);
     this.getStoryDetail(storyID);
     this.getStoryRating(storyID);
   }
@@ -226,8 +226,6 @@ export class InforStoryComponent {
   }
 
   async getStoryDetail(storyID: number) {
-    const res: any = await firstValueFrom(this._storyService.getStoryById(storyID));
-
     this._storyService.getStoryById(storyID).subscribe((res: any) => {
       this.author = res.data.author;
       this.title = res.data.title;
@@ -237,31 +235,12 @@ export class InforStoryComponent {
       this.description = res.data.description;
       this.views = res.data.views;
       this.likes = res.data.likes;
-
-      this.comments = this.comments.map((comment: any) => {
-        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
-        return {
-          commentID: comment.commentID.toString(),
-          label: comment.username || 'Người dùng',
-          avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
-          content: comment.content,
-          time: this.getTimeAgo(comment.createdAt),
-          status: comment.status,
-          likes: comment.likes,
-          disLikes: comment.disLikes,
-          children: this.mapChildComments(comment.childComments),
-          reactions: comment.reactions,
-          isLiked: userReaction ? userReaction.isLike : false,
-          isDisliked: userReaction ? !userReaction.isLike : false,
-        };
-      });
     });
   }
 
   mapChildComments(childComments: any[]): any[] {
     return childComments.map((child: any) => {
       const userReaction = child.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
-
       return {
         commentID: child.commentID.toString(),
         label: child.username || 'Người dùng',
@@ -320,10 +299,27 @@ export class InforStoryComponent {
     });
   }
 
-  async getCommentsByStoryID(storyID: number) {
+  getCommentsByStoryID(storyID: number) {
     return this._commentService.getCommentsByStoryID(storyID, this.pageIndex, this.pageSize).subscribe((res: any) => {
       this.comments = res.data;
       this.totalComments = this.countTotalComments(this.comments);
+      this.comments = this.comments.map((comment: any) => {
+        const userReaction = comment.reactions.find((reaction: any) => reaction.userID === this.currentUserId);
+        return {
+          commentID: comment.commentID.toString(),
+          label: comment.username || 'Người dùng',
+          avatar: comment.username ? comment.username.charAt(0).toUpperCase() : 'U',
+          content: comment.content,
+          time: this.getTimeAgo(comment.createdAt),
+          status: comment.status,
+          likes: comment.likes,
+          disLikes: comment.disLikes,
+          children: this.mapChildComments(comment.childComments),
+          reactions: comment.reactions,
+          isLiked: userReaction ? userReaction.isLike : false,
+          isDisliked: userReaction ? !userReaction.isLike : false,
+        };
+      });
     });
   }
 

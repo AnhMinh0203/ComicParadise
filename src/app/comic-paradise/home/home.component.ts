@@ -170,6 +170,30 @@ export class HomeComponent {
     this.getCurrentUpdateStories();
   }
 
+  // getTopStories(type: string, pageIndex: number) {
+  //   setTimeout(() => {
+  //     this._storyService.getTopStories(type, pageIndex, this.pageSizeTopStory).subscribe((res: any) => {
+  //       if (res && res.isSuccess) {
+  //         const newItems = res.data.items;
+
+  //         if (type === 'day') {
+  //           this.topStoriesDay = [...this.topStoriesDay, ...newItems];
+  //           this.hasMoreDay = newItems.length === this.pageSizeTopStory;
+  //           this.pageIndexDay++;
+  //         } else if (type === 'week') {
+  //           this.topStoriesWeek = [...this.topStoriesWeek, ...newItems];
+  //           this.hasMoreWeek = newItems.length === this.pageSizeTopStory;
+  //           this.pageIndexWeek++;
+  //         } else {
+  //           this.topStoriesMonth = [...this.topStoriesMonth, ...newItems];
+  //           this.hasMoreMonth = newItems.length === this.pageSizeTopStory;
+  //           this.pageIndexMonth++;
+  //         }
+  //       }
+  //     })
+  //   }, 300);
+  // }
+
   getTopStories(type: string, pageIndex: number) {
     setTimeout(() => {
       this._storyService.getTopStories(type, pageIndex, this.pageSizeTopStory).subscribe((res: any) => {
@@ -180,19 +204,38 @@ export class HomeComponent {
             this.topStoriesDay = [...this.topStoriesDay, ...newItems];
             this.hasMoreDay = newItems.length === this.pageSizeTopStory;
             this.pageIndexDay++;
+
+            this.displayLimitDay += 4;
+            if (this.displayLimitDay > this.topStoriesDay.length) {
+              this.displayLimitDay = this.topStoriesDay.length;
+            }
+
           } else if (type === 'week') {
             this.topStoriesWeek = [...this.topStoriesWeek, ...newItems];
             this.hasMoreWeek = newItems.length === this.pageSizeTopStory;
             this.pageIndexWeek++;
+
+            this.displayLimitWeek += 4;
+            if (this.displayLimitWeek > this.topStoriesWeek.length) {
+              this.displayLimitWeek = this.topStoriesWeek.length;
+            }
+
           } else {
             this.topStoriesMonth = [...this.topStoriesMonth, ...newItems];
             this.hasMoreMonth = newItems.length === this.pageSizeTopStory;
             this.pageIndexMonth++;
+
+            this.displayLimitMonth += 4;
+            if (this.displayLimitMonth > this.topStoriesMonth.length) {
+              this.displayLimitMonth = this.topStoriesMonth.length;
+            }
           }
         }
-      })
+      });
     }, 300);
   }
+
+
 
   onTabChange(tabIndex: any) {
     this.selectedTab = tabIndex.toString();
@@ -208,39 +251,38 @@ export class HomeComponent {
   showMoreTopStories(type: string) {
     switch (type) {
       case 'month':
-        this.displayLimitMonth += 4;
-        if (this.displayLimitMonth > this.topStoriesMonth.length) {
-          this.displayLimitMonth = this.topStoriesMonth.length;
-        }
+        this.getTopStories('month', this.pageIndexMonth);
         break;
       case 'week':
-        this.displayLimitWeek += 4;
-        if (this.displayLimitWeek > this.topStoriesWeek.length) {
-          this.displayLimitWeek = this.topStoriesWeek.length;
-        }
+        this.getTopStories('week', this.pageIndexWeek);
         break;
       case 'day':
-        this.displayLimitDay += 4;
-        if (this.displayLimitDay > this.topStoriesDay.length) {
-          this.displayLimitDay = this.topStoriesDay.length;
-        }
+        this.getTopStories('day', this.pageIndexDay);
         break;
     }
   }
+
+
 
   showLessTopStories(type: string) {
     switch (type) {
       case 'month':
         this.displayLimitMonth = 4;
+        this.hasMoreMonth = this.topStoriesMonth.length > 4;
         break;
       case 'week':
         this.displayLimitWeek = 4;
+        this.hasMoreWeek = this.topStoriesWeek.length > 4;
         break;
       case 'day':
         this.displayLimitDay = 4;
+        this.hasMoreDay = this.topStoriesDay.length > 4;
         break;
     }
   }
+
+
+
 
   getAdvanceStories() {
     setTimeout(() => {
