@@ -318,10 +318,12 @@ export class StoryManagementComponent {
       }
     });
   }
-  searchStory() {
+  searchStory(tabName: 'my' | 'all' | 'pending') {
     this._storyService.searchStories(this.keySearch).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this.stories = res.data;
+        if (tabName === 'my') this.myStories = res.data;
+        else if (tabName === 'all') this.stories = res.data;
+        else if (tabName === 'pending') this.pendingStories = res.data;
       }
       else {
         this._responseHandler.showWarning("Truyện không tồn tại");

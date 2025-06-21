@@ -22,9 +22,9 @@
           <div>
             <c-input-group class="mb-3">
               <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
-                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" (keydown.enter)="searchStory('my')"/>
               <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
-                (click)="searchStory()">
+                (click)="searchStory('my')">
                 Tìm kiếm
               </button>
             </c-input-group>
@@ -74,9 +74,9 @@
           <div>
             <c-input-group class="mb-3">
               <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
-                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" (keydown.enter)="searchStory('all')"/>
               <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
-                (click)="searchStory()">
+                (click)="searchStory('all')">
                 Tìm kiếm
               </button>
             </c-input-group>
@@ -127,9 +127,9 @@
           <div>
             <c-input-group class="mb-3">
               <input aria-describedby="button-addon2" aria-label="Nhập tên truyện" cFormControl
-                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" />
+                placeholder="Nhập tên truyện" [(ngModel)]="keySearch" (keydown.enter)="searchStory('pending')"/>
               <button cButton color="secondary" id="button-addon2" type="button" variant="outline"
-                (click)="searchStory()">
+                (click)="searchStory('pending')">
                 Lọc truyện
               </button>
             </c-input-group>
