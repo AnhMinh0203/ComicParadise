@@ -100,6 +100,7 @@ export class HomeComponent {
   isDarkMode = false;
 
   ngOnInit() {
+    this.currentUserId = getUserIdFromToken();
     this.route.queryParams.subscribe(params => {
       const categoryName = params['category'];
       if (categoryName) {
@@ -120,7 +121,6 @@ export class HomeComponent {
       this.filterStoryByConditions = stories;
       const isNowFiltered = stories.length > 0;
 
-      // Chỉ show warning nếu trước đó đã thực hiện filter
       if (hasFilteredByConditions && !isNowFiltered) {
         this.responseHandler.showWarning('Không có truyện nào phù hợp với bộ lọc của bạn!');
       }
@@ -142,11 +142,10 @@ export class HomeComponent {
       hasFilteredByCategories = true;
     });
 
-    this.getCurrentUpdateStories()
-    this.onTabChange(this.selectedTab);
-    this.getAdvanceStories();
-    this.getNovelStories();
-    this.currentUserId = getUserIdFromToken();
+    this.getCurrentUpdateStories();
+    setTimeout(() => this.onTabChange(this.selectedTab), 500);
+    setTimeout(() => this.getAdvanceStories(), 300);
+    setTimeout(() => this.getNovelStories(), 700);
   }
 
   navigateToInforStory(storyID: number) {
@@ -169,30 +168,6 @@ export class HomeComponent {
     this.pageIndexCurrentUpdateStory++;
     this.getCurrentUpdateStories();
   }
-
-  // getTopStories(type: string, pageIndex: number) {
-  //   setTimeout(() => {
-  //     this._storyService.getTopStories(type, pageIndex, this.pageSizeTopStory).subscribe((res: any) => {
-  //       if (res && res.isSuccess) {
-  //         const newItems = res.data.items;
-
-  //         if (type === 'day') {
-  //           this.topStoriesDay = [...this.topStoriesDay, ...newItems];
-  //           this.hasMoreDay = newItems.length === this.pageSizeTopStory;
-  //           this.pageIndexDay++;
-  //         } else if (type === 'week') {
-  //           this.topStoriesWeek = [...this.topStoriesWeek, ...newItems];
-  //           this.hasMoreWeek = newItems.length === this.pageSizeTopStory;
-  //           this.pageIndexWeek++;
-  //         } else {
-  //           this.topStoriesMonth = [...this.topStoriesMonth, ...newItems];
-  //           this.hasMoreMonth = newItems.length === this.pageSizeTopStory;
-  //           this.pageIndexMonth++;
-  //         }
-  //       }
-  //     })
-  //   }, 300);
-  // }
 
   getTopStories(type: string, pageIndex: number) {
     setTimeout(() => {
@@ -235,8 +210,6 @@ export class HomeComponent {
     }, 300);
   }
 
-
-
   onTabChange(tabIndex: any) {
     this.selectedTab = tabIndex.toString();
     if (tabIndex === '0' && this.topStoriesMonth.length === 0) {
@@ -262,8 +235,6 @@ export class HomeComponent {
     }
   }
 
-
-
   showLessTopStories(type: string) {
     switch (type) {
       case 'month':
@@ -280,9 +251,6 @@ export class HomeComponent {
         break;
     }
   }
-
-
-
 
   getAdvanceStories() {
     setTimeout(() => {

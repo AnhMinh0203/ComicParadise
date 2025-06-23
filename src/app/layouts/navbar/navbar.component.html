@@ -114,7 +114,7 @@
   </div>
   <hr>
   <h6>Thông báo cũ</h6>
-  <div *ngFor="let noti of oldNotifications.reverse()" class="d-flex justify-content-between noti-item p-2 my-2">
+  <div *ngFor="let noti of oldNotifications" class="d-flex justify-content-between noti-item p-2 my-2">
     <div class="d-flex">
       <div class="noti-icon">
         <p-avatar [label]="noti.senderId.toString().charAt(0)" shape="circle" size="large" />

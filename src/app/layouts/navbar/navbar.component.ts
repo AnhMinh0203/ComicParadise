@@ -240,6 +240,7 @@ export class NavbarComponent {
             this.oldNotifications = res.data.oldNotifications;
             this.unreadNotification = res.data.totalNewNotify;
 
+            console.log('New Notifications:', this.oldNotifications);
             this.cdr.detectChanges(); // Đảm bảo giao diện cập nhật
             this.updateIsReadStatus();
           }

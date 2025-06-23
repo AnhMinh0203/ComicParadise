@@ -158,10 +158,10 @@ export class InforStoryComponent {
 
 
   private async loadStoryInfo(storyID: number) {
-    this.getChaptersByStoryID(storyID);
-    this.getCommentsByStoryID(storyID);
     this.getStoryDetail(storyID);
-    this.getStoryRating(storyID);
+    setTimeout(() => this.getStoryRating(storyID), 200);
+    setTimeout(() => this.getChaptersByStoryID(storyID), 400);
+    setTimeout(() => this.getCommentsByStoryID(storyID), 600);
   }
 
   private loadUserInfo() {
