@@ -14,6 +14,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { TableModule, Table } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { Toast } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -37,7 +38,7 @@ import { FormModule } from '@coreui/angular';
 import { AvatarModule } from 'primeng/avatar';
 import { TagModule } from 'primeng/tag';
 import { TreeModule } from 'primeng/tree';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 
 @NgModule({
   imports: [
@@ -66,7 +67,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
     TagModule,
     TreeModule,
     InputGroupAddonModule,
-    InputGroupModule
+    InputGroupModule,
+    Toast
   ],
   exports: [
     CommonModule,
@@ -94,8 +96,9 @@ import { ConfirmationService, MessageService } from 'primeng/api';
     TagModule,
     TreeModule,
     InputGroupAddonModule,
-    InputGroupModule
+    InputGroupModule,
+    Toast
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
 })
 export class SharedModule { }

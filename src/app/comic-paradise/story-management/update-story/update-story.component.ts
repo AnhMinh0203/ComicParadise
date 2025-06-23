@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../core/share/shared.module';
 import { storyService } from '../../service/story.service';
 import { categoryService } from '../../service/category.service';
 import { Router } from '@angular/router';
-import { ConfirmationService } from 'primeng/api';
-import { DomSanitizer } from '@angular/platform-browser';
-import { HttpClient } from '@angular/common/http';
+
 import { CardModule } from 'primeng/card';
 import { FileUploadModule } from 'primeng/fileupload';
 import Quill from 'quill';
@@ -15,8 +13,6 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { chapterService } from '../../service/chapter.service';
-import { jwtDecode } from 'jwt-decode';
-import { get } from 'lodash-es';
 import { ResponseHandler } from '../../../core/helpers/response-handler';
 import { getUserIdFromToken } from '../../../core/helpers/token-helper';
 
@@ -30,11 +26,12 @@ import { getUserIdFromToken } from '../../../core/helpers/token-helper';
     MenuModule,
     Menu
   ],
-  providers: [ConfirmationService],
   templateUrl: './update-story.component.html',
   styleUrl: './update-story.component.scss'
 })
 export class UpdateStoryComponent {
+  @ViewChild('uploader') uploader: any;
+
   storyID: any | null = null;
   chapterNumber: any;
   chapterName: any;
@@ -76,7 +73,7 @@ export class UpdateStoryComponent {
     private _categoryService: categoryService,
     private _commentService: commentService,
     private _chapterService: chapterService,
-    private _responseHandler : ResponseHandler,
+    private _responseHandler: ResponseHandler,
     private activatedRoute: ActivatedRoute,
   ) { }
 
@@ -491,6 +488,32 @@ export class UpdateStoryComponent {
   }
 
   async postChapter() {
+    if (!this.chapterNumber) {
+      this._responseHandler.showWarning("Vui lòng nhập số chương!");
+      return;
+    }
+
+    if (isNaN(this.chapterNumber) || +this.chapterNumber <= 0) {
+      this._responseHandler.showWarning("Số chương phải là một số hợp lệ!");
+      return;
+    }
+
+    if (this.selectStoryType === "Manga" && (!this.selectedContentImages || this.selectedContentImages.length === 0)) {
+      this._responseHandler.showWarning("Truyện tranh cần có ít nhất một ảnh!");
+      return;
+    }
+
+    if (this.selectStoryType === "Novel") {
+      const content = this.editorInstance?.root?.innerHTML?.trim();
+      if (!content || content === "<p><br></p>") {
+        this._responseHandler.showWarning("Nội dung chương không được để trống!");
+        return;
+      }
+    }
+
+
+
+
     const chapter = {
       StoryID: this.storyID,
       ChapterNumber: this.chapterNumber,
@@ -503,9 +526,14 @@ export class UpdateStoryComponent {
 
     this._chapterService.postChapter(chapter).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
-        this._responseHandler.showwSuccess(res.data);
+        this.chapterNumber = null;
+        this.chapterName = null;
+        this.selectedContentImages = [];
+        this.uploader.clear();
+        this.getChaptersByStoryID(this.storyID);
+        this._responseHandler.showwSuccess(res.message);
       } else {
-        this._responseHandler.showError(res.data);
+        this._responseHandler.showError(res.message);
       }
     });
   }

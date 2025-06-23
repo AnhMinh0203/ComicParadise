@@ -7,7 +7,6 @@
         <div *ngIf="chapterContent" [style.max-height.px]="600" [style.overflow-y]="'auto'">
           <!-- Hiển thị danh sách ảnh -->
           <div *ngIf="chapterContent.storyType === 'Manga'">
-            <p>Minh dzzz</p>
             <div *ngFor="let imageUrl of chapterContent.imageUrls">
               <img #pageImage [src]="imageUrl" alt="Chapter Image" style="width:100%;">
             </div>

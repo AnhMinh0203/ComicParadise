@@ -1,5 +1,4 @@
 <p-toast />
-<p-confirmdialog />
 <c-card>
   <c-card-header>
     <h5>Cập nhật truyện</h5>
@@ -103,7 +102,7 @@
             <!-- Content manga -->
             <div class="contentMangaStory" *ngIf="isAddManga">
               <!-- Type of file -->
-              <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
+              <p-fileupload #uploader name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
                   [auto]="true" chooseLabel="Tải trang truyện" (onSelect)="onUploadChildrenImg($event)"
                   (onRemove)="onRemoveChildrenImg($event)">
                   <ng-template #empty>
