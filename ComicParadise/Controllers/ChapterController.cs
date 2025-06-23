@@ -28,7 +28,7 @@ namespace ComicParadise.Api.Controllers
         public async Task<ActionResult>  PostChapter (PostChapterDto postChapterDto)
         {
             var result = await _chapterRepository.PostChapterAsync(postChapterDto);
-            return Ok(new BaseResponse<string>(true,result));
+            return Ok(new BaseResponse_V2<string>(true,200,result,null));
         }
 
         [HttpGet("Get-chapter-content")]

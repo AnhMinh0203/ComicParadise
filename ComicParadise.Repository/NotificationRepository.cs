@@ -35,7 +35,7 @@ namespace ComicParadise.Repository
 
             var oldNotifications = await (from n in _context.Notifications
                                           where n.ReceiverId == userID && n.IsShow == true && n.IsRead == true
-                                          orderby n.CreatedAt
+                                          orderby n.CreatedAt descending
                                           select n).AsNoTracking().Take(20).ToListAsync();
             return new
             {
