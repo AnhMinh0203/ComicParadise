@@ -1,4 +1,4 @@
-import { NgModule, Component, AfterViewInit, ChangeDetectorRef, ViewEncapsulation, ViewChild } from '@angular/core';
+import { NgModule} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -20,16 +20,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TextareaModule } from 'primeng/textarea';
-import { HttpClient } from '@angular/common/http';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-
-// ---
-
-
-
-
-// ---
+import { TooltipModule } from 'primeng/tooltip';
 
 // CoreUI modules
 import { ButtonModule as CoreUIButtonModule } from '@coreui/angular';
@@ -68,7 +61,8 @@ import { ConfirmationService } from 'primeng/api';
     TreeModule,
     InputGroupAddonModule,
     InputGroupModule,
-    Toast
+    Toast,
+    TooltipModule
   ],
   exports: [
     CommonModule,
@@ -97,7 +91,8 @@ import { ConfirmationService } from 'primeng/api';
     TreeModule,
     InputGroupAddonModule,
     InputGroupModule,
-    Toast
+    Toast,
+    TooltipModule
   ],
   providers: [ConfirmationService],
 })

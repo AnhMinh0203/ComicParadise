@@ -31,3 +31,8 @@ export function getRoleFromToken(): string | null {
   const decoded = getDecodedToken();
   return decoded?.role ?? null;
 }
+
+export function getAccessToken(): string | null {
+  return localStorage.getItem('accessToken');
+}
+

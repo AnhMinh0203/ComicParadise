@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
 import { catchError, Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
@@ -8,17 +8,16 @@ import { catchError, Observable } from 'rxjs';
 export class storyService {
   serviceUri: any;
   constructor(private http: HttpClient) {
-    this.serviceUri =`${environment.apiUrl}/Story`;
+    this.serviceUri = `${environment.apiUrl}/Story`;
   }
 
-  addStory(model: any) {
-    var apiUrl = `${this.serviceUri}/Add-story`;
-    return this.http.post(apiUrl, model)
-      .pipe(
-        catchError((error: any) => {
-          throw error;
-        })
-      );
+  addStory(formData: FormData): Observable<HttpEvent<any>> {
+    const apiUrl = `${this.serviceUri}/Add-story`;
+    const req = new HttpRequest('POST', apiUrl, formData, {
+      reportProgress: true,
+      responseType: 'json'
+    });
+    return this.http.request(req);
   }
 
   getMyStories(userID: any) {

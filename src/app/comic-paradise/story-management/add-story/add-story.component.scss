@@ -34,3 +34,46 @@
 .expired {
   background-color: #ffcccc !important;
 }
+
+.custom-card-shadow {
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease;
+}
+
+.custom-toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  background: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  min-width: 260px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+}
+
+.spinner {
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  color: #2196f3;
+}
+
+.toast-message {
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

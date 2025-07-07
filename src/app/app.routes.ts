@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
 import { LoginComponent } from './core/authen/login/login.component';
+import { AuthGuard } from './core/authen/services/auth.guard';
 
 
 export const routes: Routes = [
@@ -10,7 +11,7 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'login',  // Cấu hình route login
+    path: 'login',  
     component: LoginComponent,
     data: {
       title: 'Login Page'
@@ -22,6 +23,7 @@ export const routes: Routes = [
     data: {
       title: 'Trang chủ'
     },
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'dashboard',
@@ -51,8 +53,6 @@ export const routes: Routes = [
         path: 'system-management',
         loadChildren: () => import('./views/base/routes').then((m) => m.routes)
       },
-
-
     ]
   },
 

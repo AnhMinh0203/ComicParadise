@@ -1,6 +1,6 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpEventType } from '@angular/common/http';
 import Quill from 'quill';
-import { Component, ViewChild } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
 import { ButtonModule as PrimeUIButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -12,15 +12,11 @@ import { EditorModule } from 'primeng/editor';
 import { ViewEncapsulation } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { Router } from '@angular/router';
-
 import { ConfirmationService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TableModule } from 'primeng/table';
-
-
-
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
@@ -34,6 +30,11 @@ import { jwtDecode } from 'jwt-decode';
 import { CardModule as PrimeCardModule } from 'primeng/card';
 import { ResponseHandler } from '../../../core/helpers/response-handler';
 import { getUserIdFromToken } from '../../../core/helpers/token-helper';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { SharedModule } from '../../../core/share/shared.module';
+import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
+import { SignalRService } from '../../service/signalr.service';
+
 @Component({
   selector: 'app-add-story',
   imports: [
@@ -60,9 +61,11 @@ import { getUserIdFromToken } from '../../../core/helpers/token-helper';
     SelectButtonModule,
     MultiSelectModule,
     TextareaModule,
-    PrimeCardModule
+    PrimeCardModule,
+    ProgressBarModule,
+    SharedModule
   ],
-  providers: [ ConfirmationService],
+  providers: [ConfirmationService],
   templateUrl: './add-story.component.html',
   styleUrls: ['./add-story.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -80,7 +83,6 @@ export class AddstoryComponent {
   coverImageDisplay: any;
   userID: any;
   editorInstance: any;
-  isAddChapter: boolean = false;
   isAddNovel: boolean = false;
   isAddManga: boolean = false;
   chapterNumber: any;
@@ -88,20 +90,33 @@ export class AddstoryComponent {
   selectedContentImages: File[] = [];
   chapters: any[] = [];
 
+  maxSizeInBytes: number = 314_572_800; // 300Mb
+  totalUploadedSize: number = 0;
+  value: number = 0;
+  interval: any;
+  loadingPercent: number = 0;
+  isUploading: boolean = false;
+  showCustomToast: boolean = false;
+  uploadMessage: string = 'Khởi động upload...';
+
   constructor(
     private router: Router,
+    private http: HttpClient,
     private _storyService: storyService,
     private _categoryService: categoryService,
-    private _responseHandler: ResponseHandler
+    private _responseHandler: ResponseHandler,
+    private _signalRService: SignalRService,
   ) { }
 
   typeOptions: any[] = [{ label: 'Truyện tranh', value: 'Manga' }, { label: 'Tiểu thuyết', value: 'Novel' }];
   selectType: any;
 
   ngOnInit() {
+    this._signalRService.startConnection().then(() => { });
     this.getCategories();
     this.selectType = this.typeOptions[0].value;
     this.userID = getUserIdFromToken();
+    this.addChapterForm();
   }
   toolbarOptions = [
     ['bold', 'italic', 'underline', 'strike'],
@@ -161,12 +176,25 @@ export class AddstoryComponent {
     this.router.navigate(['/story-management']);
   }
 
+  startCustomToast(message: string) {
+    this.uploadMessage = message;
+    this.showCustomToast = true;
+  }
+
+  updateCustomToast(message: string) {
+    this.uploadMessage = message;
+  }
+
+  hideCustomToast() {
+    this.showCustomToast = false;
+  }
+
   addStory() {
-    if (!this.title || this.title.trim() === "") {
+    if (!this.title?.trim()) {
       this._responseHandler.showWarning("Tên truyện không được để trống!");
       return;
     }
-    if (!this.author || this.author.trim() === "") {
+    if (!this.author?.trim()) {
       this._responseHandler.showWarning("Tên tác giả không được để trống!");
       return;
     }
@@ -181,21 +209,21 @@ export class AddstoryComponent {
 
     const formData = new FormData();
     const publishID = this.userID;
+    const connectionId = this._signalRService.connectionId;
 
+    formData.append("SignalRConnectionId", connectionId);
     formData.append("Title", this.title);
     formData.append("Author", this.author);
     formData.append("PublisherID", publishID);
     formData.append("Type", this.selectType);
+    formData.append("Description", this.description);
+    formData.append("CoverImage", this.coverImage);
 
     this.categoriesSelect.forEach((c: any) => {
       formData.append("CategoryIDs", c.categoryID);
     });
 
-    formData.append("Description", this.description);
-    formData.append("CoverImage", this.coverImage);
-
-    console.log("this chapters:", this.chapters);
-    if (this.chapters && this.chapters.length > 0) {
+    if (this.chapters?.length) {
       this.chapters.forEach((chapter, index) => {
         formData.append(`Chapters[${index}].ChapterNumber`, chapter.ChapterNumber.toString());
         formData.append(`Chapters[${index}].Title`, chapter.ChapterName);
@@ -206,23 +234,40 @@ export class AddstoryComponent {
           formData.append(`Chapters[${index}].Content`, chapter.content);
         }
 
-        chapter.ImageFiles.forEach((file: File) => {
+        chapter.ImageFiles?.forEach((file: File) => {
           formData.append(`Chapters[${index}].ImageFiles`, file);
         });
       });
     }
 
-    this._storyService.addStory(formData).subscribe((res: any) => {
-      if (res && res.isSuccess == true) {
-        this._responseHandler.showwSuccess(res.data);
-      } else {
-        this._responseHandler.showError(res.data);
+    this.startCustomToast('Đang khởi tạo upload...');
+    this._signalRService.onUploadProgress((data) => {
+      this.updateCustomToast(data.message);
+    });
+
+    this._storyService.addStory(formData).subscribe({
+      next: (event: HttpEvent<any>) => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          this.updateCustomToast(`Đã upload tới server: ${percent}%`);
+        } else if (event.type === HttpEventType.Response) {
+          this.hideCustomToast();
+          if (event.body?.isSuccess) {
+            this._responseHandler.showwSuccess(event.body.data || 'Đăng truyện thành công!');
+          } else {
+            this._responseHandler.showError(event.body?.data || 'Tải truyện thất bại!');
+          }
+        }
+      },
+      error: () => {
+        this.hideCustomToast();
+        this._responseHandler.showError('Có lỗi xảy ra khi tải truyện.');
       }
     });
   }
 
+
   addChapterForm() {
-    this.isAddChapter = true;
     if (this.selectType === "Novel") {
       this.isAddManga = false;
       this.isAddNovel = !this.isAddNovel;
@@ -248,19 +293,25 @@ export class AddstoryComponent {
     this.selectedContentImages = this.selectedContentImages.filter(img => img !== event.file);
   }
 
-  closeNovelForm() {
-    this.isAddChapter = false;
-  }
-
   async postChapterToList() {
     if (!this.chapterNumber) {
       this._responseHandler.showWarning("Vui lòng nhập số chương!");
       return;
     }
 
-    if (this.selectType === "Manga" && (!this.selectedContentImages || this.selectedContentImages.length === 0)) {
-      this._responseHandler.showWarning("Truyện tranh cần có ít nhất một ảnh!");
-      return;
+    if (this.selectType === "Manga") {
+      if (!this.selectedContentImages || this.selectedContentImages.length === 0) {
+        this._responseHandler.showWarning("Truyện tranh cần có ít nhất một ảnh!");
+        return;
+      }
+      const newChapterSize = this.selectedContentImages.reduce((acc, file) => acc + file.size, 0);
+      const projectedSize = this.totalUploadedSize + newChapterSize;
+      if (projectedSize > this.maxSizeInBytes) {
+        this._responseHandler.showError("Tổng dung lượng chương vượt quá giới hạn 3GB!");
+        return;
+      }
+      this.totalUploadedSize = projectedSize;
+      this.value = Math.round((this.totalUploadedSize / this.maxSizeInBytes) * 100);
     }
 
     if (this.selectType === "Novel") {
