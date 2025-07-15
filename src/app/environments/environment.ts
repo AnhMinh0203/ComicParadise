@@ -6,7 +6,7 @@ export const environment = {
 
   // deploy
   // apiUrl: 'http://truyentranhchill.com:8090/api',
-  // url:'http://truyentranhchill.com:8090/api'
+  // url:'http://truyentranhchill.com:8090'
 
   // local
   apiUrl: 'https://localhost:7268/api',
