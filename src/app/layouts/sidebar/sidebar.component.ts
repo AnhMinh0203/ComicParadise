@@ -7,7 +7,6 @@ import { AccordionModule } from 'primeng/accordion';
 import { ThemeService } from '../../core/share/theme.service';
 import { categoryService } from '../service/category.service';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { storyService } from '../../comic-paradise/service/story.service';
 import { SharedService } from '../service/share.service';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
@@ -27,7 +26,6 @@ export class SidebarComponent {
   isSidebarOpen: boolean = false;
   visibleCategories: boolean = false;
   activeCategoryIndex: number | null = null;
-
   categoryItems: MenuItem[] = [];
   notifyItems: MenuItem[] | undefined;
   isDarkMode: boolean = false;
@@ -42,7 +40,6 @@ export class SidebarComponent {
     private _categoryService: categoryService,
     private _storyService: storyService,
     private _sharedService: SharedService,
-    private http: HttpClient,
     private router: Router,
   ) {
     this.sidebarService.sidebarState$.subscribe(state => {
@@ -54,9 +51,10 @@ export class SidebarComponent {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.userID = user.userID;
     this.getCategories();
-
-
     this.loadNotification();
+    this._sharedService.loadNotifications$.subscribe(() => {
+      this.loadNotification();
+    });
     this._sharedService.unreadCount$.subscribe(count => {
       this.unreadNotification = count;
     });
@@ -86,17 +84,13 @@ export class SidebarComponent {
   navigateToLogin() {
     this.router.navigate(['/login']);
   }
+
   navigateToRegister() {
     this.router.navigate(['/register']);
-
   }
 
   closeSidebar() {
     this.sidebarService.toggleSidebar();
-  }
-
-  showCategories() {
-    this.visibleCategories = true;
   }
 
   toggleTheme() {
@@ -116,7 +110,7 @@ export class SidebarComponent {
     this.router.navigate(['/about-us']);
   }
 
-  logout(){
+  logout() {
     this._sharedService.logout();
   }
 
@@ -128,14 +122,23 @@ export class SidebarComponent {
     this._sharedService.triggeFavoriteStoriesForm();
   }
 
-  openHistoryStoriesForm(){
+  openHistoryStoriesForm() {
     this._sharedService.triggeHistoryStoriesForm();
   }
 
-  openNotificationForm(){
+  openNotificationForm() {
     this._sharedService.triggeNotificationForm();
   }
-  loadNotification(){
+
+  loadNotification() {
     this._sharedService.loadNotificationsEvent();
+  }
+
+  showCategories() {
+    this._sharedService.openCategoryDialog();
+  }
+
+  showFilter() {
+    this._sharedService.openFilterDialog();
   }
 }

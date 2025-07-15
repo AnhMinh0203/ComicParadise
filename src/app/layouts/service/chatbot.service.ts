@@ -13,9 +13,7 @@ export class ChatService {
 
   sendMessage(request: any): Observable<any> {
     const apiUrl = `${this.serviceUri}/Process-user-question`;
-
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-
     return this.http.post<any>(apiUrl, request, { headers }).pipe(
       catchError((error: any) => {
         console.error('Lỗi khi gọi chatbot:', error);
@@ -23,8 +21,4 @@ export class ChatService {
       })
     );
   }
-
-
-
-
 }

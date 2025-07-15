@@ -197,6 +197,15 @@ export class NavbarComponent {
     this._sharedService.loadNotifications$.subscribe(() => {
       this.loadNotifications();
     })
+
+    this._sharedService.openCategoryDialog$.subscribe(() => {
+      this.showDialogCategory();
+    });
+
+    this._sharedService.openFilterDialogSubject$.subscribe(() => {
+      this.showDialogFilter();
+    });
+
     this.loadNotifications();
   }
 
@@ -226,8 +235,6 @@ export class NavbarComponent {
           this.cdr.detectChanges();
         });
       }).catch(err => console.error('SignalR Connection Error:', err));
-
-
     }
   }
 
@@ -239,9 +246,7 @@ export class NavbarComponent {
             this.newNotifications = res.data.newNotifications;
             this.oldNotifications = res.data.oldNotifications;
             this.unreadNotification = res.data.totalNewNotify;
-
-            console.log('New Notifications:', this.oldNotifications);
-            this.cdr.detectChanges(); // Đảm bảo giao diện cập nhật
+            this.cdr.detectChanges();
             this.updateIsReadStatus();
           }
         },

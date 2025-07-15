@@ -2,7 +2,7 @@
 .sidebar {
   position: fixed;
   top: 0;
-  left: -250px; /* Đẩy ra ngoài màn hình */
+  left: -250px;
   width: 250px;
   height: 100vh;
   background: #333;
@@ -18,8 +18,6 @@
 .sidebar.active {
   left: 0;
 }
-
-/* Sidebar */
 
 /* Nút đóng */
 .close-btn {
@@ -105,9 +103,9 @@ ul {
 .notification:hover,
 .toggle-theme:hover,
 .bar-mobile:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Nhẹ sáng lên */
-  border-color: rgba(0, 0, 0, 0.5); /* Viền sáng hơn */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Đổ bóng nhẹ */
+  background-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .container-toggle{
