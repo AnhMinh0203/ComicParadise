@@ -30,7 +30,11 @@ builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureCloud"))
 );
 
-
+// Set maximum request body size to unlimited
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 3_221_225_472; // 3 GB
+});
 
 // CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
@@ -170,5 +174,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
-
+app.MapHub<UploadHub>("/upload-hub");
 app.Run();

@@ -50,39 +50,39 @@ namespace ComicParadise.Repository
 
 
 
-            public int? ValidateJwtToken(string? token)
+        public int? ValidateJwtToken(string? token)
+        {
+            if (token == null) return null;
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);  // Lấy key để xác thực token.
+
+            try
             {
-                if (token == null) return null;
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);  // Lấy key để xác thực token.
-
-                try
+                // Xác thực token bằng cách sử dụng TokenValidationParameters.
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
-                    // Xác thực token bằng cách sử dụng TokenValidationParameters.
-                    tokenHandler.ValidateToken(token, new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,  // Kiểm tra xem token có được ký bằng key hợp lệ không.
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = false,
-                        ClockSkew = TimeSpan.Zero
-                    }, out SecurityToken validatedToken);
+                    ValidateIssuerSigningKey = true,  // Kiểm tra xem token có được ký bằng key hợp lệ không.
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
 
-                    var jwtToken = (JwtSecurityToken)validatedToken;
+                var jwtToken = (JwtSecurityToken)validatedToken;
 
-                    // Lấy các giá trị từ Claims trong token.
-                    var userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
-                    var userName = jwtToken.Claims.First(x => x.Type == "username").Value;
-                    var email = jwtToken.Claims.First(x => x.Type == "identifier").Value;
+                // Lấy các giá trị từ Claims trong token.
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
+                var userName = jwtToken.Claims.First(x => x.Type == "username").Value;
+                var email = jwtToken.Claims.First(x => x.Type == "identifier").Value;
 
-                    return userId;
-                }
-                catch
-                {
-                    return null;
-                }
+                return userId;
             }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

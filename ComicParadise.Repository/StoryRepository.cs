@@ -17,6 +17,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using ComicParadise.DataContext.Utils;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ComicParadise.Repository
 {
@@ -30,12 +31,14 @@ namespace ComicParadise.Repository
         private readonly string? _bucketName;
         private readonly string _containerCoverImg;
         private readonly IChapterRepository _chapterRepository;
+        private readonly IHubContext<UploadHub> _hubContext;
         public StoryRepository(
             AppDbContext context,
             IConfiguration config,
-            /*            BlobServiceClient blobServiceClient,*/
+            //BlobServiceClient blobServiceClient,
             IAmazonS3 s3Client,
-            IChapterRepository chapterRepository)
+            IChapterRepository chapterRepository,
+            IHubContext<UploadHub> hubContext1)
         {
             _context = context;
             _config = config;
@@ -44,6 +47,7 @@ namespace ComicParadise.Repository
             _bucketName = _config["BucketName"];
             _containerCoverImg = _config["ContainerCoverImg"];
             _chapterRepository = chapterRepository;
+            _hubContext = hubContext1;
         }
 
         #region Add story (azure)
@@ -106,6 +110,7 @@ namespace ComicParadise.Repository
         #region Add story (aws)
         public async Task<string> AddStoryAsync(AddStoryDto createStoryDto)
         {
+            var connId = createStoryDto.SignalRConnectionId;
             try
             {
                 var publisher = await _context.Users.FindAsync(createStoryDto.PublisherID);
@@ -143,10 +148,18 @@ namespace ComicParadise.Repository
 
                 if (createStoryDto.Chapters != null && createStoryDto.Chapters.Any())
                 {
+                    int total = createStoryDto.Chapters.Count;
+                    int current = 0;
                     foreach (var chapter in createStoryDto.Chapters)
                     {
+                        current++;
                         chapter.StoryID = newStory.StoryID;
-                        await _chapterRepository.PostChapterAsync(chapter); 
+
+                        await _hubContext.Clients.Client(connId).SendAsync("ReceiveUploadProgress", new
+                        {
+                            message = $"Đã tải {current}/{total} chương"
+                        });
+                        await _chapterRepository.PostChapterAsync(chapter);
                     }
                 }
                 await _context.SaveChangesAsync();
