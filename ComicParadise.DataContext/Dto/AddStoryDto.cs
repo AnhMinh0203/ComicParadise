@@ -17,7 +17,21 @@ namespace ComicParadise.DataContext.Dto
         public IFormFile CoverImage { get; set; }
         public string Description { get; set; }
         public List<int> CategoryIDs { get; set; }
-        public List<PostChapterDto> Chapters { get; set; }
+        public List<PostChapterDto>? Chapters { get; set; }
+    }
+
+    public class AddStoryStepModeDto
+    {
+        public string? SignalRConnectionId { get; set; }
+        public int? StoryID { get; set; }
+        public string? Title { get; set; }
+        public string? Author { get; set; }
+        public string? Type { get; set; }
+        public int? PublisherID { get; set; }
+        public IFormFile? CoverImage { get; set; }
+        public string? Description { get; set; }
+        public List<int>? CategoryIDs { get; set; }
+        public List<PostChapterDto>? Chapters { get; set; }
     }
 
     public class UpdateStoryDto

@@ -11,6 +11,7 @@ namespace ComicParadise.Repository.Common
     public interface IStoryRepository
     {
         Task<string> AddStoryAsync(AddStoryDto createStoryDto);
+        Task<BaseResponse_V2<int?>> AddStoryByStepModeAsync(AddStoryStepModeDto dto);
         Task<List<StoryInfor>> GetStoriesAsync(int? userID, string? storyStatus);
         Task<string> UpdateStatusAsync(string status, int storyID);
         Task<StoryDetail> GetStoryByIdAsync(int storyID);

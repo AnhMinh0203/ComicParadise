@@ -27,6 +27,14 @@ namespace ComicParadise.Api.Controllers
             var result = await _storyRepository.AddStoryAsync(dto);
             return Ok(new BaseResponse<string> (true, result));
         }
+
+        [HttpPost("Add-story-by-step-mode")]
+        public async Task<ActionResult> AddStoryByStepMode(AddStoryStepModeDto dto)
+        {
+            var result = await _storyRepository.AddStoryByStepModeAsync(dto);
+            return Ok(result);
+        }
+
         [HttpGet("Get-all-stories")]
         public async Task<ActionResult> GetAllStory(int? userID, string? storyStatus)
         {

@@ -182,6 +182,97 @@ namespace ComicParadise.Repository
         }
         #endregion
 
+        #region Add story by step mode
+        public async Task<BaseResponse_V2<int?>> AddStoryByStepModeAsync(AddStoryStepModeDto dto)
+        {
+            var connId = dto.SignalRConnectionId;
+            try
+            {
+                if (dto.StoryID == null)
+                {
+                    var publisher = await _context.Users.FindAsync(dto.PublisherID);
+                    if (publisher == null)
+                        return BaseResponse_V2<int?>.BadRequest("Nhà xuất bản không tồn tại");
+
+                    var status = (publisher.Role == "Admin") ? "Approved" : "Pending";
+
+                    string primaryImgUrl = null;
+                    if (dto.CoverImage != null)
+                    {
+                        var fileName = $"cover-{Guid.NewGuid()}{Path.GetExtension(dto.CoverImage.FileName)}";
+                        primaryImgUrl = await UploadFileToS3(dto.CoverImage, _containerCoverImg, fileName);
+                    }
+                    if (publisher == null)
+                        return BaseResponse_V2<int?>.BadRequest("Nhà xuất bản không tồn tại");
+                    var newStory = new Story
+                    {
+                        Title = dto.Title,
+                        Author = dto.Author,
+                        Type = dto.Type,
+                        Status = status,
+                        PublisherID = dto.PublisherID.Value,
+                        CoverImage = primaryImgUrl,
+                        Description = dto.Description,
+                    };
+
+                    _context.Stories.Add(newStory);
+                    await _context.SaveChangesAsync();
+
+                    var storyCategories = dto.CategoryIDs?.Select(categoryId => new StoryCategoriesMapping
+                    {
+                        StoryID = newStory.StoryID,
+                        CategoryID = categoryId
+                    }).ToList();
+
+                    if (storyCategories != null && storyCategories.Any())
+                        _context.StoryCategoriesMapping.AddRange(storyCategories);
+
+                    await _context.SaveChangesAsync();
+
+                    return BaseResponse_V2<int?>.Success("Thêm truyện thành công", newStory.StoryID);
+                }
+
+                if (dto.Chapters == null || !dto.Chapters.Any())
+                    return BaseResponse_V2<int?>.BadRequest("Danh sách chương trống");
+
+                int total = dto.Chapters.Count;
+                int current = 0;
+
+                foreach (var chapter in dto.Chapters)
+                {
+                    current++;
+                    chapter.StoryID = dto.StoryID.Value;
+
+                    if (!string.IsNullOrEmpty(connId))
+                    {
+                        await _hubContext.Clients.Client(connId).SendAsync("ReceiveUploadProgress", new
+                        {
+                            message = $"Đã tải {current}/{total} chương"
+                        });
+                    }
+
+                    await _chapterRepository.PostChapterAsync(chapter);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return BaseResponse_V2<int?>.Success($"Đã upload {dto.Chapters.Count} chương", dto.StoryID);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return BaseResponse_V2<int?>.Fail($"Lỗi database: {dbEx.Message}");
+            }
+            catch (Azure.RequestFailedException azEx)
+            {
+                return BaseResponse_V2<int?>.Fail($"Lỗi upload ảnh lên cloud: {azEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse_V2<int?>.Fail($"Lỗi hệ thống: {ex.Message}");
+            }
+        }
+        #endregion
+
         #region Upload file to Azure
         private async Task<string> UploadFileToAzure(IFormFile imgFile, BlobContainerClient containerClient)
         {
