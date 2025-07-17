@@ -511,9 +511,6 @@ export class UpdateStoryComponent {
       }
     }
 
-
-
-
     const chapter = {
       StoryID: this.storyID,
       ChapterNumber: this.chapterNumber,

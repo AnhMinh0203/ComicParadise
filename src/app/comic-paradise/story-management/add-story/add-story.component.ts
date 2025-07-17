@@ -26,7 +26,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TextareaModule } from 'primeng/textarea';
 import { categoryService } from '../../service/category.service';
-import { jwtDecode } from 'jwt-decode';
 import { CardModule as PrimeCardModule } from 'primeng/card';
 import { ResponseHandler } from '../../../core/helpers/response-handler';
 import { getUserIdFromToken } from '../../../core/helpers/token-helper';
@@ -34,7 +33,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { SharedModule } from '../../../core/share/shared.module';
 import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
 import { SignalRService } from '../../service/signalr.service';
-
+import { ToggleSwitch } from 'primeng/toggleswitch';
 @Component({
   selector: 'app-add-story',
   imports: [
@@ -63,7 +62,8 @@ import { SignalRService } from '../../service/signalr.service';
     TextareaModule,
     PrimeCardModule,
     ProgressBarModule,
-    SharedModule
+    SharedModule,
+    ToggleSwitch
   ],
   providers: [ConfirmationService],
   templateUrl: './add-story.component.html',
@@ -90,7 +90,7 @@ export class AddstoryComponent {
   selectedContentImages: File[] = [];
   chapters: any[] = [];
 
-  maxSizeInBytes: number = 314_572_800; // 300Mb
+  maxSizeInBytes: number = 3_221_225_472; // 3GB
   totalUploadedSize: number = 0;
   value: number = 0;
   interval: any;
@@ -98,10 +98,11 @@ export class AddstoryComponent {
   isUploading: boolean = false;
   showCustomToast: boolean = false;
   uploadMessage: string = 'Khởi động upload...';
+  isStepMode: boolean = false;
+  storyID: any | null = null;
 
   constructor(
     private router: Router,
-    private http: HttpClient,
     private _storyService: storyService,
     private _categoryService: categoryService,
     private _responseHandler: ResponseHandler,
@@ -264,8 +265,129 @@ export class AddstoryComponent {
         this._responseHandler.showError('Có lỗi xảy ra khi tải truyện.');
       }
     });
+    this.clearStoryForm();
+    this.clearChapterForm();
   }
 
+  uploadStoryInfo() {
+    if (!this.title?.trim()) {
+      this._responseHandler.showWarning("Tên truyện không được để trống!");
+      return;
+    }
+    if (!this.author?.trim()) {
+      this._responseHandler.showWarning("Tên tác giả không được để trống!");
+      return;
+    }
+    if (!this.selectType) {
+      this._responseHandler.showWarning("Vui lòng chọn danh mục!");
+      return;
+    }
+    if (!this.coverImage) {
+      this._responseHandler.showWarning("Vui lòng chọn ảnh bìa cho truyện!");
+      return;
+    }
+
+    const formData = new FormData();
+    const publishID = this.userID;
+
+    formData.append("Title", this.title);
+    formData.append("Author", this.author);
+    formData.append("PublisherID", publishID);
+    formData.append("Type", this.selectType);
+    formData.append("Description", this.description || "");
+    formData.append("CoverImage", this.coverImage);
+    this.categoriesSelect.forEach((c: any) => {
+      formData.append("CategoryIDs", c.categoryID.toString());
+    });
+
+    this._storyService.addStoryByStepMode(formData).subscribe(event => {
+      if (event.type === HttpEventType.Response) {
+        this.storyID = event.body.data;
+        this._responseHandler.showwSuccess('Tải thông tin truyện thành công!');
+      }
+    });
+  }
+
+  addStoryByStepMode() {
+    const formData = new FormData();
+    const connectionId = this._signalRService.connectionId;
+    if (!this.storyID) {
+      this._responseHandler.showWarning("Vui lòng tải thông tin truyện trước khi thêm chương!");
+      return;
+    }
+    formData.append("StoryID", this.storyID.toString());
+    formData.append("SignalRConnectionId", connectionId);
+    if (this.chapters?.length) {
+      this.chapters.forEach((chapter, index) => {
+        formData.append(`Chapters[${index}].ChapterNumber`, chapter.ChapterNumber.toString());
+        formData.append(`Chapters[${index}].Title`, chapter.ChapterName);
+        formData.append(`Chapters[${index}].StoryType`, chapter.StoryType || 'manga');
+        formData.append(`Chapters[${index}].CreatedBy`, chapter.CreatedBy.toString());
+
+        if (chapter.Content) {
+          formData.append(`Chapters[${index}].Content`, chapter.Content);
+        }
+
+        if (chapter.ImageFiles?.length) {
+          chapter.ImageFiles.forEach((file: File) => {
+            formData.append(`Chapters[${index}].ImageFiles`, file);
+          });
+        }
+      });
+      this.startCustomToast('Đang khởi tạo upload...');
+      this._signalRService.onUploadProgress((data) => {
+        this.updateCustomToast(data.message);
+      });
+
+      this._storyService.addStoryByStepMode(formData).subscribe({
+        next: (event: HttpEvent<any>) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            this.updateCustomToast(`Đã upload tới server: ${percent}%`);
+          } else if (event.type === HttpEventType.Response) {
+            this.hideCustomToast();
+
+            if (event.body?.isSuccess) {
+              this._responseHandler.showwSuccess('Tải chương truyện thành công!');
+            } else {
+              this._responseHandler.showError(event.body?.message || 'Tải truyện thất bại!');
+            }
+          }
+        },
+        error: () => {
+          this.hideCustomToast();
+          this._responseHandler.showError('Có lỗi xảy ra khi tải truyện.');
+        }
+      });
+      this.clearChapterForm();
+    }
+    else {
+      this._responseHandler.showWarning("Vui lòng thêm ít nhất một chương trước khi tải!");
+    }
+  }
+
+  clearStoryForm() {
+    this.title = null;
+    this.author = null;
+    this.description = null;
+    this.publisher = null;
+
+    this.categoriesSelect = [];
+    this.coverImage = null;
+    this.coverImageDisplay = null;
+
+    this.selectType = this.typeOptions?.[0]?.value ?? null;
+    this.isStepMode = false;
+  }
+
+  clearChapterForm() {
+    this.chapterNumber = null;
+    this.chapterName = null;
+    this.selectedContentImages = [];
+    this.uploader.clear();
+    this.editorInstance?.setText('');
+    this.chapters = [];
+  }
 
   addChapterForm() {
     if (this.selectType === "Novel") {

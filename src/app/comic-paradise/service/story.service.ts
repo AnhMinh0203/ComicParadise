@@ -20,6 +20,15 @@ export class storyService {
     return this.http.request(req);
   }
 
+  addStoryByStepMode(formData: FormData): Observable<HttpEvent<any>> {
+    const apiUrl = `${this.serviceUri}/Add-story-by-step-mode`;
+    const req = new HttpRequest('POST', apiUrl, formData, {
+      reportProgress: true,
+      responseType: 'json'
+    });
+    return this.http.request(req);
+  }
+
   getMyStories(userID: any) {
     var apiUrl = `${this.serviceUri}/Get-all-stories?userID=${userID}`;
     return this.http.get(apiUrl)

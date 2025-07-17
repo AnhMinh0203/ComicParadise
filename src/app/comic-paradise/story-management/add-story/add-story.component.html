@@ -32,9 +32,13 @@
         <p-card [styleClass]="'mb-2 custom-card-shadow'">
           <div class="row my-3">
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
-              <div class="flex justify-center">
+              <div class="d-flex justify-content-between align-items-center">
                 <p-selectbutton [options]="typeOptions" [(ngModel)]="selectType" optionLabel="label" optionValue="value"
                   aria-labelledby="basic" (onChange)="addChapterForm()" />
+                <div class="d-flex align-items-center">
+                    <p-toggleswitch [(ngModel)]="isStepMode" class="d-inline-flex align-items-center"/>
+                    <label for="isStepMode" class="ms-2 mb-0">Đăng từng bước</label>
+                  </div>
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
@@ -83,12 +87,15 @@
           </div>
         </p-card>
 
+        <!-- Upload story infor by step mode -->
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 " *ngIf="isStepMode">
+          <div class="mt-3">
+            <p-button label="Tải thông tin truyện" (click)="uploadStoryInfo()" [styleClass]="'w-100'" />
+          </div>
+        </div>
+
         <h6 class="mt-3"><b>3. Chương</b></h6>
         <p-card [styleClass]="'mb-2 custom-card-shadow'">
-          <!-- <div class="chapter-action d-flex justify-content-end my-3">
-            <p-button label=" Thêm chương mới" severity="success" icon="pi pi-bookmark-fill"
-              class=" border border-success rounded" (click)="addChapterForm()" />
-          </div> -->
           <div class="chapter-limit d-flex justify-center align-items-center my-3 mt-3" *ngIf="isAddManga">
             <div class="chapter-limit-tutorial m-2">
               <i class="pi pi-question-circle" pTooltip="Giới hạn dung lượng khi thêm mới chapter là 3GB"
@@ -132,7 +139,21 @@
 
             <!-- Actions novel -->
             <div class="add-novel-actions d-flex justify-content-end mt-2">
-              <p-button label="Thêm chương" severity="success" [ngClass]="'ms-2'" (click)="postChapterToList()" />
+              <p-button
+                label="Thêm chương"
+                [severity]="isStepMode ? 'secondary' : 'success'"
+                [ngClass]="'ms-2'"
+                (click)="postChapterToList()"
+              />
+
+              <p-button
+                *ngIf="isStepMode"
+                label="Upload chương"
+                severity="primary"
+                [ngClass]="'ms-2'"
+                [disabled]="chapters.length === 0"
+                (click)="addStoryByStepMode()"
+              />
             </div>
           </div>
 
@@ -158,7 +179,7 @@
             </div>
           </div>
         </p-card>
-        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 " *ngIf="!isStepMode">
           <div class="mt-3">
             <p-button label="Xác nhận" (click)="addStory()" [styleClass]="'w-100'" />
           </div>
