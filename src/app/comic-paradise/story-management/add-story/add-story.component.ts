@@ -158,10 +158,10 @@ export class AddstoryComponent {
 
   onUploadCoverImage(event: any) {
     const file = event.files[0];
-    const maxSizeKB = 1000;
+    const maxSizeKB = 8000;
 
     if (file.size / 1024 > maxSizeKB) {
-      this._responseHandler.showWarning('Kích thước ảnh không được lớn hơn 1MB');
+      this._responseHandler.showWarning('Kích thước ảnh không được lớn hơn 8MB');
       return;
     }
 
@@ -254,6 +254,7 @@ export class AddstoryComponent {
         } else if (event.type === HttpEventType.Response) {
           this.hideCustomToast();
           if (event.body?.isSuccess) {
+            (window as any).uploadDone = true; // flag to indicate upload completion
             this._responseHandler.showwSuccess(event.body.data || 'Đăng truyện thành công!');
           } else {
             this._responseHandler.showError(event.body?.data || 'Tải truyện thất bại!');
@@ -348,6 +349,7 @@ export class AddstoryComponent {
             this.hideCustomToast();
 
             if (event.body?.isSuccess) {
+              (window as any).uploadDone = true;
               this._responseHandler.showwSuccess('Tải chương truyện thành công!');
             } else {
               this._responseHandler.showError(event.body?.message || 'Tải truyện thất bại!');
